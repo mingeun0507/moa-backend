@@ -35,3 +35,8 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Security Files ###
+application-dev.yml
+application-prod.yml
+
