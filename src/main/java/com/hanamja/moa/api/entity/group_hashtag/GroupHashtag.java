@@ -1,6 +1,9 @@
 package com.hanamja.moa.api.entity.group_hashtag;
 
+import com.hanamja.moa.api.entity.group.Group;
+import com.hanamja.moa.api.entity.hashtag.Hashtag;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -9,13 +12,25 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "MOA_HAS")
+@Table(name = "MOA_GROUP_HASHTAG")
 public class GroupHashtag {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "gh_id")
     private Long id;
 
-    // TODO: 레퍼런스 키, 생성자 구현 필요
+    @ManyToOne
+    @JoinColumn(name = "group_id", nullable = false)
+    private Group group;
 
+    @ManyToOne
+    @JoinColumn(name = "hashtag_id", nullable = false)
+    private Hashtag hashtag;
+
+    @Builder
+    public GroupHashtag(Group group, Hashtag hashtag) {
+        this.group = group;
+        this.hashtag = hashtag;
+    }
 }
