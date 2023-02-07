@@ -1,6 +1,7 @@
 package com.hanamja.moa.api.entity.user;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -51,6 +52,19 @@ public class User implements UserDetails {
     private Role role;
 
     // TODO: 학부 컬럼 추가 필요
+
+
+    @Builder
+    public User(String studentId, String password, String name, String gender, String imageLink, Long point, Boolean isFreshmen, Role role) {
+        this.studentId = studentId;
+        this.password = password;
+        this.name = name;
+        this.gender = gender;
+        this.imageLink = imageLink;
+        this.point = point;
+        this.isFreshmen = isFreshmen;
+        this.role = role;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
