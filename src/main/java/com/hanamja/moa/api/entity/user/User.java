@@ -42,8 +42,8 @@ public class User implements UserDetails {
     @Column(name = "point")
     private Long point;
 
-    @Column(name = "is_freshmen",
-            columnDefinition = "Boolean GENERATED ALWAYS AS (IF(student_id like '23%', true, false))")
+    @Column(name = "is_freshmen")
+//            columnDefinition = "TINYINT(1) GENERATED ALWAYS AS (IF(student_id like '23%', true, false))")
     private Boolean isFreshmen;
 
     @Column(name = "role")
