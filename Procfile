@@ -1,0 +1,1 @@
+web: java -jar moa-springboot-server-ebextensions-1.jar
