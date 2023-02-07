@@ -1,4 +1,4 @@
-package com.hanamja.moa.api.entity.join;
+package com.hanamja.moa.api.entity.user_group;
 
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 @Table(name = "MOA_JOIN")
-public class Join {
+public class UserGroup {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
