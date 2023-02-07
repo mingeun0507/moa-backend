@@ -9,6 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -43,10 +44,6 @@ public class User implements UserDetails {
     @Column(name = "point")
     private Long point;
 
-    @Column(name = "is_freshmen")
-//            columnDefinition = "TINYINT(1) GENERATED ALWAYS AS (IF(student_id like '23%', true, false))")
-    private Boolean isFreshmen;
-
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -55,14 +52,13 @@ public class User implements UserDetails {
 
 
     @Builder
-    public User(String studentId, String password, String name, String gender, String imageLink, Long point, Boolean isFreshmen, Role role) {
+    public User(String studentId, String password, String name, String gender, String imageLink, Long point, Role role) {
         this.studentId = studentId;
         this.password = password;
         this.name = name;
         this.gender = gender;
         this.imageLink = imageLink;
         this.point = point;
-        this.isFreshmen = isFreshmen;
         this.role = role;
     }
 
@@ -104,5 +100,10 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public boolean isFreshman() {
+        String year = Integer.toString(Year.now().getValue());
+        return this.studentId.startsWith(year);
     }
 }
