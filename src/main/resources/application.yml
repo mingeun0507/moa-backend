@@ -24,12 +24,6 @@ spring:
     show-sql: true
     open-in-view: true
 
-  config:
-    import:
-      - classpath:/application-dev.yml
-    activate:
-      on-profile: dev
-
 logging:
   level:
     org.hibernate.SQL: debug
