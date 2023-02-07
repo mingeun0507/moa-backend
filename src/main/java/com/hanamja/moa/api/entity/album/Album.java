@@ -16,5 +16,8 @@ public class Album {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "is_badged", nullable = false)
+    private Boolean isBadged;
+
     // TODO: 레퍼런스 키 추가 필요
 }
