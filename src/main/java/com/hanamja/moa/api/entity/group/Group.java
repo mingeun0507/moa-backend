@@ -1,5 +1,8 @@
 package com.hanamja.moa.api.entity.group;
 
+import com.hanamja.moa.api.entity.group_hashtag.GroupHashtag;
+import com.hanamja.moa.api.entity.user.User;
+import com.hanamja.moa.api.entity.user_group.UserGroup;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -7,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -16,6 +20,7 @@ public class Group {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "group_id")
     private Long id;
 
     @Column(name = "name", nullable = false)
@@ -39,14 +44,37 @@ public class Group {
     @Column(name = "image_link")
     private String imageLink;
 
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User maker;
+
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    private List<UserGroup> userGroupList;
+
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    private List<GroupHashtag> groupHashtagList;
+
     @Builder
-    public Group(String name, String description, Long maxPeopleNum, Long currentPeopleNum, LocalDateTime createdAt, LocalDateTime meetingAt, String imageLink) {
+    public Group(String name, String description, Long maxPeopleNum, Long currentPeopleNum, LocalDateTime createdAt, LocalDateTime meetingAt, String imageLink, User maker) {
         this.name = name;
         this.description = description;
         this.maxPeopleNum = maxPeopleNum;
         this.currentPeopleNum = currentPeopleNum;
-        this.createdAt = createdAt;
+        this.createdAt = LocalDateTime.now();
         this.meetingAt = meetingAt;
         this.imageLink = imageLink;
+        this.maker = maker;
+    }
+
+    // 인증샷에 대한 update 메소드
+    public void uploadImage(String imageLink) {
+        this.imageLink = imageLink;
+    }
+
+    // 모임 정보 수정에 대한 update 메소드
+    public void modifyGroupInfo(String name, String description, Long maxPeopleNum) {
+        this.name = name == null ? this.name : name;
+        this.description = description == null ? this.description : description;
+        this.maxPeopleNum = description == null ? this.maxPeopleNum : maxPeopleNum;
     }
 }
