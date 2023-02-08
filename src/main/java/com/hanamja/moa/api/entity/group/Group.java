@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -76,5 +77,16 @@ public class Group {
         this.name = name == null ? this.name : name;
         this.description = description == null ? this.description : description;
         this.maxPeopleNum = description == null ? this.maxPeopleNum : maxPeopleNum;
+    }
+
+
+    public void addCurrentPeopleNum() {
+        this.currentPeopleNum++;
+        // 참여했을 떄 인원수 늘려주는 메소드
+    }
+
+    public Boolean isFull() {
+        return Objects.equals(this.currentPeopleNum, this.maxPeopleNum);
+        // 인원수 늘리기 전에 체크하는 메소드
     }
 }
