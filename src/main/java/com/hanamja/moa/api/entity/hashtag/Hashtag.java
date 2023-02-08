@@ -2,6 +2,7 @@ package com.hanamja.moa.api.entity.hashtag;
 
 import com.hanamja.moa.api.entity.group_hashtag.GroupHashtag;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -28,4 +29,10 @@ public class Hashtag {
 
     @OneToMany(mappedBy = "hashtag", fetch = FetchType.LAZY)
     private List<GroupHashtag> groupHashtagList;
+
+    @Builder
+    public Hashtag(String name) {
+        this.name = name;
+        this.touchedAt = LocalDateTime.now();
+    }
 }
