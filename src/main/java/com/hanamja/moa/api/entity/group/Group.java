@@ -56,7 +56,7 @@ public class Group {
     private List<GroupHashtag> groupHashtagList;
 
     @Builder
-    public Group(String name, String description, Long maxPeopleNum, Long currentPeopleNum, LocalDateTime createdAt, LocalDateTime meetingAt, String imageLink, User maker) {
+    public Group(String name, String description, Long maxPeopleNum, Long currentPeopleNum, LocalDateTime meetingAt, String imageLink, User maker) {
         this.name = name;
         this.description = description;
         this.maxPeopleNum = maxPeopleNum;
