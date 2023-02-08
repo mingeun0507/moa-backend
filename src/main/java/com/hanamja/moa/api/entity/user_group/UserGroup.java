@@ -35,8 +35,8 @@ public class UserGroup {
     private Group group;
 
     @Builder
-    public UserGroup(LocalDateTime joinAt, String progress, User joiner, Group group) {
-        this.joinAt = joinAt;
+    public UserGroup(String progress, User joiner, Group group) {
+        this.joinAt = LocalDateTime.now();
         this.progress = progress;
         this.joiner = joiner;
         this.group = group;
