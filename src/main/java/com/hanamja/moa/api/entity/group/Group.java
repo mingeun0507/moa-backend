@@ -1,0 +1,92 @@
+package com.hanamja.moa.api.entity.group;
+
+import com.hanamja.moa.api.entity.group_hashtag.GroupHashtag;
+import com.hanamja.moa.api.entity.user.User;
+import com.hanamja.moa.api.entity.user_group.UserGroup;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
+@Table(name = "MOA_GROUP")
+public class Group {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "group_id")
+    private Long id;
+
+    @Column(name = "name", nullable = false)
+    private String name;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "max_num", nullable = false)
+    private Long maxPeopleNum;
+
+    @Column(name = "current_num", nullable = false)
+    private Long currentPeopleNum;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "meeting_at", nullable = false)
+    private LocalDateTime meetingAt;
+
+    @Column(name = "image_link")
+    private String imageLink;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User maker;
+
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    private List<UserGroup> userGroupList;
+
+    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    private List<GroupHashtag> groupHashtagList;
+
+    @Builder
+    public Group(String name, String description, Long maxPeopleNum, Long currentPeopleNum, LocalDateTime meetingAt, String imageLink, User maker) {
+        this.name = name;
+        this.description = description;
+        this.maxPeopleNum = maxPeopleNum;
+        this.currentPeopleNum = currentPeopleNum;
+        this.createdAt = LocalDateTime.now();
+        this.meetingAt = meetingAt;
+        this.imageLink = imageLink;
+        this.maker = maker;
+    }
+
+    // 인증샷에 대한 update 메소드
+    public void uploadImage(String imageLink) {
+        this.imageLink = imageLink;
+    }
+
+    // 모임 정보 수정에 대한 update 메소드
+    public void modifyGroupInfo(String name, String description, Long maxPeopleNum) {
+        this.name = name == null ? this.name : name;
+        this.description = description == null ? this.description : description;
+        this.maxPeopleNum = description == null ? this.maxPeopleNum : maxPeopleNum;
+    }
+
+
+    public void addCurrentPeopleNum() {
+        this.currentPeopleNum++;
+        // 참여했을 떄 인원수 늘려주는 메소드
+    }
+
+    public Boolean isFull() {
+        return Objects.equals(this.currentPeopleNum, this.maxPeopleNum);
+        // 인원수 늘리기 전에 체크하는 메소드
+    }
+}
