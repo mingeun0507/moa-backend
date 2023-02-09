@@ -39,7 +39,7 @@ public class Group {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "meeting_at", nullable = false)
+    @Column(name = "meeting_at")
     private LocalDateTime meetingAt;
 
     @Column(name = "image_link")
