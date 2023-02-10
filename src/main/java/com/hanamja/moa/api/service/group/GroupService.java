@@ -2,6 +2,7 @@ package com.hanamja.moa.api.service.group;
 
 import com.hanamja.moa.api.dto.group.GroupInfoResponseDto;
 import com.hanamja.moa.api.dto.group.GroupMakingRequestDto;
+import com.hanamja.moa.api.dto.group.GroupModifyingRequestDto;
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.group.GroupRepository;
 import com.hanamja.moa.api.entity.group_hashtag.GroupHashtag;
@@ -35,12 +36,8 @@ public class GroupService {
                 // TODO: Exception 구현 후 사용자를 찾지 못한 경우 unchecked Exception 던지기
         );
 
-        if (user.isFreshman()) {
-            log.info("신입생의 모임 생성 시도 발생 - 학번: {}, 이름: {}", user.getStudentId(), user.getName());
-            // TODO: 예외 처리 구현 필요
-            // 신입생이 만드는지?
-        }
-
+        // 재학생인지 검증
+        validateSenior(user);
 
         // Hashtag #으로 파싱 후 분리, 저장 (다른 메소드로 분리 구현)
         List<Hashtag> hashtagList = saveHashtags(groupMakingRequestDto.getHashtags());
@@ -60,8 +57,16 @@ public class GroupService {
         return GroupInfoResponseDto.from(newGroup);
     }
 
+    private void validateSenior(User user) {
+        if (user.isFreshman()) {
+            log.info("신입생의 모임 생성 시도 발생 - 학번: {}, 이름: {}", user.getStudentId(), user.getName());
+            // TODO: 예외 처리 구현 필요
+            // 신입생이 만드는지?
+        }
+    }
+
     @Transactional
-    public List<Hashtag> saveHashtags(String hashtagString) {
+    protected List<Hashtag> saveHashtags(String hashtagString) {
         List<String> hashtagStringList = new java.util.ArrayList<>(List.of(hashtagString.split("#")));
         hashtagStringList.remove(0);
 
@@ -87,4 +92,48 @@ public class GroupService {
         ).collect(Collectors.toList());
     }
 
+    @Transactional
+    public GroupInfoResponseDto modifyExistingGroup(GroupModifyingRequestDto groupModifyingRequestDto) {
+        // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
+
+        User user = userRepository.findById(1L).orElseThrow(
+                // TODO: Exception 구현 후 사용자를 찾지 못한 경우 unchecked Exception 던지기
+        );
+
+        // 재학생인지 검증
+        validateSenior(user);
+
+        // groupId로 group 찾아오기
+        Group existingGroup = groupRepository.findById(groupModifyingRequestDto.getId()).orElseThrow(
+                // TODO: group이 없을 때 400 Bad Request 던지도록 구현 필요
+        );
+
+        if (existingGroup.getCurrentPeopleNum() > groupModifyingRequestDto.getMaxPeopleNum()) {
+            // TODO: 새로운 group 최대 인원수보다 현재 인원수가 많으면 400 Bad Request
+        }
+
+        // group 정보 수정
+        existingGroup.modifyGroupInfo(
+                groupModifyingRequestDto.getName(),
+                groupModifyingRequestDto.getDescription(),
+                groupModifyingRequestDto.getMeetingAt(),
+                groupModifyingRequestDto.getMaxPeopleNum()
+        );
+
+        // 기존 해시태그 정보 삭제
+        groupHashtagRepository.deleteAllByGroup_Id(existingGroup.getId());
+
+        // 새로운 해시태그 정보 등록 및 관계 테이블에 저장
+        List<Hashtag> hashtagList = saveHashtags(groupModifyingRequestDto.getHashtags());
+        hashtagList.stream().map(
+                x -> GroupHashtag
+                        .builder()
+                        .group(existingGroup)
+                        .hashtag(x)
+                        .build()
+        ).forEach(groupHashtagRepository::save);
+
+        // 수정된 group 정보 반영
+        return GroupInfoResponseDto.from(groupRepository.save(existingGroup));
+    }
 }
