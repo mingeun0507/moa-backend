@@ -14,17 +14,19 @@ public class GroupInfoResponseDto {
     private Long maxPeopleNum;
     private Long currentPeopleNum;
     private LocalDateTime createdAt;
+    private LocalDateTime modifiedAt;
     private LocalDateTime meetingAt;
     private String imageLink;
 
     @Builder
-    public GroupInfoResponseDto(Long id, String name, String description, Long maxPeopleNum, Long currentPeopleNum, LocalDateTime createdAt, LocalDateTime meetingAt, String imageLink) {
+    public GroupInfoResponseDto(Long id, String name, String description, Long maxPeopleNum, Long currentPeopleNum, LocalDateTime createdAt, LocalDateTime modifiedAt, LocalDateTime meetingAt, String imageLink) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.maxPeopleNum = maxPeopleNum;
         this.currentPeopleNum = currentPeopleNum;
         this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
         this.meetingAt = meetingAt;
         this.imageLink = imageLink;
     }
@@ -38,6 +40,7 @@ public class GroupInfoResponseDto {
                 .maxPeopleNum(group.getMaxPeopleNum())
                 .currentPeopleNum(group.getCurrentPeopleNum())
                 .createdAt(group.getCreatedAt())
+                .modifiedAt(group.getModifiedAt())
                 .meetingAt(group.getMeetingAt())
                 .imageLink(group.getImageLink())
                 .build();
