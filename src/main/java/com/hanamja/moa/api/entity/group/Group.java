@@ -65,6 +65,7 @@ public class Group {
         this.maxPeopleNum = maxPeopleNum;
         this.currentPeopleNum = currentPeopleNum;
         this.createdAt = LocalDateTime.now();
+        this.modifiedAt = LocalDateTime.now();
         this.meetingAt = meetingAt;
         this.imageLink = imageLink;
         this.maker = maker;
