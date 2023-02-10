@@ -39,6 +39,9 @@ public class Group {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "modified_at", nullable = false)
+    private LocalDateTime modifiedAt;
+
     @Column(name = "meeting_at")
     private LocalDateTime meetingAt;
 
@@ -73,10 +76,12 @@ public class Group {
     }
 
     // 모임 정보 수정에 대한 update 메소드
-    public void modifyGroupInfo(String name, String description, Long maxPeopleNum) {
-        this.name = name == null ? this.name : name;
-        this.description = description == null ? this.description : description;
-        this.maxPeopleNum = description == null ? this.maxPeopleNum : maxPeopleNum;
+    public void modifyGroupInfo(String name, String description, LocalDateTime meetingAt, Long maxPeopleNum) {
+        this.name = name;
+        this.description = description;
+        this.modifiedAt = LocalDateTime.now();
+        this.meetingAt = meetingAt;
+        this.maxPeopleNum = maxPeopleNum;
     }
 
 
