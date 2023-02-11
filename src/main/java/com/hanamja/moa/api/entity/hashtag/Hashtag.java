@@ -21,7 +21,7 @@ public class Hashtag {
     @Column(name = "hashtag_id")
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", unique = true, nullable = false)
     private String name;
 
     @Column(name = "touched_at", nullable = false)
@@ -33,6 +33,10 @@ public class Hashtag {
     @Builder
     public Hashtag(String name) {
         this.name = name;
+        this.touchedAt = LocalDateTime.now();
+    }
+
+    public void updateTouchedAt() {
         this.touchedAt = LocalDateTime.now();
     }
 }

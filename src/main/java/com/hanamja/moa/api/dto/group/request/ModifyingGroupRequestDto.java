@@ -1,0 +1,15 @@
+package com.hanamja.moa.api.dto.group.request;
+
+import lombok.Data;
+
+import java.time.LocalDateTime;
+
+@Data
+public class ModifyingGroupRequestDto {
+    private Long id;
+    private String name;
+    private String description;
+    private Long maxPeopleNum;
+    private LocalDateTime meetingAt;
+    private String hashtags;
+}

@@ -30,6 +30,9 @@ public class Group {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "state")
+    private State state;
+
     @Column(name = "max_num", nullable = false)
     private Long maxPeopleNum;
 
@@ -39,7 +42,10 @@ public class Group {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "meeting_at", nullable = false)
+    @Column(name = "modified_at", nullable = false)
+    private LocalDateTime modifiedAt;
+
+    @Column(name = "meeting_at")
     private LocalDateTime meetingAt;
 
     @Column(name = "image_link")
@@ -59,9 +65,11 @@ public class Group {
     public Group(String name, String description, Long maxPeopleNum, Long currentPeopleNum, LocalDateTime meetingAt, String imageLink, User maker) {
         this.name = name;
         this.description = description;
+        this.state = State.RECRUITING;
         this.maxPeopleNum = maxPeopleNum;
         this.currentPeopleNum = currentPeopleNum;
         this.createdAt = LocalDateTime.now();
+        this.modifiedAt = LocalDateTime.now();
         this.meetingAt = meetingAt;
         this.imageLink = imageLink;
         this.maker = maker;
@@ -73,10 +81,12 @@ public class Group {
     }
 
     // 모임 정보 수정에 대한 update 메소드
-    public void modifyGroupInfo(String name, String description, Long maxPeopleNum) {
-        this.name = name == null ? this.name : name;
-        this.description = description == null ? this.description : description;
-        this.maxPeopleNum = description == null ? this.maxPeopleNum : maxPeopleNum;
+    public void modifyGroupInfo(String name, String description, LocalDateTime meetingAt, Long maxPeopleNum) {
+        this.name = name;
+        this.description = description;
+        this.modifiedAt = LocalDateTime.now();
+        this.meetingAt = meetingAt;
+        this.maxPeopleNum = maxPeopleNum;
     }
 
 
@@ -88,5 +98,10 @@ public class Group {
     public Boolean isFull() {
         return Objects.equals(this.currentPeopleNum, this.maxPeopleNum);
         // 인원수 늘리기 전에 체크하는 메소드
+    }
+
+    public void updateState(State newState) {
+        this.state = newState;
+        // 모임 상태 변경 시 사용할 메소드
     }
 }
