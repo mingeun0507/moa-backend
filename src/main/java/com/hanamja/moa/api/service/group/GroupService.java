@@ -1,8 +1,8 @@
 package com.hanamja.moa.api.service.group;
 
 import com.hanamja.moa.api.dto.group.GroupInfoResponseDto;
-import com.hanamja.moa.api.dto.group.GroupModifyingRequestDto;
 import com.hanamja.moa.api.dto.group.MakingGroupRequestDto;
+import com.hanamja.moa.api.dto.group.ModifyingGroupRequestDto;
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.group.GroupRepository;
 import com.hanamja.moa.api.entity.group_hashtag.GroupHashtag;
@@ -93,7 +93,7 @@ public class GroupService {
     }
 
     @Transactional
-    public GroupInfoResponseDto modifyExistingGroup(GroupModifyingRequestDto groupModifyingRequestDto) {
+    public GroupInfoResponseDto modifyExistingGroup(ModifyingGroupRequestDto modifyingGroupRequestDto) {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
 
         User user = userRepository.findById(1L).orElseThrow(
@@ -104,27 +104,27 @@ public class GroupService {
         validateSenior(user);
 
         // groupId로 group 찾아오기
-        Group existingGroup = groupRepository.findById(groupModifyingRequestDto.getId()).orElseThrow(
+        Group existingGroup = groupRepository.findById(modifyingGroupRequestDto.getId()).orElseThrow(
                 // TODO: group이 없을 때 400 Bad Request 던지도록 구현 필요
         );
 
-        if (existingGroup.getCurrentPeopleNum() > groupModifyingRequestDto.getMaxPeopleNum()) {
+        if (existingGroup.getCurrentPeopleNum() > modifyingGroupRequestDto.getMaxPeopleNum()) {
             // TODO: 새로운 group 최대 인원수보다 현재 인원수가 많으면 400 Bad Request
         }
 
         // group 정보 수정
         existingGroup.modifyGroupInfo(
-                groupModifyingRequestDto.getName(),
-                groupModifyingRequestDto.getDescription(),
-                groupModifyingRequestDto.getMeetingAt(),
-                groupModifyingRequestDto.getMaxPeopleNum()
+                modifyingGroupRequestDto.getName(),
+                modifyingGroupRequestDto.getDescription(),
+                modifyingGroupRequestDto.getMeetingAt(),
+                modifyingGroupRequestDto.getMaxPeopleNum()
         );
 
         // 기존 해시태그 정보 삭제
         groupHashtagRepository.deleteAllByGroup_Id(existingGroup.getId());
 
         // 새로운 해시태그 정보 등록 및 관계 테이블에 저장
-        List<Hashtag> hashtagList = saveHashtags(groupModifyingRequestDto.getHashtags());
+        List<Hashtag> hashtagList = saveHashtags(modifyingGroupRequestDto.getHashtags());
         hashtagList.stream().map(
                 x -> GroupHashtag
                         .builder()
