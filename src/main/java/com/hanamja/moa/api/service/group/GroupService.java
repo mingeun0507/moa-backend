@@ -13,8 +13,11 @@ import com.hanamja.moa.api.entity.hashtag.HashtagRepository;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.api.entity.user_group.UserGroupRepository;
+import com.hanamja.moa.exception.custom.UserInputException;
+import com.hanamja.moa.exception.custom.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +39,11 @@ public class GroupService {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
 
         User user = userRepository.findById(1L).orElseThrow(
-                // TODO: Exception 구현 후 사용자를 찾지 못한 경우 unchecked Exception 던지기
+                () -> UserNotFoundException
+                        .builder()
+                        .httpStatus(HttpStatus.BAD_REQUEST)
+                        .message("유효하지 않은 사용자입니다.")
+                        .build()
         );
 
         // 재학생인지 검증
@@ -63,8 +70,21 @@ public class GroupService {
     private void validateSenior(User user) {
         if (user.isFreshman()) {
             log.info("신입생의 모임 생성 시도 발생 - 학번: {}, 이름: {}", user.getStudentId(), user.getName());
-            // TODO: 예외 처리 구현 필요
-            // 신입생이 만드는지?
+            throw UserInputException
+                    .builder()
+                    .httpStatus(HttpStatus.UNAUTHORIZED)
+                    .message("신입생은 모임을 생성할 수 없습니다.")
+                    .build();
+        }
+    }
+
+    private void validateMaker(User user, Group group) {
+        if (!group.getMaker().getId().equals(user.getId())) {
+            throw UserInputException
+                    .builder()
+                    .httpStatus(HttpStatus.UNAUTHORIZED)
+                    .message("해당 모임에 접근할 권한이 없습니다.")
+                    .build();
         }
     }
 
@@ -110,6 +130,8 @@ public class GroupService {
         Group existingGroup = groupRepository.findById(modifyingGroupRequestDto.getId()).orElseThrow(
                 // TODO: group이 없을 때 400 Bad Request 던지도록 구현 필요
         );
+
+        validateMaker(user, existingGroup);
 
         if (existingGroup.getCurrentPeopleNum() > modifyingGroupRequestDto.getMaxPeopleNum()) {
             // TODO: 새로운 group 최대 인원수보다 현재 인원수가 많으면 400 Bad Request
