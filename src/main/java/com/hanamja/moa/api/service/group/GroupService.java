@@ -1,8 +1,8 @@
 package com.hanamja.moa.api.service.group;
 
 import com.hanamja.moa.api.dto.group.GroupInfoResponseDto;
-import com.hanamja.moa.api.dto.group.GroupMakingRequestDto;
 import com.hanamja.moa.api.dto.group.GroupModifyingRequestDto;
+import com.hanamja.moa.api.dto.group.MakingGroupRequestDto;
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.group.GroupRepository;
 import com.hanamja.moa.api.entity.group_hashtag.GroupHashtag;
@@ -29,7 +29,7 @@ public class GroupService {
     private final HashtagRepository hashtagRepository;
 
     @Transactional
-    public GroupInfoResponseDto makeNewGroup(GroupMakingRequestDto groupMakingRequestDto) {
+    public GroupInfoResponseDto makeNewGroup(MakingGroupRequestDto makingGroupRequestDto) {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
 
         User user = userRepository.findById(1L).orElseThrow(
@@ -40,9 +40,9 @@ public class GroupService {
         validateSenior(user);
 
         // Hashtag #으로 파싱 후 분리, 저장 (다른 메소드로 분리 구현)
-        List<Hashtag> hashtagList = saveHashtags(groupMakingRequestDto.getHashtags());
+        List<Hashtag> hashtagList = saveHashtags(makingGroupRequestDto.getHashtags());
 
-        Group newGroup = GroupMakingRequestDto.toEntity(groupMakingRequestDto, user);
+        Group newGroup = MakingGroupRequestDto.toEntity(makingGroupRequestDto, user);
         groupRepository.save(newGroup);
 
         // GroupHashtag 생성 및 Group과의 관계 설정, 저장

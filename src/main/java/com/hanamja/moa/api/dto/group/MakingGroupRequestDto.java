@@ -7,7 +7,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class GroupMakingRequestDto {
+public class MakingGroupRequestDto {
 
     private String name;
     private String description;
@@ -15,14 +15,14 @@ public class GroupMakingRequestDto {
     private LocalDateTime meetingAt;
     private String hashtags;
 
-    public static Group toEntity(GroupMakingRequestDto groupMakingRequestDto, User user) {
+    public static Group toEntity(MakingGroupRequestDto makingGroupRequestDto, User user) {
         return Group
                 .builder()
-                .name(groupMakingRequestDto.getName())
-                .description(groupMakingRequestDto.getDescription())
-                .maxPeopleNum(groupMakingRequestDto.getMaxPeopleNum())
+                .name(makingGroupRequestDto.getName())
+                .description(makingGroupRequestDto.getDescription())
+                .maxPeopleNum(makingGroupRequestDto.getMaxPeopleNum())
                 .currentPeopleNum(1L)
-                .meetingAt(groupMakingRequestDto.getMeetingAt())
+                .meetingAt(makingGroupRequestDto.getMeetingAt())
                 .maker(user)
                 .build();
     }

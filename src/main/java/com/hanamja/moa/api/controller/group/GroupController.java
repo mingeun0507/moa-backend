@@ -1,8 +1,8 @@
 package com.hanamja.moa.api.controller.group;
 
 import com.hanamja.moa.api.dto.group.GroupInfoResponseDto;
-import com.hanamja.moa.api.dto.group.GroupMakingRequestDto;
 import com.hanamja.moa.api.dto.group.GroupModifyingRequestDto;
+import com.hanamja.moa.api.dto.group.MakingGroupRequestDto;
 import com.hanamja.moa.api.service.group.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +16,10 @@ public class GroupController {
     private final GroupService groupService;
 
     @PostMapping
-    public ResponseEntity<GroupInfoResponseDto> makeNewGroup(@RequestBody GroupMakingRequestDto groupMakingRequestDto) {
+    public ResponseEntity<GroupInfoResponseDto> makeNewGroup(@RequestBody MakingGroupRequestDto makingGroupRequestDto) {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
 
-        return ResponseEntity.ok(groupService.makeNewGroup(groupMakingRequestDto));
+        return ResponseEntity.ok(groupService.makeNewGroup(makingGroupRequestDto));
     }
 
     @PutMapping
@@ -28,5 +28,4 @@ public class GroupController {
 
         return ResponseEntity.ok(groupService.modifyExistingGroup(groupModifyingRequestDto));
     }
-
 }
