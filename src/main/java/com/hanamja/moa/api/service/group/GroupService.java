@@ -3,6 +3,7 @@ package com.hanamja.moa.api.service.group;
 import com.hanamja.moa.api.dto.group.GroupInfoResponseDto;
 import com.hanamja.moa.api.dto.group.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.ModifyingGroupRequestDto;
+import com.hanamja.moa.api.dto.group.RemovingGroupRequestDto;
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.group.GroupRepository;
 import com.hanamja.moa.api.entity.group_hashtag.GroupHashtag;
@@ -11,6 +12,7 @@ import com.hanamja.moa.api.entity.hashtag.Hashtag;
 import com.hanamja.moa.api.entity.hashtag.HashtagRepository;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserRepository;
+import com.hanamja.moa.api.entity.user_group.UserGroupRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class GroupService {
     private final UserRepository userRepository;
+    private final UserGroupRepository userGroupRepository;
     private final GroupRepository groupRepository;
     private final GroupHashtagRepository groupHashtagRepository;
     private final HashtagRepository hashtagRepository;
@@ -135,5 +138,32 @@ public class GroupService {
 
         // 수정된 group 정보 반영
         return GroupInfoResponseDto.from(groupRepository.save(existingGroup));
+    }
+
+    @Transactional
+    public GroupInfoResponseDto removeExistingGroup(RemovingGroupRequestDto removingGroupRequestDto) {
+        User user = userRepository.findById(1L).orElseThrow(
+                // TODO: Exception 구현 후 사용자를 찾지 못한 경우 unchecked Exception 던지기
+        );
+
+        // 재학생인지 검증
+        validateSenior(user);
+
+        // groupId로 group 찾아오기
+        Group existingGroup = groupRepository.findById(removingGroupRequestDto.getId()).orElseThrow(
+                // TODO: group이 없을 때 400 Bad Request 던지도록 구현 필요
+        );
+
+        GroupInfoResponseDto removedGroupDto = GroupInfoResponseDto.from(existingGroup);
+
+        // UserGroup, GroupHashtag에서 해당 Group 모두 삭제
+        userGroupRepository.deleteAllByGroup_Id(removingGroupRequestDto.getId());
+        groupHashtagRepository.deleteAllByGroup_Id(removingGroupRequestDto.getId());
+
+        // Group 삭제
+        groupRepository.deleteById(removingGroupRequestDto.getId());
+
+        return removedGroupDto;
+
     }
 }
