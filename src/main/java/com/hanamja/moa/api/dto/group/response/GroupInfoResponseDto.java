@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class GroupInfoResponseDto {
@@ -20,8 +21,10 @@ public class GroupInfoResponseDto {
     private LocalDateTime meetingAt;
     private String imageLink;
 
+    private List<String> hashtags;
+
     @Builder
-    public GroupInfoResponseDto(Long id, String name, String description, State state, Long maxPeopleNum, Long currentPeopleNum, LocalDateTime createdAt, LocalDateTime modifiedAt, LocalDateTime meetingAt, String imageLink) {
+    public GroupInfoResponseDto(Long id, String name, String description, State state, Long maxPeopleNum, Long currentPeopleNum, LocalDateTime createdAt, LocalDateTime modifiedAt, LocalDateTime meetingAt, String imageLink, List<String> hashtags) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -32,9 +35,10 @@ public class GroupInfoResponseDto {
         this.modifiedAt = modifiedAt;
         this.meetingAt = meetingAt;
         this.imageLink = imageLink;
+        this.hashtags = hashtags;
     }
 
-    public static GroupInfoResponseDto from(Group group) {
+    public static GroupInfoResponseDto from(Group group, List<String> hashtags) {
         return GroupInfoResponseDto
                 .builder()
                 .id(group.getId())
@@ -47,6 +51,7 @@ public class GroupInfoResponseDto {
                 .modifiedAt(group.getModifiedAt())
                 .meetingAt(group.getMeetingAt())
                 .imageLink(group.getImageLink())
+                .hashtags(hashtags)
                 .build();
     }
 
