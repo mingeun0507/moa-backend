@@ -13,10 +13,9 @@ import com.hanamja.moa.api.entity.hashtag.HashtagRepository;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.api.entity.user_group.UserGroupRepository;
-import com.hanamja.moa.exception.custom.GroupNotFoundException;
 import com.hanamja.moa.exception.custom.InvalidMaxPeopleNumberException;
+import com.hanamja.moa.exception.custom.NotFoundException;
 import com.hanamja.moa.exception.custom.UserInputException;
-import com.hanamja.moa.exception.custom.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -60,7 +59,7 @@ public class GroupService {
                         .build()
         ).forEach(groupHashtagRepository::save);
 
-        return GroupInfoResponseDto.from(newGroup);
+        return GroupInfoResponseDto.from(newGroup, hashtagList.stream().map(Hashtag::getName).collect(Collectors.toList()));
     }
 
     @Transactional
@@ -75,7 +74,7 @@ public class GroupService {
 
         // groupId로 group 찾아오기
         Group existingGroup = groupRepository.findById(modifyingGroupRequestDto.getId()).orElseThrow(
-                () -> GroupNotFoundException
+                () -> NotFoundException
                         .builder()
                         .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
                         .message("일시적 오류입니다. 다시 시도해주세요.")
@@ -114,7 +113,7 @@ public class GroupService {
         ).forEach(groupHashtagRepository::save);
 
         // 수정된 group 정보 반영
-        return GroupInfoResponseDto.from(groupRepository.save(existingGroup));
+        return GroupInfoResponseDto.from(existingGroup, hashtagList.stream().map(Hashtag::getName).collect(Collectors.toList()));
     }
 
     @Transactional
@@ -127,14 +126,20 @@ public class GroupService {
 
         // groupId로 group 찾아오기
         Group existingGroup = groupRepository.findById(removingGroupRequestDto.getId()).orElseThrow(
-                () -> GroupNotFoundException
+                () -> NotFoundException
                         .builder()
                         .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
                         .message("일시적 오류입니다. 다시 시도해주세요.")
                         .build()
         );
 
-        GroupInfoResponseDto removedGroupDto = GroupInfoResponseDto.from(existingGroup);
+        List<String> hashtagStringList = groupHashtagRepository.findAllByGroup_Id(existingGroup.getId())
+                .stream().map(x -> hashtagRepository.findById(x.getHashtag().getId()))
+                .map(x -> x.orElseThrow().getName()).collect(Collectors.toList());
+
+        GroupInfoResponseDto removedGroupDto =
+                GroupInfoResponseDto.from(existingGroup, hashtagStringList);
+
 
         // UserGroup, GroupHashtag에서 해당 Group 모두 삭제
         userGroupRepository.deleteAllByGroup_Id(removingGroupRequestDto.getId());
@@ -144,12 +149,11 @@ public class GroupService {
         groupRepository.deleteById(removingGroupRequestDto.getId());
 
         return removedGroupDto;
-
     }
 
     private User validateUser(Long userId) {
         return userRepository.findById(userId).orElseThrow(
-                () -> UserNotFoundException
+                () -> NotFoundException
                         .builder()
                         .httpStatus(HttpStatus.BAD_REQUEST)
                         .message("유효하지 않은 사용자입니다.")
@@ -187,8 +191,8 @@ public class GroupService {
                 x -> {
                     if (hashtagRepository.existsByName(x)) {
                         // 이미 같은 이름의 해시태그가 존재하는 경우 변경 시간 업데이트
-                        Hashtag existingHastag = hashtagRepository.findByName(x).orElseThrow();
-                        existingHastag.updateTouchedAt();
+                        Hashtag existingHashtag = hashtagRepository.findByName(x).orElseThrow();
+                        existingHashtag.updateTouchedAt();
 
                         // 찾아온 해시태그를 리턴 - TODO: orElseThrow에 500 Internal 에러 처리 추가
                         return hashtagRepository.findByName(x).orElseThrow();
