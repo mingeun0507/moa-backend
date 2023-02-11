@@ -1,4 +1,4 @@
-package com.hanamja.moa.api.dto.group;
+package com.hanamja.moa.api.dto.group.response;
 
 import com.hanamja.moa.api.entity.group.Group;
 import lombok.Builder;
