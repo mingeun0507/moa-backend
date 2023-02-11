@@ -1,4 +1,4 @@
-package com.hanamja.moa.api.dto.group;
+package com.hanamja.moa.api.dto.group.request;
 
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.user.User;
