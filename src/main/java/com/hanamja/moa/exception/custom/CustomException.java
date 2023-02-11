@@ -1,5 +1,6 @@
 package com.hanamja.moa.exception.custom;
 
+import lombok.Builder;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
@@ -11,6 +12,7 @@ public class CustomException extends RuntimeException {
         super(message);
     }
 
+    @Builder
     public CustomException(HttpStatus httpStatus, String message) {
         super(message);
         this.httpStatus = httpStatus;
