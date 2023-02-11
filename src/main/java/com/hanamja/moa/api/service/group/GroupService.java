@@ -1,9 +1,9 @@
 package com.hanamja.moa.api.service.group;
 
-import com.hanamja.moa.api.dto.group.GroupInfoResponseDto;
-import com.hanamja.moa.api.dto.group.MakingGroupRequestDto;
-import com.hanamja.moa.api.dto.group.ModifyingGroupRequestDto;
-import com.hanamja.moa.api.dto.group.RemovingGroupRequestDto;
+import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
+import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
+import com.hanamja.moa.api.dto.group.request.RemovingGroupRequestDto;
+import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.group.GroupRepository;
 import com.hanamja.moa.api.entity.group_hashtag.GroupHashtag;
