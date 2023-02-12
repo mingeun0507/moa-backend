@@ -3,6 +3,7 @@ package com.hanamja.moa.api.service.group;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.RemovingGroupRequestDto;
+import com.hanamja.moa.api.dto.group.response.GroupInfoListResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.group.GroupRepository;
@@ -12,9 +13,10 @@ import com.hanamja.moa.api.entity.hashtag.Hashtag;
 import com.hanamja.moa.api.entity.hashtag.HashtagRepository;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserRepository;
+import com.hanamja.moa.api.entity.user_group.UserGroup;
 import com.hanamja.moa.api.entity.user_group.UserGroupRepository;
+import com.hanamja.moa.exception.custom.NotFoundException;
 import com.hanamja.moa.exception.custom.UserInputException;
-import com.hanamja.moa.exception.custom.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 @Slf4j
+@Transactional(readOnly = true)
 public class GroupService {
     private final UserRepository userRepository;
     private final UserGroupRepository userGroupRepository;
@@ -39,7 +42,7 @@ public class GroupService {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
 
         User user = userRepository.findById(1L).orElseThrow(
-                () -> UserNotFoundException
+                () -> NotFoundException
                         .builder()
                         .httpStatus(HttpStatus.BAD_REQUEST)
                         .message("유효하지 않은 사용자입니다.")
@@ -186,6 +189,43 @@ public class GroupService {
         groupRepository.deleteById(removingGroupRequestDto.getId());
 
         return removedGroupDto;
+    }
 
+    public GroupInfoResponseDto join(Long groupId, User user) {
+
+        Group group = groupRepository.findById(groupId).orElseThrow(
+                () -> new NotFoundException("해당 그룹을 찾을 수 없습니다.")
+        );
+
+        UserGroup userGroup = UserGroup
+                .builder()
+                .progress("")
+                .joiner(user)
+                .group(group)
+                .build();
+
+        userGroupRepository.save(userGroup);
+
+        return GroupInfoResponseDto.from(group);
+    }
+
+    public GroupInfoListResponseDto getMyGroupList(User user) {
+        Long userId = user.getId();
+        List<Group> groupList = groupRepository.findAllByUserId(userId);
+
+        List<GroupInfoResponseDto> items = groupList.stream().map(GroupInfoResponseDto::from).collect(Collectors.toList());
+
+        return GroupInfoListResponseDto.of(items);
+    }
+
+    public GroupInfoResponseDto quit(Long groupId, User user) {
+
+        UserGroup userGroup = userGroupRepository.findByGroupIdAndJoinerId(groupId, user.getId())
+                .orElseThrow(() -> new NotFoundException("해당 그룹을 찾을 수 없습니다."));
+
+        Group group = userGroup.getGroup();
+        userGroupRepository.delete(userGroup);
+
+        return GroupInfoResponseDto.from(group);
     }
 }
