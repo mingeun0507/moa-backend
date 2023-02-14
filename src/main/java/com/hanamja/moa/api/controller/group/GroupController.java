@@ -3,7 +3,10 @@ package com.hanamja.moa.api.controller.group;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.RemovingGroupRequestDto;
+import com.hanamja.moa.api.dto.group.response.GroupInfoListResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
+import com.hanamja.moa.api.entity.group.GroupRepository;
+import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.service.group.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -36,4 +39,38 @@ public class GroupController {
 
         return ResponseEntity.ok(groupService.removeExistingGroup(removingGroupRequestDto));
     }
+
+    @PostMapping("/{groupId}")
+    public ResponseEntity<GroupInfoResponseDto> join(
+            @PathVariable("groupId") Long groupId
+            /*, @AuthenticationPrincipal UserAccount userAccount */
+    ) {
+
+        User user = User.builder().build();
+        GroupInfoResponseDto response = groupService.join(groupId, user);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("my")
+    public ResponseEntity<GroupInfoListResponseDto> getMyGroupList(
+            /*, @AuthenticationPrincipal UserAccount userAccount */) {
+
+        User user = User.builder().build();
+        GroupInfoListResponseDto response = groupService.getMyGroupList(user);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("my")
+    public ResponseEntity<GroupInfoResponseDto> quit(
+            @PathVariable("groupId") Long groupId
+            /*, @AuthenticationPrincipal UserAccount userAccount */
+    ) {
+        User user = User.builder().build();
+        GroupInfoResponseDto response = groupService.quit(groupId, user);
+
+        return ResponseEntity.ok(response);
+    }
+
 }
