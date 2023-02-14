@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/group")
@@ -35,5 +37,11 @@ public class GroupController {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
 
         return ResponseEntity.ok(groupService.removeExistingGroup(removingGroupRequestDto));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<GroupInfoResponseDto>> getExistingGroups(@RequestParam String sortedBy) {
+
+        return ResponseEntity.ok(groupService.getExistingGroups(sortedBy));
     }
 }
