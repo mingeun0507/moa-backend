@@ -6,6 +6,7 @@ import com.hanamja.moa.api.dto.group.request.RemovingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.group.GroupRepository;
+import com.hanamja.moa.api.entity.group.State;
 import com.hanamja.moa.api.entity.group_hashtag.GroupHashtag;
 import com.hanamja.moa.api.entity.group_hashtag.GroupHashtagRepository;
 import com.hanamja.moa.api.entity.hashtag.Hashtag;
@@ -14,6 +15,7 @@ import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.api.entity.user_group.UserGroupRepository;
 import com.hanamja.moa.exception.custom.InvalidMaxPeopleNumberException;
+import com.hanamja.moa.exception.custom.InvalidParameterException;
 import com.hanamja.moa.exception.custom.NotFoundException;
 import com.hanamja.moa.exception.custom.UserInputException;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -133,9 +136,7 @@ public class GroupService {
                         .build()
         );
 
-        List<String> hashtagStringList = groupHashtagRepository.findAllByGroup_Id(existingGroup.getId())
-                .stream().map(x -> hashtagRepository.findById(x.getHashtag().getId()))
-                .map(x -> x.orElseThrow().getName()).collect(Collectors.toList());
+        List<String> hashtagStringList = getHashtagStringList(existingGroup);
 
         GroupInfoResponseDto removedGroupDto =
                 GroupInfoResponseDto.from(existingGroup, hashtagStringList);
@@ -182,6 +183,12 @@ public class GroupService {
         }
     }
 
+    private List<String> getHashtagStringList(Group existingGroup) {
+        return groupHashtagRepository.findAllByGroup_Id(existingGroup.getId())
+                .stream().map(x -> hashtagRepository.findById(x.getHashtag().getId()))
+                .map(x -> x.orElseThrow().getName()).collect(Collectors.toList());
+    }
+
     @Transactional
     protected List<Hashtag> saveHashtags(String hashtagString) {
         List<String> hashtagStringList = new java.util.ArrayList<>(List.of(hashtagString.split("#")));
@@ -194,8 +201,14 @@ public class GroupService {
                         Hashtag existingHashtag = hashtagRepository.findByName(x).orElseThrow();
                         existingHashtag.updateTouchedAt();
 
-                        // 찾아온 해시태그를 리턴 - TODO: orElseThrow에 500 Internal 에러 처리 추가
-                        return hashtagRepository.findByName(x).orElseThrow();
+                        // 찾아온 해시태그를 리턴
+                        return hashtagRepository.findByName(x).orElseThrow(
+                                () -> NotFoundException
+                                        .builder()
+                                        .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+                                        .message("일시적인 오류입니다. 다시 시도해주세요.")
+                                        .build()
+                        );
                     } else {
                         // 같은 이름의 해시태그가 존재하지 않는 경우 새로운 해시태그 생성
                         return hashtagRepository.save(
@@ -207,5 +220,25 @@ public class GroupService {
                     }
                 }
         ).collect(Collectors.toList());
+    }
+
+    public List<GroupInfoResponseDto> getExistingGroups(String sortedBy) {
+        if (sortedBy.equals("recent")) {
+            return groupRepository
+                    .findAllByStateOrderByCreatedAtDesc(State.RECRUITING)
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList());
+        } else if (sortedBy.equals("soon")) {
+            return groupRepository
+                    .findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State.RECRUITING, LocalDateTime.now())
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList());
+        } else {
+            throw InvalidParameterException
+                    .builder()
+                    .httpStatus(HttpStatus.BAD_REQUEST)
+                    .message("올바르지 않은 Query String입니다.")
+                    .build();
+        }
     }
 }
