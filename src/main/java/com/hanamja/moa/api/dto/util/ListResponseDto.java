@@ -1,4 +1,4 @@
-package com.hanamja.moa.api.dto.group.response;
+package com.hanamja.moa.api.dto.util;
 
 import lombok.Builder;
 import lombok.Getter;

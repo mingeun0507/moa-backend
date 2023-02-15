@@ -1,4 +1,4 @@
-package com.hanamja.moa.api.dto.group.response;
+package com.hanamja.moa.api.dto.album;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AccessLevel;

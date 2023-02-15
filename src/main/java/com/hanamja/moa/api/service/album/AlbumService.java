@@ -1,8 +1,8 @@
 package com.hanamja.moa.api.service.album;
 
-import com.hanamja.moa.api.dto.group.response.AlbumRespDto;
-import com.hanamja.moa.api.dto.group.response.CardRespDto;
-import com.hanamja.moa.api.dto.group.response.ListResponseDto;
+import com.hanamja.moa.api.dto.album.AlbumRespDto;
+import com.hanamja.moa.api.dto.album.CardRespDto;
+import com.hanamja.moa.api.dto.util.ListResponseDto;
 import com.hanamja.moa.api.entity.album.AlbumRepository;
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
