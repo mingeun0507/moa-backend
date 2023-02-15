@@ -35,14 +35,10 @@ public class SecurityConfig {
         return configuration.getAuthenticationManager();
     }
 
-    // h2 database 테스트가 원활하도록 관련 API 들은 전부 무시
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                .antMatchers("/v*/api-docs",  "/configuration/ui",
-                        "/swagger-resources", "/configuration/security", "/swagger*/**",
-                        "/swagger-ui.html", "/webjars/**","/swagger/**")
-                .antMatchers("/h2-console/**", "/favicon.ico");
+                .antMatchers("");
     }
 
 
@@ -94,7 +90,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(false); // 쿠키를 받을건지
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT", "PATCH", "OPTIONS"));
 
         configuration.addAllowedHeader("*");
