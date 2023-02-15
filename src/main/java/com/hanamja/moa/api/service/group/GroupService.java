@@ -3,8 +3,11 @@ package com.hanamja.moa.api.service.group;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.RemovingGroupRequestDto;
+import com.hanamja.moa.api.dto.group.response.GroupCompleteRespDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoListResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
+import com.hanamja.moa.api.entity.album.Album;
+import com.hanamja.moa.api.entity.album.AlbumRepository;
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.group.GroupRepository;
 import com.hanamja.moa.api.entity.group_hashtag.GroupHashtag;
@@ -17,25 +20,29 @@ import com.hanamja.moa.api.entity.user_group.UserGroup;
 import com.hanamja.moa.api.entity.user_group.UserGroupRepository;
 import com.hanamja.moa.exception.custom.NotFoundException;
 import com.hanamja.moa.exception.custom.UserInputException;
+import com.hanamja.moa.utils.s3.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
 @Slf4j
-@Transactional(readOnly = true)
 public class GroupService {
     private final UserRepository userRepository;
     private final UserGroupRepository userGroupRepository;
     private final GroupRepository groupRepository;
     private final GroupHashtagRepository groupHashtagRepository;
     private final HashtagRepository hashtagRepository;
+    private final AlbumRepository albumRepository;
+    private final S3UploadService s3UploadService;
 
     @Transactional
     public GroupInfoResponseDto makeNewGroup(MakingGroupRequestDto makingGroupRequestDto) {
@@ -227,5 +234,68 @@ public class GroupService {
         userGroupRepository.delete(userGroup);
 
         return GroupInfoResponseDto.from(group);
+    }
+
+    @Transactional
+    public GroupCompleteRespDto completeGroup(Long uid, Long gid, MultipartFile image){
+        if(groupRepository.existsByIdAndMaker_Id(gid, uid)){
+            String imageLink = s3UploadService.saveFileAndGetUrl(image);
+
+            // Group 이랑 UserGroup 이랑 join 해서 업데이트 같이하고싶은데 생각이 안난다...
+            groupRepository.updateGroupImage(imageLink, gid);
+            userGroupRepository.updateProgress("DONE", gid);
+
+            // gid 받아서 group 에 속해있는 user 앨범 findAll
+            // 앨범마다 group 유저 정보 체크해서 없으면 카드 추가
+            // 있으면 badged -> true 로 변경
+            List<User> groupJoinUsers = userGroupRepository.findAllByGroup_Id(gid).stream()
+                    .map(UserGroup::getJoiner).collect(Collectors.toList());
+
+            groupJoinUsers.forEach(albumOwner -> {
+                List<User> metUsers = albumRepository.findAllByOwner_Id(albumOwner.getId()).stream()
+                        .map(Album::getMetUser).collect(Collectors.toList());
+
+                groupJoinUsers.forEach(groupJoinUser -> {
+                    if(albumOwner.getId() != groupJoinUser.getId() && !metUsers.contains(groupJoinUser)){
+                        albumRepository.save(Album.builder()
+                                .owner(albumOwner).metUser(groupJoinUser).isBadged(true)
+                                .build());
+                    }else{
+                        albumRepository.updateBadgeState(true, groupJoinUser.getId(), albumOwner.getId());
+                    }
+                });
+            });
+
+            // 위에 update 과정 끝나면 gid 로 user info 토대로 response data 구축하기
+            // 모임에 참여했던 user 의 프사, 이름, 만난 날짜, 위에서 저장한 모임 사진 url
+            List<GroupCompleteRespDto.MemberInfo> memberInfoList = new ArrayList<>();
+
+            List<Long> groupIdList = userGroupRepository.findAllByJoiner_IdAndProgress(uid,"DONE").stream()
+                    .map(UserGroup::getId).collect(Collectors.toList());
+
+            groupJoinUsers.stream().forEach(user -> {
+                if(!user.getId().equals(uid)) {
+                    // 만난 횟수 : uid 가 참여한 group_id 리스트 중에 user.getId()가
+                    // 속한 group_id 리스트 중에 겹치는거 중에 progress 가 DONE 인 것
+                    List<Long> userGroupIdList = userGroupRepository.findAllByJoiner_IdAndProgress(user.getId(), "DONE").stream()
+                            .map(UserGroup::getId).collect(Collectors.toList());
+
+                    userGroupIdList.retainAll(groupIdList); // 교집합
+
+                    memberInfoList.add(GroupCompleteRespDto.MemberInfo.builder()
+                            .userId(user.getId()).username(user.getUsername())
+                            .imageLink(user.getImageLink()).meetingCnt((long) userGroupIdList.size())
+                            .build());
+                }
+            });
+            return GroupCompleteRespDto.builder()
+                    .memberInfoList(memberInfoList).groupImageLink(imageLink)
+                    .build();
+        }else{
+            // throw new 잘못된 요청 case 리턴하기
+            return GroupCompleteRespDto.builder()
+                    .memberInfoList(null).groupImageLink(null)
+                    .build();
+        }
     }
 }
