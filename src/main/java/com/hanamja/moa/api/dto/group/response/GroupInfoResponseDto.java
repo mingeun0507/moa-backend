@@ -2,13 +2,16 @@ package com.hanamja.moa.api.dto.group.response;
 
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.group.State;
+import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Data
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GroupInfoResponseDto {
     private Long id;
     private String name;

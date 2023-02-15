@@ -2,11 +2,14 @@ package com.hanamja.moa.api.dto.group.request;
 
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.user.User;
-import lombok.Data;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MakingGroupRequestDto {
 
     private String name;

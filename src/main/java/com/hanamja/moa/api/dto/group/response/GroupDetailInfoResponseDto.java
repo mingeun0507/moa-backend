@@ -2,12 +2,15 @@ package com.hanamja.moa.api.dto.group.response;
 
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.user.User;
+import lombok.AccessLevel;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-@Data
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GroupDetailInfoResponseDto {
     private GroupInfoResponseDto groupInfoResponseDto;
     private List<SimpleUserInfoDto> userInfoDtoList;
@@ -29,7 +32,8 @@ public class GroupDetailInfoResponseDto {
                 .build();
     }
 
-    @Data
+    @Getter
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     public static class SimpleUserInfoDto {
         private Long id;
         private String name;
