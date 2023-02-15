@@ -3,10 +3,10 @@ package com.hanamja.moa.api.service.group;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.RemovingGroupRequestDto;
-import com.hanamja.moa.api.dto.group.response.GroupDetailInfoResponseDto;
-import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupCompleteRespDto;
+import com.hanamja.moa.api.dto.group.response.GroupDetailInfoResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoListResponseDto;
+import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
 import com.hanamja.moa.api.entity.album.Album;
 import com.hanamja.moa.api.entity.album.AlbumRepository;
 import com.hanamja.moa.api.entity.group.Group;
@@ -32,8 +32,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,7 +48,6 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final GroupHashtagRepository groupHashtagRepository;
     private final HashtagRepository hashtagRepository;
-    private final AlbumRepository albumRepository;
     private final AmazonS3Uploader amazonS3Uploader;
 
     @Transactional
@@ -93,7 +92,7 @@ public class GroupService {
                 () -> NotFoundException
                         .builder()
                         .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .message("일시적 오류입니다. 다시 시도해주세요.")
+                        .message("존재하지 않는 groupId입니다.")
                         .build()
         );
 
@@ -303,6 +302,7 @@ public class GroupService {
         }
 
         return GroupDetailInfoResponseDto.from(existingGroup, getHashtagStringList(existingGroup), simpleUserInfoDtoList, point);
+    }
         
     public GroupInfoResponseDto join(Long groupId, User user) {
 
@@ -319,14 +319,14 @@ public class GroupService {
 
         userGroupRepository.save(userGroup);
 
-        return GroupInfoResponseDto.from(group);
+        return GroupInfoResponseDto.from(group, getHashtagStringList(group));
     }
 
     public GroupInfoListResponseDto getMyGroupList(User user) {
         Long userId = user.getId();
         List<Group> groupList = groupRepository.findAllByUserId(userId);
 
-        List<GroupInfoResponseDto> items = groupList.stream().map(GroupInfoResponseDto::from).collect(Collectors.toList());
+        List<GroupInfoResponseDto> items = groupList.stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x))).collect(Collectors.toList());
 
         return GroupInfoListResponseDto.of(items);
     }
@@ -339,7 +339,7 @@ public class GroupService {
         Group group = userGroup.getGroup();
         userGroupRepository.delete(userGroup);
 
-        return GroupInfoResponseDto.from(group);
+        return GroupInfoResponseDto.from(group, getHashtagStringList(group));
     }
 
     @Transactional
@@ -379,8 +379,8 @@ public class GroupService {
             List<Long> groupIdList = userGroupRepository.findAllByJoiner_IdAndProgress(uid,"DONE").stream()
                     .map(UserGroup::getId).collect(Collectors.toList());
 
-            groupJoinUsers.stream().forEach(user -> {
-                if(!user.getId().equals(uid)) {
+            groupJoinUsers.forEach(user -> {
+                if (!user.getId().equals(uid)) {
                     // 만난 횟수 : uid 가 참여한 group_id 리스트 중에 user.getId()가
                     // 속한 group_id 리스트 중에 겹치는거 중에 progress 가 DONE 인 것
                     List<Long> userGroupIdList = userGroupRepository.findAllByJoiner_IdAndProgress(user.getId(), "DONE").stream()
