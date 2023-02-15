@@ -8,8 +8,8 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface AlbumRepository extends JpaRepository<Album, Long> {
+    Boolean existsByOwner_IdAndMetUser_Id(Long ownerId, Long metUserId);
     boolean existsByMetUser_Id(Long uid);
-
     List<Album> findAllByOwner_Id(Long oid);
 
     @Modifying(clearAutomatically = true)

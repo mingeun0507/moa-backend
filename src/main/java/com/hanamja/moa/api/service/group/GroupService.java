@@ -4,12 +4,14 @@ import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.RemovingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.response.GroupCompleteRespDto;
+import com.hanamja.moa.api.dto.group.response.GroupDetailInfoResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoListResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
 import com.hanamja.moa.api.entity.album.Album;
 import com.hanamja.moa.api.entity.album.AlbumRepository;
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.group.GroupRepository;
+import com.hanamja.moa.api.entity.group.State;
 import com.hanamja.moa.api.entity.group_hashtag.GroupHashtag;
 import com.hanamja.moa.api.entity.group_hashtag.GroupHashtagRepository;
 import com.hanamja.moa.api.entity.hashtag.Hashtag;
@@ -18,6 +20,8 @@ import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
 import com.hanamja.moa.api.entity.user_group.UserGroupRepository;
+import com.hanamja.moa.exception.custom.InvalidMaxPeopleNumberException;
+import com.hanamja.moa.exception.custom.InvalidParameterException;
 import com.hanamja.moa.exception.custom.NotFoundException;
 import com.hanamja.moa.exception.custom.UserInputException;
 import com.hanamja.moa.utils.s3.AmazonS3Uploader;
@@ -29,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,25 +42,19 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class GroupService {
+    private final AlbumRepository albumRepository;
     private final UserRepository userRepository;
     private final UserGroupRepository userGroupRepository;
     private final GroupRepository groupRepository;
     private final GroupHashtagRepository groupHashtagRepository;
     private final HashtagRepository hashtagRepository;
-    private final AlbumRepository albumRepository;
     private final AmazonS3Uploader amazonS3Uploader;
 
     @Transactional
     public GroupInfoResponseDto makeNewGroup(MakingGroupRequestDto makingGroupRequestDto) {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
-
-        User user = userRepository.findById(1L).orElseThrow(
-                () -> NotFoundException
-                        .builder()
-                        .httpStatus(HttpStatus.BAD_REQUEST)
-                        .message("유효하지 않은 사용자입니다.")
-                        .build()
-        );
+        Long userId = 1L;
+        User user = validateUser(userId);
 
         // 재학생인지 검증
         validateSenior(user);
@@ -75,77 +74,36 @@ public class GroupService {
                         .build()
         ).forEach(groupHashtagRepository::save);
 
-        return GroupInfoResponseDto.from(newGroup);
-    }
-
-    private void validateSenior(User user) {
-        if (user.isFreshman()) {
-            log.info("신입생의 모임 생성 시도 발생 - 학번: {}, 이름: {}", user.getStudentId(), user.getName());
-            throw UserInputException
-                    .builder()
-                    .httpStatus(HttpStatus.UNAUTHORIZED)
-                    .message("신입생은 모임을 생성할 수 없습니다.")
-                    .build();
-        }
-    }
-
-    private void validateMaker(User user, Group group) {
-        if (!group.getMaker().getId().equals(user.getId())) {
-            throw UserInputException
-                    .builder()
-                    .httpStatus(HttpStatus.UNAUTHORIZED)
-                    .message("해당 모임에 접근할 권한이 없습니다.")
-                    .build();
-        }
-    }
-
-    @Transactional
-    protected List<Hashtag> saveHashtags(String hashtagString) {
-        List<String> hashtagStringList = new java.util.ArrayList<>(List.of(hashtagString.split("#")));
-        hashtagStringList.remove(0);
-
-        return hashtagStringList.stream().map(
-                x -> {
-                    if (hashtagRepository.existsByName(x)) {
-                        // 이미 같은 이름의 해시태그가 존재하는 경우 변경 시간 업데이트
-                        Hashtag existingHastag = hashtagRepository.findByName(x).orElseThrow();
-                        existingHastag.updateTouchedAt();
-
-                        // 찾아온 해시태그를 리턴 - TODO: orElseThrow에 500 Internal 에러 처리 추가
-                        return hashtagRepository.findByName(x).orElseThrow();
-                    } else {
-                        // 같은 이름의 해시태그가 존재하지 않는 경우 새로운 해시태그 생성
-                        return hashtagRepository.save(
-                                Hashtag
-                                        .builder()
-                                        .name(x)
-                                        .build()
-                        );
-                    }
-                }
-        ).collect(Collectors.toList());
+        return GroupInfoResponseDto.from(newGroup, hashtagList.stream().map(Hashtag::getName).collect(Collectors.toList()));
     }
 
     @Transactional
     public GroupInfoResponseDto modifyExistingGroup(ModifyingGroupRequestDto modifyingGroupRequestDto) {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
 
-        User user = userRepository.findById(1L).orElseThrow(
-                // TODO: Exception 구현 후 사용자를 찾지 못한 경우 unchecked Exception 던지기
-        );
+        Long userId = 1L;
+        User user = validateUser(userId);
 
         // 재학생인지 검증
         validateSenior(user);
 
         // groupId로 group 찾아오기
         Group existingGroup = groupRepository.findById(modifyingGroupRequestDto.getId()).orElseThrow(
-                // TODO: group이 없을 때 400 Bad Request 던지도록 구현 필요
+                () -> NotFoundException
+                        .builder()
+                        .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .message("존재하지 않는 groupId입니다.")
+                        .build()
         );
 
         validateMaker(user, existingGroup);
 
         if (existingGroup.getCurrentPeopleNum() > modifyingGroupRequestDto.getMaxPeopleNum()) {
-            // TODO: 새로운 group 최대 인원수보다 현재 인원수가 많으면 400 Bad Request
+            throw InvalidMaxPeopleNumberException
+                    .builder()
+                    .httpStatus(HttpStatus.BAD_REQUEST)
+                    .message("모임에 신청한 인원 수보다 적게 줄일 수 없습니다.")
+                    .build();
         }
 
         // group 정보 수정
@@ -170,24 +128,31 @@ public class GroupService {
         ).forEach(groupHashtagRepository::save);
 
         // 수정된 group 정보 반영
-        return GroupInfoResponseDto.from(groupRepository.save(existingGroup));
+        return GroupInfoResponseDto.from(existingGroup, hashtagList.stream().map(Hashtag::getName).collect(Collectors.toList()));
     }
 
     @Transactional
     public GroupInfoResponseDto removeExistingGroup(RemovingGroupRequestDto removingGroupRequestDto) {
-        User user = userRepository.findById(1L).orElseThrow(
-                // TODO: Exception 구현 후 사용자를 찾지 못한 경우 unchecked Exception 던지기
-        );
+        Long userId = 1L;
+        User user = validateUser(userId);
 
         // 재학생인지 검증
         validateSenior(user);
 
         // groupId로 group 찾아오기
         Group existingGroup = groupRepository.findById(removingGroupRequestDto.getId()).orElseThrow(
-                // TODO: group이 없을 때 400 Bad Request 던지도록 구현 필요
+                () -> NotFoundException
+                        .builder()
+                        .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .message("일시적 오류입니다. 다시 시도해주세요.")
+                        .build()
         );
 
-        GroupInfoResponseDto removedGroupDto = GroupInfoResponseDto.from(existingGroup);
+        List<String> hashtagStringList = getHashtagStringList(existingGroup);
+
+        GroupInfoResponseDto removedGroupDto =
+                GroupInfoResponseDto.from(existingGroup, hashtagStringList);
+
 
         // UserGroup, GroupHashtag에서 해당 Group 모두 삭제
         userGroupRepository.deleteAllByGroup_Id(removingGroupRequestDto.getId());
@@ -199,6 +164,146 @@ public class GroupService {
         return removedGroupDto;
     }
 
+    private User validateUser(Long userId) {
+        return userRepository.findById(userId).orElseThrow(
+                () -> NotFoundException
+                        .builder()
+                        .httpStatus(HttpStatus.BAD_REQUEST)
+                        .message("유효하지 않은 사용자입니다.")
+                        .build()
+        );
+    }
+
+    private void validateSenior(User user) {
+        if (user.isFreshman()) {
+            log.info("신입생의 모임 생성 시도 발생 - 학번: {}, 이름: {}", user.getStudentId(), user.getName());
+            throw UserInputException
+                    .builder()
+                    .httpStatus(HttpStatus.UNAUTHORIZED)
+                    .message("신입생은 모임을 생성할 수 없습니다.")
+                    .build();
+        }
+    }
+
+    private void validateMaker(User user, Group group) {
+        if (!group.getMaker().getId().equals(user.getId())) {
+            throw UserInputException
+                    .builder()
+                    .httpStatus(HttpStatus.UNAUTHORIZED)
+                    .message("해당 모임에 접근할 권한이 없습니다.")
+                    .build();
+        }
+    }
+
+    private List<String> getHashtagStringList(Group existingGroup) {
+        return groupHashtagRepository.findAllByGroup_Id(existingGroup.getId())
+                .stream().map(x -> hashtagRepository.findById(x.getHashtag().getId()))
+                .map(x -> x.orElseThrow().getName()).collect(Collectors.toList());
+    }
+
+    @Transactional
+    protected List<Hashtag> saveHashtags(String hashtagString) {
+        List<String> hashtagStringList = new java.util.ArrayList<>(List.of(hashtagString.split("#")));
+        hashtagStringList.remove(0);
+
+        return hashtagStringList.stream().map(
+                x -> {
+                    if (hashtagRepository.existsByName(x)) {
+                        // 이미 같은 이름의 해시태그가 존재하는 경우 변경 시간 업데이트
+                        Hashtag existingHashtag = hashtagRepository.findByName(x).orElseThrow();
+                        existingHashtag.updateTouchedAt();
+
+                        // 찾아온 해시태그를 리턴
+                        return hashtagRepository.findByName(x).orElseThrow(
+                                () -> NotFoundException
+                                        .builder()
+                                        .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+                                        .message("일시적인 오류입니다. 다시 시도해주세요.")
+                                        .build()
+                        );
+                    } else {
+                        // 같은 이름의 해시태그가 존재하지 않는 경우 새로운 해시태그 생성
+                        return hashtagRepository.save(
+                                Hashtag
+                                        .builder()
+                                        .name(x)
+                                        .build()
+                        );
+                    }
+                }
+        ).collect(Collectors.toList());
+    }
+
+    public List<GroupInfoResponseDto> getExistingGroups(String sortedBy) {
+        if (sortedBy.equals("recent")) {
+            return groupRepository
+                    .findAllByStateOrderByCreatedAtDesc(State.RECRUITING)
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList());
+        } else if (sortedBy.equals("soon")) {
+            return groupRepository
+                    .findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State.RECRUITING, LocalDateTime.now())
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList());
+        } else {
+            throw InvalidParameterException
+                    .builder()
+                    .httpStatus(HttpStatus.BAD_REQUEST)
+                    .message("올바르지 않은 Query String입니다.")
+                    .build();
+        }
+    }
+
+    public GroupDetailInfoResponseDto getExistingGroupDetail(Long id) {
+        // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
+        Long userId = 1L;
+        User user = validateUser(userId);
+
+        Group existingGroup = groupRepository.findById(id).orElseThrow(
+                () -> NotFoundException
+                        .builder()
+                        .httpStatus(HttpStatus.BAD_REQUEST)
+                        .message("groupId로 group을 찾을 수 없습니다.")
+                        .build()
+        );
+
+        // 참여자들의 간단한 프로필 추가
+        List<GroupDetailInfoResponseDto.SimpleUserInfoDto> simpleUserInfoDtoList =
+                userGroupRepository.findAllByGroup_Id(id).stream()
+                        .map(x -> GroupDetailInfoResponseDto.SimpleUserInfoDto.from(x.getJoiner()))
+                        .collect(Collectors.toList());
+
+        // 생성자의 간단한 프로필 추가
+        simpleUserInfoDtoList.add(0, GroupDetailInfoResponseDto.SimpleUserInfoDto.from(existingGroup.getMaker()));
+
+        // 포인트 정산
+        int point = 0;
+
+        // 모임 참여 3회까지는 점수 부여 - 300, 400, 500
+        switch (userGroupRepository.countAllByJoiner_Id(user.getId())) {
+            case 0:
+                point += 300;
+                break;
+            case 1:
+                point = 400;
+                break;
+            case 2:
+                point = 500;
+                break;
+        }
+
+        // 현재 참여자가 내 앨범에 저장된 사람이면 50, 아니면 100
+        for (var x : simpleUserInfoDtoList) {
+            if (albumRepository.existsByOwner_IdAndMetUser_Id(user.getId(), x.getId())) {
+                point += 50;
+            } else if (!user.getId().equals(x.getId())) {
+                point += 100;
+            }
+        }
+
+        return GroupDetailInfoResponseDto.from(existingGroup, getHashtagStringList(existingGroup), simpleUserInfoDtoList, point);
+    }
+        
     public GroupInfoResponseDto join(Long groupId, User user) {
 
         Group group = groupRepository.findById(groupId).orElseThrow(
@@ -214,14 +319,14 @@ public class GroupService {
 
         userGroupRepository.save(userGroup);
 
-        return GroupInfoResponseDto.from(group);
+        return GroupInfoResponseDto.from(group, getHashtagStringList(group));
     }
 
     public GroupInfoListResponseDto getMyGroupList(User user) {
         Long userId = user.getId();
         List<Group> groupList = groupRepository.findAllByUserId(userId);
 
-        List<GroupInfoResponseDto> items = groupList.stream().map(GroupInfoResponseDto::from).collect(Collectors.toList());
+        List<GroupInfoResponseDto> items = groupList.stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x))).collect(Collectors.toList());
 
         return GroupInfoListResponseDto.of(items);
     }
@@ -234,7 +339,7 @@ public class GroupService {
         Group group = userGroup.getGroup();
         userGroupRepository.delete(userGroup);
 
-        return GroupInfoResponseDto.from(group);
+        return GroupInfoResponseDto.from(group, getHashtagStringList(group));
     }
 
     @Transactional
@@ -274,8 +379,8 @@ public class GroupService {
             List<Long> groupIdList = userGroupRepository.findAllByJoiner_IdAndProgress(uid,"DONE").stream()
                     .map(UserGroup::getId).collect(Collectors.toList());
 
-            groupJoinUsers.stream().forEach(user -> {
-                if(!user.getId().equals(uid)) {
+            groupJoinUsers.forEach(user -> {
+                if (!user.getId().equals(uid)) {
                     // 만난 횟수 : uid 가 참여한 group_id 리스트 중에 user.getId()가
                     // 속한 group_id 리스트 중에 겹치는거 중에 progress 가 DONE 인 것
                     List<Long> userGroupIdList = userGroupRepository.findAllByJoiner_IdAndProgress(user.getId(), "DONE").stream()

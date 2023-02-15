@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,5 +21,9 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
     @Query(value = "UPDATE Group gp SET gp.imageLink = :imageLink WHERE gp.id = :gid")
     void updateGroupImage(@Param(value = "imageLink")String imageLink,
                           @Param(value = "gid")Long gid);
+    
+    List<Group> findAllByStateOrderByCreatedAtDesc(State state);
+
+    List<Group> findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State state, LocalDateTime currentTime);
 
 }
