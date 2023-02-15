@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/group")
@@ -82,7 +84,7 @@ public class GroupController {
     @PostMapping(value = "/complete")
     public ResponseEntity<?> makeCard(@RequestPart(value = "uid") Long uid,
                                       @RequestPart(value = "gid") Long gid,
-                                      @RequestPart(value = "image") MultipartFile image){
+                                      @RequestPart(value = "image") MultipartFile image) throws IOException {
         // 모임 완료 후 -> card 생성하는 로직
         GroupCompleteRespDto groupCompleteRespDto = groupService.completeGroup(uid, gid, image);
         return ResponseEntity.ok().body(groupCompleteRespDto);
