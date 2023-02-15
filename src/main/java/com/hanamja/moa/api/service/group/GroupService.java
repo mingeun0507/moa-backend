@@ -20,7 +20,7 @@ import com.hanamja.moa.api.entity.user_group.UserGroup;
 import com.hanamja.moa.api.entity.user_group.UserGroupRepository;
 import com.hanamja.moa.exception.custom.NotFoundException;
 import com.hanamja.moa.exception.custom.UserInputException;
-import com.hanamja.moa.utils.s3.S3UploadService;
+import com.hanamja.moa.utils.s3.AmazonS3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,7 +43,7 @@ public class GroupService {
     private final GroupHashtagRepository groupHashtagRepository;
     private final HashtagRepository hashtagRepository;
     private final AlbumRepository albumRepository;
-    private final S3UploadService s3UploadService;
+    private final AmazonS3Uploader amazonS3Uploader;
 
     @Transactional
     public GroupInfoResponseDto makeNewGroup(MakingGroupRequestDto makingGroupRequestDto) {
@@ -237,9 +238,9 @@ public class GroupService {
     }
 
     @Transactional
-    public GroupCompleteRespDto completeGroup(Long uid, Long gid, MultipartFile image){
+    public GroupCompleteRespDto completeGroup(Long uid, Long gid, MultipartFile image) throws IOException {
         if(groupRepository.existsByIdAndMaker_Id(gid, uid)){
-            String imageLink = s3UploadService.saveFileAndGetUrl(image);
+            String imageLink = amazonS3Uploader.saveFileAndGetUrl(image);
 
             // Group 이랑 UserGroup 이랑 join 해서 업데이트 같이하고싶은데 생각이 안난다...
             groupRepository.updateGroupImage(imageLink, gid);
