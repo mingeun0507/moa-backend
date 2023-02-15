@@ -1,7 +1,9 @@
 package com.hanamja.moa.utils.s3;
 
 import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,9 +23,11 @@ public class AmazonS3Uploader {
         String s3FileName = "image/" + UUID.randomUUID() + "_" + multipartFile.getOriginalFilename();
 
         ObjectMetadata objMeta = new ObjectMetadata();
-        objMeta.setContentLength(multipartFile.getInputStream().available());
+        objMeta.setContentType(multipartFile.getContentType());
+        objMeta.setContentLength(multipartFile.getSize());
 
-        amazonS3.putObject(bucket, s3FileName, multipartFile.getInputStream(), objMeta);
+        amazonS3.putObject(new PutObjectRequest(bucket, s3FileName, multipartFile.getInputStream(), objMeta)
+                .withCannedAcl(CannedAccessControlList.PublicRead));
 
         return amazonS3.getUrl(bucket, s3FileName).toString();
     }
