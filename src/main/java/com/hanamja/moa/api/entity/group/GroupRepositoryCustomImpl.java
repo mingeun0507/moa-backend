@@ -14,11 +14,11 @@ import static com.hanamja.moa.api.entity.user_group.QUserGroup.userGroup;
 
 @Repository
 @RequiredArgsConstructor
-public class GroupRepositoryCustomImpl {
+public class GroupRepositoryCustomImpl implements GroupRepositoryCustom{
 
     private final JPAQueryFactory jpaQueryFactory;
 
-    List<Group> findAllByUserId(Long userId){
+    public List<Group> findAllByUserId(Long userId){
         return jpaQueryFactory.selectFrom(group)
                 .join(userGroup.group, group)
                 .where(userGroup.joiner.id.eq(userId))
