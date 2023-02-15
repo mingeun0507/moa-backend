@@ -3,6 +3,7 @@ package com.hanamja.moa.api.controller.group;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.RemovingGroupRequestDto;
+import com.hanamja.moa.api.dto.group.response.GroupDetailInfoResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
 import com.hanamja.moa.api.service.group.GroupService;
 import lombok.RequiredArgsConstructor;
@@ -43,5 +44,12 @@ public class GroupController {
     public ResponseEntity<List<GroupInfoResponseDto>> getExistingGroups(@RequestParam String sortedBy) {
 
         return ResponseEntity.ok(groupService.getExistingGroups(sortedBy));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<GroupDetailInfoResponseDto> getExistingGroupDetail(@PathVariable Long id) {
+        // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
+
+        return ResponseEntity.ok(groupService.getExistingGroupDetail(id));
     }
 }
