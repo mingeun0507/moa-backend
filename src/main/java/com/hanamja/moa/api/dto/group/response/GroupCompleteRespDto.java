@@ -1,14 +1,12 @@
 package com.hanamja.moa.api.dto.group.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
-@Data
-@NoArgsConstructor
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GroupCompleteRespDto {
     @JsonProperty(value = "member_info_list")
     private List<MemberInfo> memberInfoList;

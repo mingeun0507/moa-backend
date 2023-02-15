@@ -4,6 +4,7 @@ import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.RemovingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.response.GroupCompleteRespDto;
+import com.hanamja.moa.api.dto.group.response.GroupDetailInfoResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoListResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
 import com.hanamja.moa.api.entity.user.User;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -43,6 +45,19 @@ public class GroupController {
         return ResponseEntity.ok(groupService.removeExistingGroup(removingGroupRequestDto));
     }
 
+    @GetMapping
+    public ResponseEntity<List<GroupInfoResponseDto>> getExistingGroups(@RequestParam String sortedBy) {
+
+        return ResponseEntity.ok(groupService.getExistingGroups(sortedBy));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<GroupDetailInfoResponseDto> getExistingGroupDetail(@PathVariable Long id) {
+        // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
+
+        return ResponseEntity.ok(groupService.getExistingGroupDetail(id));
+    }
+        
     @PostMapping("/{groupId}")
     public ResponseEntity<GroupInfoResponseDto> join(
             @PathVariable("groupId") Long groupId

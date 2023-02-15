@@ -8,14 +8,19 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
+import java.util.List;
+
 public interface UserGroupRepository extends JpaRepository<UserGroup, Long> {
     void deleteAllByGroup_Id(Long groupId);
 
+    List<UserGroup> findAllByGroup_Id(Long groupId);
+
+    int countAllByJoiner_Id(Long userId);
+    
     Optional<UserGroup> findByGroupIdAndJoinerId(Long groupId, Long joinerId);
 
-    List<UserGroup> findAllByGroup_Id(Long gid);
-
     List<UserGroup> findAllByJoiner_IdAndProgress(Long uid, String progress);
+    
     @Modifying(clearAutomatically = true)
     @Query(value = "UPDATE UserGroup ug SET ug.progress = :state WHERE ug.group.id = :gid")
     void updateProgress(@Param(value = "state") String state,
