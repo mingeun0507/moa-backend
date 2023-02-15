@@ -3,7 +3,9 @@ package com.hanamja.moa.api.service.group;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.RemovingGroupRequestDto;
+import com.hanamja.moa.api.dto.group.response.GroupDetailInfoResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
+import com.hanamja.moa.api.entity.album.AlbumRepository;
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.group.GroupRepository;
 import com.hanamja.moa.api.entity.group.State;
@@ -32,6 +34,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class GroupService {
+    private final AlbumRepository albumRepository;
     private final UserRepository userRepository;
     private final UserGroupRepository userGroupRepository;
     private final GroupRepository groupRepository;
@@ -240,5 +243,55 @@ public class GroupService {
                     .message("올바르지 않은 Query String입니다.")
                     .build();
         }
+    }
+
+    public GroupDetailInfoResponseDto getExistingGroupDetail(Long id) {
+        // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
+        Long userId = 1L;
+        User user = validateUser(userId);
+
+        Group existingGroup = groupRepository.findById(id).orElseThrow(
+                () -> NotFoundException
+                        .builder()
+                        .httpStatus(HttpStatus.BAD_REQUEST)
+                        .message("groupId로 group을 찾을 수 없습니다.")
+                        .build()
+        );
+
+        // 참여자들의 간단한 프로필 추가
+        List<GroupDetailInfoResponseDto.SimpleUserInfoDto> simpleUserInfoDtoList =
+                userGroupRepository.findAllByGroup_Id(id).stream()
+                        .map(x -> GroupDetailInfoResponseDto.SimpleUserInfoDto.from(x.getJoiner()))
+                        .collect(Collectors.toList());
+
+        // 생성자의 간단한 프로필 추가
+        simpleUserInfoDtoList.add(0, GroupDetailInfoResponseDto.SimpleUserInfoDto.from(existingGroup.getMaker()));
+
+        // 포인트 정산
+        int point = 0;
+
+        // 모임 참여 3회까지는 점수 부여 - 300, 400, 500
+        switch (userGroupRepository.countAllByJoiner_Id(user.getId())) {
+            case 0:
+                point += 300;
+                break;
+            case 1:
+                point = 400;
+                break;
+            case 2:
+                point = 500;
+                break;
+        }
+
+        // 현재 참여자가 내 앨범에 저장된 사람이면 50, 아니면 100
+        for (var x : simpleUserInfoDtoList) {
+            if (albumRepository.existsByOwner_IdAndMetUser_Id(user.getId(), x.getId())) {
+                point += 50;
+            } else if (!user.getId().equals(x.getId())) {
+                point += 100;
+            }
+        }
+
+        return GroupDetailInfoResponseDto.from(existingGroup, getHashtagStringList(existingGroup), simpleUserInfoDtoList, point);
     }
 }
