@@ -3,14 +3,15 @@ package com.hanamja.moa.api.controller.group;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.RemovingGroupRequestDto;
+import com.hanamja.moa.api.dto.group.response.GroupCompleteRespDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoListResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
-import com.hanamja.moa.api.entity.group.GroupRepository;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.service.group.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
 @RestController
@@ -73,4 +74,17 @@ public class GroupController {
         return ResponseEntity.ok(response);
     }
 
+
+    /**
+     * 승민 TODO
+     * 1. 인증샷 업로드가 되면 imageLink 및 진행상황 complete 로 업데이트 - PUT
+     */
+    @PostMapping(value = "/complete")
+    public ResponseEntity<?> makeCard(@RequestPart(value = "uid") Long uid,
+                                      @RequestPart(value = "gid") Long gid,
+                                      @RequestPart(value = "image") MultipartFile image){
+        // 모임 완료 후 -> card 생성하는 로직
+        GroupCompleteRespDto groupCompleteRespDto = groupService.completeGroup(uid, gid, image);
+        return ResponseEntity.ok().body(groupCompleteRespDto);
+    }
 }

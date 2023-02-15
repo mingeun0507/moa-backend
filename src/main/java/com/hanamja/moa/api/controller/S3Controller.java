@@ -1,6 +1,6 @@
-package com.hanamja.moa.controller;
+package com.hanamja.moa.api.controller;
 
-import com.hanamja.moa.service.S3UploadService;
+import com.hanamja.moa.utils.s3.S3UploadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

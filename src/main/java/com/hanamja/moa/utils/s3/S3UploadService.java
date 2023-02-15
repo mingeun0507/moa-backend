@@ -1,7 +1,5 @@
-package com.hanamja.moa.service;
+package com.hanamja.moa.utils.s3;
 
-import com.hanamja.moa.utils.s3.AmazonS3ResourceStorage;
-import com.hanamja.moa.utils.s3.FileDetail;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
