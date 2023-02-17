@@ -244,9 +244,9 @@ public class InitDatabaseForLocal {
                     .owner(seokmin)
                     .build();
 
-//            historyRepository.save(mingeunHistory1);
-//            historyRepository.save(mingeunHistory2);
-//            historyRepository.save(seokminHistory1);
+            historyRepository.save(mingeunHistory1);
+            historyRepository.save(mingeunHistory2);
+            historyRepository.save(seokminHistory1);
         }
 
     }
