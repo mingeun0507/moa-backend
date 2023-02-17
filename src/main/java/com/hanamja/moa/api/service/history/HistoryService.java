@@ -1,7 +1,9 @@
 package com.hanamja.moa.api.service.history;
 
+import com.hanamja.moa.api.dto.history.request.RemovingHistoryRequestDto;
 import com.hanamja.moa.api.dto.history.response.HistoryDetailInfoResponseDto;
 import com.hanamja.moa.api.dto.history.response.HistoryInfoResponseDto;
+import com.hanamja.moa.api.entity.history.History;
 import com.hanamja.moa.api.entity.history.HistoryRepository;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserRepository;
@@ -47,5 +49,25 @@ public class HistoryService {
 
                 )
         );
+    }
+
+    public HistoryDetailInfoResponseDto removeHistory(RemovingHistoryRequestDto removingHistoryRequestDto) {
+        // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
+        User user = userRepository.findById(1L).orElseThrow();
+        History history = null;
+
+        if (!historyRepository.existsById(removingHistoryRequestDto.getId())) {
+            throw NotFoundException
+                    .builder()
+                    .httpStatus(HttpStatus.BAD_REQUEST)
+                    .message("해당하는 historyId로 history를 찾을 수 없습니다.")
+                    .build();
+        } else {
+            history = historyRepository.findById(removingHistoryRequestDto.getId()).orElseThrow();
+        }
+
+        historyRepository.deleteById(history.getId());
+
+        return HistoryDetailInfoResponseDto.from(history);
     }
 }
