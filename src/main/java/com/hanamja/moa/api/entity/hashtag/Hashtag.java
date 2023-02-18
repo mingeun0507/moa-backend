@@ -27,7 +27,7 @@ public class Hashtag {
     @Column(name = "touched_at", nullable = false)
     private LocalDateTime touchedAt;
 
-    @OneToMany(mappedBy = "hashtag", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "hashtag")
     private List<GroupHashtag> groupHashtagList;
 
     @Builder

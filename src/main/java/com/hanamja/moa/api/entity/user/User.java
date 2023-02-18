@@ -60,19 +60,19 @@ public class User implements UserDetails {
     @JoinColumn(name = "dept_id", nullable = false)
     private Department department;
 
-    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "owner")
     private List<Album> albumList;
 
-    @OneToMany(mappedBy = "joiner", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "joiner")
     private List<UserGroup> userGroupList;
 
-    @OneToMany(mappedBy = "maker", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "maker")
     private List<Group> groupList;
 
-//    @OneToMany(mappedBy = "metUser", fetch = FetchType.LAZY)
+//    @OneToMany(mappedBy = "metUser")
 //    private List<Album> metAlbumList;
 
-    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "owner")
     private List<History> historyList;
 
     @Builder

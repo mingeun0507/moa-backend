@@ -55,10 +55,10 @@ public class Group {
     @JoinColumn(name = "user_id", nullable = false)
     private User maker;
 
-    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "group")
     private List<UserGroup> userGroupList;
 
-    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "group")
     private List<GroupHashtag> groupHashtagList;
 
     @Builder
