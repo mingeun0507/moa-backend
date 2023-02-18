@@ -7,6 +7,7 @@ import com.hanamja.moa.api.dto.group.response.GroupCompleteRespDto;
 import com.hanamja.moa.api.dto.group.response.GroupDetailInfoResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoListResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
+import com.hanamja.moa.api.dto.util.ListResponseDto;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.service.group.GroupService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -46,7 +46,7 @@ public class GroupController {
     }
 
     @GetMapping
-    public ResponseEntity<List<GroupInfoResponseDto>> getExistingGroups(@RequestParam String sortedBy) {
+    public ResponseEntity<ListResponseDto<GroupInfoResponseDto>> getExistingGroups(@RequestParam String sortedBy) {
 
         return ResponseEntity.ok(groupService.getExistingGroups(sortedBy));
     }
