@@ -51,7 +51,7 @@ public class Group {
     @Column(name = "image_link")
     private String imageLink;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User maker;
 

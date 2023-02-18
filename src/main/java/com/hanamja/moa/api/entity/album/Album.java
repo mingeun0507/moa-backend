@@ -22,11 +22,11 @@ public class Album {
     @Column(name = "is_badged", nullable = false)
     private Boolean isBadged;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "met_user_id", nullable = false)
     private User metUser;
 
