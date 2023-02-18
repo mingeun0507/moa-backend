@@ -1,6 +1,5 @@
 package com.hanamja.moa.api.controller.history;
 
-import com.hanamja.moa.api.dto.history.request.RemovingHistoryRequestDto;
 import com.hanamja.moa.api.dto.history.response.HistoryDetailInfoResponseDto;
 import com.hanamja.moa.api.dto.history.response.HistoryInfoResponseDto;
 import com.hanamja.moa.api.dto.util.ListResponseDto;
@@ -29,10 +28,10 @@ public class HistoryController {
         return ResponseEntity.ok(historyService.getHistoryDetail(historyId));
     }
 
-    @DeleteMapping
-    public ResponseEntity<HistoryDetailInfoResponseDto> removeHistory(@RequestBody RemovingHistoryRequestDto removingHistoryRequestDto) {
+    @DeleteMapping("/{historyId}")
+    public ResponseEntity<HistoryDetailInfoResponseDto> removeHistory(@PathVariable Long historyId) {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
 
-        return ResponseEntity.ok(historyService.removeHistory(removingHistoryRequestDto));
+        return ResponseEntity.ok(historyService.removeHistory(historyId));
     }
 }
