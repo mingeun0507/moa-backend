@@ -3,6 +3,7 @@ package com.hanamja.moa.api.service.history;
 import com.hanamja.moa.api.dto.history.request.RemovingHistoryRequestDto;
 import com.hanamja.moa.api.dto.history.response.HistoryDetailInfoResponseDto;
 import com.hanamja.moa.api.dto.history.response.HistoryInfoResponseDto;
+import com.hanamja.moa.api.dto.util.ListResponseDto;
 import com.hanamja.moa.api.entity.history.History;
 import com.hanamja.moa.api.entity.history.HistoryRepository;
 import com.hanamja.moa.api.entity.user.User;
@@ -13,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -23,15 +23,17 @@ public class HistoryService {
     private final UserRepository userRepository;
     private final HistoryRepository historyRepository;
 
-    public List<HistoryInfoResponseDto> getHistoryList() {
+    public ListResponseDto<HistoryInfoResponseDto> getHistoryList() {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
         User user = userRepository.findById(1L).orElseThrow();
 
-        return historyRepository
-                .findAllByOwner_Id(user.getId())
-                .stream()
-                .map(HistoryInfoResponseDto::from)
-                .collect(Collectors.toList());
+        return ListResponseDto.<HistoryInfoResponseDto>builder()
+                .items(historyRepository
+                        .findAllByOwner_Id(user.getId())
+                        .stream()
+                        .map(HistoryInfoResponseDto::from)
+                        .collect(Collectors.toList()))
+                .build();
     }
 
     public HistoryDetailInfoResponseDto getHistoryDetail(Long historyId) {
