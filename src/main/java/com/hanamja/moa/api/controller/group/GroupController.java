@@ -8,9 +8,11 @@ import com.hanamja.moa.api.dto.group.response.GroupDetailInfoResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoListResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
 import com.hanamja.moa.api.entity.user.User;
+import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.service.group.GroupService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -70,17 +72,18 @@ public class GroupController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("my")
+    @GetMapping("/my")
     public ResponseEntity<GroupInfoListResponseDto> getMyGroupList(
-            /*, @AuthenticationPrincipal UserAccount userAccount */) {
+             @AuthenticationPrincipal UserAccount userAccount) {
 
-        User user = User.builder().build();
-        GroupInfoListResponseDto response = groupService.getMyGroupList(user);
+        System.out.println(userAccount.getUserId());
+
+        GroupInfoListResponseDto response = groupService.getMyGroupList(userAccount.getUserId());
 
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("my")
+    @DeleteMapping("/my")
     public ResponseEntity<GroupInfoResponseDto> quit(
             @PathVariable("groupId") Long groupId
             /*, @AuthenticationPrincipal UserAccount userAccount */

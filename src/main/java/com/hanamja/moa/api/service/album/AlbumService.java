@@ -41,7 +41,7 @@ public class AlbumService {
 
                     response.add(AlbumRespDto.builder()
                             .userId(album.getMetUser().getId())
-                            .username(album.getMetUser().getUsername())
+                            .username(album.getMetUser().getStudentId())
                             .imageLink(album.getMetUser().getImageLink())
                             .meetingCnt(albumUserGroupIdList.size())
                             .isBadged(isBadged)
