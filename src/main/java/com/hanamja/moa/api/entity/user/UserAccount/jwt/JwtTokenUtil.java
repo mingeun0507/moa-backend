@@ -1,16 +1,14 @@
 package com.hanamja.moa.api.entity.user.UserAccount.jwt;
 
 import com.hanamja.moa.api.entity.user.Role;
-import com.hanamja.moa.api.entity.user.UserAccount.UserAccountService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.Header;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
@@ -21,6 +19,9 @@ public class JwtTokenUtil {
 
     @Value("${jwt.secret}")
     private String jwtSecret;
+
+    public static final String AUTHORIZATION_HEADER = "Authorization";
+    public static final String BEARER_PREFIX = "Bearer ";
 
     private static final int ACCESS_TOKEN_EXPIRATION_MS = 69 * 60 * 1000;
 
@@ -66,8 +67,11 @@ public class JwtTokenUtil {
     }
 
     public String resolveToken(HttpServletRequest request) {
-        log.error(request.getHeader("Authorization"));
-        return request.getHeader("Authorization");
+        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
+        if(StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)){
+            return bearerToken.substring(7);
+        }
+        return null;
     }
 
     // Jwt Token의 유효성 및 만료 기간 검사
