@@ -2,7 +2,7 @@ package com.hanamja.moa.api.service.album;
 
 import com.hanamja.moa.api.dto.album.AlbumRespDto;
 import com.hanamja.moa.api.dto.album.CardRespDto;
-import com.hanamja.moa.api.dto.util.ListResponseDto;
+import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.album.AlbumRepository;
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,7 +24,7 @@ public class AlbumService {
     private final AlbumRepository albumRepository;
 
     @Transactional(readOnly = true)
-    public ListResponseDto<?> getMyAlbumInfo(Long uid){
+    public DataResponseDto<?> getMyAlbumInfo(Long uid){
         List<AlbumRespDto> response = new ArrayList<>();
 
         List<Long> groupIdList = userGroupRepository.findAllByJoiner_IdAndProgress(uid, "DONE").stream()
@@ -48,13 +47,13 @@ public class AlbumService {
                             .build());
                 });
 
-        return ListResponseDto.builder()
-                .items(Collections.singletonList(response))
+        return DataResponseDto.builder()
+                .data(response)
                 .build();
     }
 
     @Transactional(readOnly = true)
-    public ListResponseDto<?> getCardInfo(Long uid, Long cardId){
+    public DataResponseDto<?> getCardInfo(Long uid, Long cardId){
         List<CardRespDto> response = new ArrayList<>();
         // uid, cardId 가 모두 속해있는 group_id 와 매핑된 group 의 인증사진, 만남일자 가져오기
         List<Long> uidGroupList = userGroupRepository.findAllByJoiner_IdAndProgress(uid, "DONE").stream()
@@ -68,8 +67,8 @@ public class AlbumService {
                                 .build());
                     }
                 });
-        return ListResponseDto.builder()
-                .items(Collections.singletonList(response))
+        return DataResponseDto.builder()
+                .data(response)
                 .build();
     }
 }
