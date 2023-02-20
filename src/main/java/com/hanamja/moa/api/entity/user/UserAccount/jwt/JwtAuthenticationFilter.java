@@ -5,10 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -16,8 +13,8 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.MessageInterpolator;
 import java.io.IOException;
+import java.util.Arrays;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -29,7 +26,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-
         String token = jwtTokenUtil.resolveToken(request);
 
         Authentication authentication = new UsernamePasswordAuthenticationToken(token, "");
@@ -42,26 +38,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.clearContext();
         }
     }
-}
 
-//public class JwtAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
-//
-//    public JwtAuthenticationFilter(String defaultFilterProcessesUrl) {
-//        super(defaultFilterProcessesUrl);
-//    }
-//
-//    @Override
-//    public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-//        String token = jwtTokenUtil.resolveToken(request);
-//        Authentication authentication = new UsernamePasswordAuthenticationToken(token, "");
-//
-//        return getAuthenticationManager()
-//                .authenticate(new UsernamePasswordAuthenticationToken(authentication, ""));
-//
-//    }
-//
-//
-//    protected AuthenticationManager getAuthenticationManager() {
-//        return super.getAuthenticationManager();
-//    }
-//}
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
+        String[] excludePath = {"/api/auth/login"}; // TODO: JWT 안쓰는 API 추가 필요
+        String path = request.getRequestURI();
+        return Arrays.stream(excludePath).anyMatch(path::startsWith);
+    }
+}

@@ -1,9 +1,7 @@
 package com.hanamja.moa.config;
 
 import com.hanamja.moa.api.entity.user.UserAccount.jwt.JwtAuthenticationFilter;
-import com.hanamja.moa.api.entity.user.UserAccount.jwt.JwtAuthenticationProvider;
 import com.hanamja.moa.api.entity.user.UserAccount.jwt.JwtExceptionFilter;
-import com.hanamja.moa.api.entity.user.UserAccount.jwt.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;
@@ -11,13 +9,10 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -39,9 +34,6 @@ public class SecurityConfig {
 
     private final JwtExceptionFilter jwtExceptionFilter;
 
-    private final JwtTokenUtil jwtTokenUtil;
-
-    private final AuthenticationManager authenticationManager;
 
     public PasswordEncoder getPasswordEncoder() {
         System.out.println(PasswordEncoderFactories.createDelegatingPasswordEncoder().encode("manna_voca"));
@@ -64,9 +56,6 @@ public class SecurityConfig {
         return httpSecurity
                 .cors().configurationSource(corsConfigurationSource())
                 .and()
-
-//                .authenticationProvider(customEmailPasswordAuthProvider)
-
                 .csrf().disable()// CSRF 설정 Disable
                 // exception handling 할 때 우리가 만든 클래스를 추가
                 .exceptionHandling()
@@ -79,25 +68,17 @@ public class SecurityConfig {
                 .frameOptions()
                 .sameOrigin()
 
-                // 시큐리티는 기본적으로 세션을 사용
-                // 여기서는 세션을 사용하지 않기 때문에 세션 설정을 Stateless 로 설정
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
 
-                // 로그인, 회원가입 API 는 토큰이 없는 상태에서 요청이 들어오기 때문에 permitAll 설정\
                 .and()
                 .authorizeRequests() // http servletRequest 를 사용하는 요청들에 대한 접근제한을 설정
                 .antMatchers("/api/auth/login").permitAll()
                 .anyRequest().authenticated()   // 나머지 API 는 전부 인증 필요
 
-                // JwtFilter 를 등록한다.
-                // UsernamePasswordAuthenticationFilter 앞에 등록하는 이유는 딱히 없지만
-                // SecurityContext를 사용하기 때문에 앞단의 필터에서 SecurityContext가 설정되고 난뒤 필터를 둔다.
-                // 인증 필터
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-//
                 .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class)
 
                 .build();
