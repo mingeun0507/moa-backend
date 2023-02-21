@@ -1,9 +1,9 @@
-package com.hanamja.moa.api.controller.history;
+package com.hanamja.moa.api.controller.point_history;
 
-import com.hanamja.moa.api.dto.history.response.HistoryDetailInfoResponseDto;
-import com.hanamja.moa.api.dto.history.response.HistoryInfoResponseDto;
+import com.hanamja.moa.api.dto.point_history.response.PointHistoryDetailInfoResponseDto;
+import com.hanamja.moa.api.dto.point_history.response.PointHistoryInfoResponseDto;
 import com.hanamja.moa.api.dto.util.ListResponseDto;
-import com.hanamja.moa.api.service.history.HistoryService;
+import com.hanamja.moa.api.service.point_history.PointHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/history")
-public class HistoryController {
-    private final HistoryService historyService;
+public class PointHistoryController {
+    private final PointHistoryService pointHistoryService;
 
     @GetMapping
-    public ResponseEntity<ListResponseDto<HistoryInfoResponseDto>> getHistoryList() {
+    public ResponseEntity<ListResponseDto<PointHistoryInfoResponseDto>> getHistoryList() {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
 
-        return ResponseEntity.ok(historyService.getHistoryList());
+        return ResponseEntity.ok(pointHistoryService.getHistoryList());
     }
 
 //    @GetMapping("/{historyId}")
@@ -29,9 +29,9 @@ public class HistoryController {
 //    }
 
     @DeleteMapping("/{historyId}")
-    public ResponseEntity<HistoryDetailInfoResponseDto> removeHistory(@PathVariable Long historyId) {
+    public ResponseEntity<PointHistoryDetailInfoResponseDto> removeHistory(@PathVariable Long historyId) {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
 
-        return ResponseEntity.ok(historyService.removeHistory(historyId));
+        return ResponseEntity.ok(pointHistoryService.removeHistory(historyId));
     }
 }

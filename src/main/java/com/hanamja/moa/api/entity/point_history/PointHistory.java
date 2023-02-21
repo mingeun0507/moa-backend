@@ -1,4 +1,4 @@
-package com.hanamja.moa.api.entity.history;
+package com.hanamja.moa.api.entity.point_history;
 
 import com.hanamja.moa.api.entity.user.User;
 import lombok.AccessLevel;
@@ -12,12 +12,12 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "MOA_HISTORY")
-public class History {
+@Table(name = "MOA_POINT_HISTORY")
+public class PointHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "history_id")
+    @Column(name = "p_history_id")
     private Long id;
 
     @Column(name = "title")
@@ -37,7 +37,7 @@ public class History {
     private User owner;
 
     @Builder
-    public History(String title, String message, Long point, User owner) {
+    public PointHistory(String title, String message, Long point, User owner) {
         this.title = title;
         this.message = message;
         this.point = point;

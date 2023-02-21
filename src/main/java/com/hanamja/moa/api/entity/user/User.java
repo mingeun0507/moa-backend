@@ -3,7 +3,7 @@ package com.hanamja.moa.api.entity.user;
 import com.hanamja.moa.api.entity.album.Album;
 import com.hanamja.moa.api.entity.department.Department;
 import com.hanamja.moa.api.entity.group.Group;
-import com.hanamja.moa.api.entity.history.History;
+import com.hanamja.moa.api.entity.point_history.PointHistory;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -73,7 +73,7 @@ public class User implements UserDetails {
 //    private List<Album> metAlbumList;
 
     @OneToMany(mappedBy = "owner")
-    private List<History> historyList;
+    private List<PointHistory> pointHistoryList;
 
     @Builder
     public User(String studentId, String password, String name, String gender, String imageLink, Long point, String intro, Role role, Department department) {

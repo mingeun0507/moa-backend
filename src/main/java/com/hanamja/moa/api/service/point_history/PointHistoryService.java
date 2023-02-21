@@ -1,10 +1,10 @@
-package com.hanamja.moa.api.service.history;
+package com.hanamja.moa.api.service.point_history;
 
-import com.hanamja.moa.api.dto.history.response.HistoryDetailInfoResponseDto;
-import com.hanamja.moa.api.dto.history.response.HistoryInfoResponseDto;
+import com.hanamja.moa.api.dto.point_history.response.PointHistoryDetailInfoResponseDto;
+import com.hanamja.moa.api.dto.point_history.response.PointHistoryInfoResponseDto;
 import com.hanamja.moa.api.dto.util.ListResponseDto;
-import com.hanamja.moa.api.entity.history.History;
-import com.hanamja.moa.api.entity.history.HistoryRepository;
+import com.hanamja.moa.api.entity.point_history.PointHistory;
+import com.hanamja.moa.api.entity.point_history.PointHistoryRepository;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.exception.custom.NotFoundException;
@@ -18,19 +18,19 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Service
 @Slf4j
-public class HistoryService {
+public class PointHistoryService {
     private final UserRepository userRepository;
-    private final HistoryRepository historyRepository;
+    private final PointHistoryRepository pointHistoryRepository;
 
-    public ListResponseDto<HistoryInfoResponseDto> getHistoryList() {
+    public ListResponseDto<PointHistoryInfoResponseDto> getHistoryList() {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
         User user = userRepository.findById(1L).orElseThrow();
 
-        return ListResponseDto.<HistoryInfoResponseDto>builder()
-                .items(historyRepository
+        return ListResponseDto.<PointHistoryInfoResponseDto>builder()
+                .items(pointHistoryRepository
                         .findAllByOwner_Id(user.getId())
                         .stream()
-                        .map(HistoryInfoResponseDto::from)
+                        .map(PointHistoryInfoResponseDto::from)
                         .collect(Collectors.toList()))
                 .build();
     }
@@ -51,23 +51,23 @@ public class HistoryService {
 //        );
 //    }
 
-    public HistoryDetailInfoResponseDto removeHistory(Long historyId) {
+    public PointHistoryDetailInfoResponseDto removeHistory(Long historyId) {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
         User user = userRepository.findById(1L).orElseThrow();
-        History history = null;
+        PointHistory pointHistory = null;
 
-        if (!historyRepository.existsById(historyId)) {
+        if (!pointHistoryRepository.existsById(historyId)) {
             throw NotFoundException
                     .builder()
                     .httpStatus(HttpStatus.BAD_REQUEST)
                     .message("해당하는 historyId로 history를 찾을 수 없습니다.")
                     .build();
         } else {
-            history = historyRepository.findById(historyId).orElseThrow();
+            pointHistory = pointHistoryRepository.findById(historyId).orElseThrow();
         }
 
-        historyRepository.deleteById(history.getId());
+        pointHistoryRepository.deleteById(pointHistory.getId());
 
-        return HistoryDetailInfoResponseDto.from(history);
+        return PointHistoryDetailInfoResponseDto.from(pointHistory);
     }
 }

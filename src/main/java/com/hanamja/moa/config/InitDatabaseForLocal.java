@@ -10,8 +10,8 @@ import com.hanamja.moa.api.entity.group_hashtag.GroupHashtag;
 import com.hanamja.moa.api.entity.group_hashtag.GroupHashtagRepository;
 import com.hanamja.moa.api.entity.hashtag.Hashtag;
 import com.hanamja.moa.api.entity.hashtag.HashtagRepository;
-import com.hanamja.moa.api.entity.history.History;
-import com.hanamja.moa.api.entity.history.HistoryRepository;
+import com.hanamja.moa.api.entity.point_history.PointHistory;
+import com.hanamja.moa.api.entity.point_history.PointHistoryRepository;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
@@ -54,7 +54,7 @@ public class InitDatabaseForLocal {
 
         private final HashtagRepository hashtagRepository;
 
-        private final HistoryRepository historyRepository;
+        private final PointHistoryRepository pointHistoryRepository;
 
         @Transactional
         public void init() {
@@ -220,7 +220,7 @@ public class InitDatabaseForLocal {
             groupHashtagRepository.save(CCHashtagAlcohol);
             groupHashtagRepository.save(LOLHashtagGame);
 
-            History mingeunHistory1 = History
+            PointHistory mingeunPointHistory1 = PointHistory
                     .builder()
                     .title("CC 강의")
                     .message("윤석민 50점, 윤석민 100점\n모임 참여점수 150점")
@@ -228,7 +228,7 @@ public class InitDatabaseForLocal {
                     .owner(mingeun)
                     .build();
 
-            History mingeunHistory2 = History
+            PointHistory mingeunPointHistory2 = PointHistory
                     .builder()
                     .title("협곡 데이트")
                     .message("윤석민 50점, 윤석민 100점\n모임 참여점수 150점")
@@ -236,7 +236,7 @@ public class InitDatabaseForLocal {
                     .owner(mingeun)
                     .build();
 
-            History seokminHistory1 = History
+            PointHistory seokminPointHistory1 = PointHistory
                     .builder()
                     .title("협곡 데이트")
                     .message("윤석민 50점, 윤석민 100점\n모임 참여점수 150점")
@@ -244,9 +244,9 @@ public class InitDatabaseForLocal {
                     .owner(seokmin)
                     .build();
 
-            historyRepository.save(mingeunHistory1);
-            historyRepository.save(mingeunHistory2);
-            historyRepository.save(seokminHistory1);
+            pointHistoryRepository.save(mingeunPointHistory1);
+            pointHistoryRepository.save(mingeunPointHistory2);
+            pointHistoryRepository.save(seokminPointHistory1);
         }
 
     }
