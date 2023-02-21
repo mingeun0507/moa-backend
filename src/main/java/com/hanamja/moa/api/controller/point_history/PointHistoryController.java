@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/point-history")
@@ -14,7 +16,7 @@ public class PointHistoryController {
     private final PointHistoryService pointHistoryService;
 
     @GetMapping
-    public ResponseEntity<DataResponseDto<PointHistoryInfoResponseDto>> getHistoryList() {
+    public ResponseEntity<DataResponseDto<List<PointHistoryInfoResponseDto>>> getHistoryList() {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
 
         return ResponseEntity.ok(pointHistoryService.getHistoryList());
