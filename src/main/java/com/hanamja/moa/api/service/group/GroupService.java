@@ -7,6 +7,7 @@ import com.hanamja.moa.api.dto.group.response.GroupCompleteRespDto;
 import com.hanamja.moa.api.dto.group.response.GroupDetailInfoResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoListResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
+import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.album.Album;
 import com.hanamja.moa.api.entity.album.AlbumRepository;
 import com.hanamja.moa.api.entity.group.Group;
@@ -234,17 +235,22 @@ public class GroupService {
         ).collect(Collectors.toList());
     }
 
-    public List<GroupInfoResponseDto> getExistingGroups(String sortedBy) {
+    public DataResponseDto<List<GroupInfoResponseDto>> getExistingGroups(String sortedBy) {
         if (sortedBy.equals("recent")) {
-            return groupRepository
-                    .findAllByStateOrderByCreatedAtDesc(State.RECRUITING)
-                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
-                    .collect(Collectors.toList());
+            return DataResponseDto.<List<GroupInfoResponseDto>>builder()
+                    .data(groupRepository
+                            .findAllByStateOrderByCreatedAtDesc(State.RECRUITING)
+                            .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                            .collect(Collectors.toList()
+                            )
+                    ).build();
         } else if (sortedBy.equals("soon")) {
-            return groupRepository
-                    .findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State.RECRUITING, LocalDateTime.now())
-                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
-                    .collect(Collectors.toList());
+            return DataResponseDto.<List<GroupInfoResponseDto>>builder()
+                    .data(groupRepository
+                            .findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State.RECRUITING, LocalDateTime.now())
+                            .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                            .collect(Collectors.toList())
+                    ).build();
         } else {
             throw InvalidParameterException
                     .builder()

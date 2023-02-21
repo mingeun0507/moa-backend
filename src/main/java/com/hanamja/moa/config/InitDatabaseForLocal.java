@@ -10,6 +10,8 @@ import com.hanamja.moa.api.entity.group_hashtag.GroupHashtag;
 import com.hanamja.moa.api.entity.group_hashtag.GroupHashtagRepository;
 import com.hanamja.moa.api.entity.hashtag.Hashtag;
 import com.hanamja.moa.api.entity.hashtag.HashtagRepository;
+import com.hanamja.moa.api.entity.point_history.PointHistory;
+import com.hanamja.moa.api.entity.point_history.PointHistoryRepository;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
@@ -51,6 +53,8 @@ public class InitDatabaseForLocal {
         private final GroupHashtagRepository groupHashtagRepository;
 
         private final HashtagRepository hashtagRepository;
+
+        private final PointHistoryRepository pointHistoryRepository;
 
         @Transactional
         public void init() {
@@ -216,6 +220,33 @@ public class InitDatabaseForLocal {
             groupHashtagRepository.save(CCHashtagAlcohol);
             groupHashtagRepository.save(LOLHashtagGame);
 
+            PointHistory mingeunPointHistory1 = PointHistory
+                    .builder()
+                    .title("CC 강의")
+                    .message("윤석민 50점, 윤석민 100점\n모임 참여점수 150점")
+                    .point(300L)
+                    .owner(mingeun)
+                    .build();
+
+            PointHistory mingeunPointHistory2 = PointHistory
+                    .builder()
+                    .title("협곡 데이트")
+                    .message("윤석민 50점, 윤석민 100점\n모임 참여점수 150점")
+                    .point(500L)
+                    .owner(mingeun)
+                    .build();
+
+            PointHistory seokminPointHistory1 = PointHistory
+                    .builder()
+                    .title("협곡 데이트")
+                    .message("윤석민 50점, 윤석민 100점\n모임 참여점수 150점")
+                    .point(400L)
+                    .owner(seokmin)
+                    .build();
+
+            pointHistoryRepository.save(mingeunPointHistory1);
+            pointHistoryRepository.save(mingeunPointHistory2);
+            pointHistoryRepository.save(seokminPointHistory1);
         }
 
     }

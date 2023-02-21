@@ -21,7 +21,7 @@ public class Department {
     @Column(name = "name", nullable = false)
     private String name;
 
-//    @OneToMany(mappedBy = "department", fetch = FetchType.LAZY)
+//    @OneToMany(mappedBy = "department")
 //    private List<User> userList; -> 양방향 조회 컬럼, 필요시 활성화
 
     @Builder

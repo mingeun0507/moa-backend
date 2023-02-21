@@ -3,6 +3,7 @@ package com.hanamja.moa.api.entity.user;
 import com.hanamja.moa.api.entity.album.Album;
 import com.hanamja.moa.api.entity.department.Department;
 import com.hanamja.moa.api.entity.group.Group;
+import com.hanamja.moa.api.entity.point_history.PointHistory;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -55,21 +56,24 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dept_id", nullable = false)
     private Department department;
 
-    @OneToMany(mappedBy = "owner", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "owner")
     private List<Album> albumList;
 
-    @OneToMany(mappedBy = "joiner", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "joiner")
     private List<UserGroup> userGroupList;
 
-    @OneToMany(mappedBy = "maker", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "maker")
     private List<Group> groupList;
 
-//    @OneToMany(mappedBy = "metUser", fetch = FetchType.LAZY)
+//    @OneToMany(mappedBy = "metUser")
 //    private List<Album> metAlbumList;
+
+    @OneToMany(mappedBy = "owner")
+    private List<PointHistory> pointHistoryList;
 
     @Builder
     public User(String studentId, String password, String name, String gender, String imageLink, Long point, String intro, Role role, Department department) {

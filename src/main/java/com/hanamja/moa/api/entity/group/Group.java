@@ -51,14 +51,14 @@ public class Group {
     @Column(name = "image_link")
     private String imageLink;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User maker;
 
-    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "group")
     private List<UserGroup> userGroupList;
 
-    @OneToMany(mappedBy = "group", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "group")
     private List<GroupHashtag> groupHashtagList;
 
     @Builder
