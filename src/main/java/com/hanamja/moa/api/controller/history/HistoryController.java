@@ -21,12 +21,12 @@ public class HistoryController {
         return ResponseEntity.ok(historyService.getHistoryList());
     }
 
-    @GetMapping("/{historyId}")
-    public ResponseEntity<HistoryDetailInfoResponseDto> getHistoryDetail(@PathVariable Long historyId) {
-        // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
-
-        return ResponseEntity.ok(historyService.getHistoryDetail(historyId));
-    }
+//    @GetMapping("/{historyId}")
+//    public ResponseEntity<HistoryDetailInfoResponseDto> getHistoryDetail(@PathVariable Long historyId) {
+//        // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
+//
+//        return ResponseEntity.ok(historyService.getHistoryDetail(historyId));
+//    }
 
     @DeleteMapping("/{historyId}")
     public ResponseEntity<HistoryDetailInfoResponseDto> removeHistory(@PathVariable Long historyId) {

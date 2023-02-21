@@ -35,22 +35,21 @@ public class HistoryService {
                 .build();
     }
 
-    public HistoryDetailInfoResponseDto getHistoryDetail(Long historyId) {
-        // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
-        User user = userRepository.findById(1L).orElseThrow();
-
-        return HistoryDetailInfoResponseDto.from(historyRepository
-                .findById(historyId)
-                .orElseThrow(
-                        () -> NotFoundException
-                                .builder()
-                                .httpStatus(HttpStatus.BAD_REQUEST)
-                                .message("해당하는 historyId로 history를 찾을 수 없습니다.")
-                                .build()
-
-                )
-        );
-    }
+//    public HistoryDetailInfoResponseDto getHistoryDetail(Long historyId) {
+//        User user = userRepository.findById(1L).orElseThrow();
+//
+//        return HistoryDetailInfoResponseDto.from(historyRepository
+//                .findById(historyId)
+//                .orElseThrow(
+//                        () -> NotFoundException
+//                                .builder()
+//                                .httpStatus(HttpStatus.BAD_REQUEST)
+//                                .message("해당하는 historyId로 history를 찾을 수 없습니다.")
+//                                .build()
+//
+//                )
+//        );
+//    }
 
     public HistoryDetailInfoResponseDto removeHistory(Long historyId) {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
