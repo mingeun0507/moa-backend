@@ -223,7 +223,7 @@ public class InitDatabaseForLocal {
             History mingeunHistory1 = History
                     .builder()
                     .title("CC 강의")
-                    .message("CC 강의에 참여함")
+                    .message("윤석민 50점, 윤석민 100점\n모임 참여점수 150점")
                     .point(300L)
                     .owner(mingeun)
                     .build();
@@ -231,7 +231,7 @@ public class InitDatabaseForLocal {
             History mingeunHistory2 = History
                     .builder()
                     .title("협곡 데이트")
-                    .message("협곡 데이트에 참여함")
+                    .message("윤석민 50점, 윤석민 100점\n모임 참여점수 150점")
                     .point(500L)
                     .owner(mingeun)
                     .build();
@@ -239,7 +239,7 @@ public class InitDatabaseForLocal {
             History seokminHistory1 = History
                     .builder()
                     .title("협곡 데이트")
-                    .message("협곡 데이트에 참여함")
+                    .message("윤석민 50점, 윤석민 100점\n모임 참여점수 150점")
                     .point(400L)
                     .owner(seokmin)
                     .build();
