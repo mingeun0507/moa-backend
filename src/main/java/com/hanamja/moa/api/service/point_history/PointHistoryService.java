@@ -1,7 +1,7 @@
 package com.hanamja.moa.api.service.point_history;
 
 import com.hanamja.moa.api.dto.point_history.response.PointHistoryInfoResponseDto;
-import com.hanamja.moa.api.dto.util.ListResponseDto;
+import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.point_history.PointHistory;
 import com.hanamja.moa.api.entity.point_history.PointHistoryRepository;
 import com.hanamja.moa.api.entity.user.User;
@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -21,12 +22,12 @@ public class PointHistoryService {
     private final UserRepository userRepository;
     private final PointHistoryRepository pointHistoryRepository;
 
-    public ListResponseDto<PointHistoryInfoResponseDto> getHistoryList() {
+    public DataResponseDto<List<PointHistoryInfoResponseDto>> getHistoryList() {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
         User user = userRepository.findById(1L).orElseThrow();
 
-        return ListResponseDto.<PointHistoryInfoResponseDto>builder()
-                .items(pointHistoryRepository
+        return DataResponseDto.<List<PointHistoryInfoResponseDto>>builder()
+                .data(pointHistoryRepository
                         .findAllByOwner_Id(user.getId())
                         .stream()
                         .map(PointHistoryInfoResponseDto::from)
