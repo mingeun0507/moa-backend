@@ -1,6 +1,5 @@
 package com.hanamja.moa.api.controller.point_history;
 
-import com.hanamja.moa.api.dto.point_history.response.PointHistoryDetailInfoResponseDto;
 import com.hanamja.moa.api.dto.point_history.response.PointHistoryInfoResponseDto;
 import com.hanamja.moa.api.dto.util.ListResponseDto;
 import com.hanamja.moa.api.service.point_history.PointHistoryService;
@@ -29,7 +28,7 @@ public class PointHistoryController {
 //    }
 
     @DeleteMapping("/{historyId}")
-    public ResponseEntity<PointHistoryDetailInfoResponseDto> removeHistory(@PathVariable Long historyId) {
+    public ResponseEntity<PointHistoryInfoResponseDto> removeHistory(@PathVariable Long historyId) {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
 
         return ResponseEntity.ok(pointHistoryService.removeHistory(historyId));

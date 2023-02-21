@@ -1,6 +1,5 @@
 package com.hanamja.moa.api.service.point_history;
 
-import com.hanamja.moa.api.dto.point_history.response.PointHistoryDetailInfoResponseDto;
 import com.hanamja.moa.api.dto.point_history.response.PointHistoryInfoResponseDto;
 import com.hanamja.moa.api.dto.util.ListResponseDto;
 import com.hanamja.moa.api.entity.point_history.PointHistory;
@@ -51,7 +50,7 @@ public class PointHistoryService {
 //        );
 //    }
 
-    public PointHistoryDetailInfoResponseDto removeHistory(Long historyId) {
+    public PointHistoryInfoResponseDto removeHistory(Long historyId) {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
         User user = userRepository.findById(1L).orElseThrow();
 
@@ -65,6 +64,6 @@ public class PointHistoryService {
 
         pointHistoryRepository.deleteById(pointHistory.getId());
 
-        return PointHistoryDetailInfoResponseDto.from(pointHistory);
+        return PointHistoryInfoResponseDto.from(pointHistory);
     }
 }
