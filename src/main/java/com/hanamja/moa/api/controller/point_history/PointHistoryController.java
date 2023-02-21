@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/api/history")
+@RequestMapping("/api/point-history")
 public class PointHistoryController {
     private final PointHistoryService pointHistoryService;
 
