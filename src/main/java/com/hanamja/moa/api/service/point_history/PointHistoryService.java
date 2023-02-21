@@ -54,17 +54,14 @@ public class PointHistoryService {
     public PointHistoryDetailInfoResponseDto removeHistory(Long historyId) {
         // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
         User user = userRepository.findById(1L).orElseThrow();
-        PointHistory pointHistory = null;
 
-        if (!pointHistoryRepository.existsById(historyId)) {
-            throw NotFoundException
-                    .builder()
-                    .httpStatus(HttpStatus.BAD_REQUEST)
-                    .message("해당하는 historyId로 history를 찾을 수 없습니다.")
-                    .build();
-        } else {
-            pointHistory = pointHistoryRepository.findById(historyId).orElseThrow();
-        }
+        PointHistory pointHistory = pointHistoryRepository.findById(historyId).orElseThrow(
+                () -> NotFoundException
+                        .builder()
+                        .httpStatus(HttpStatus.BAD_REQUEST)
+                        .message("해당하는 historyId로 history를 찾을 수 없습니다.")
+                        .build()
+        );
 
         pointHistoryRepository.deleteById(pointHistory.getId());
 
