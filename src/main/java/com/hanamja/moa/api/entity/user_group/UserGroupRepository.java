@@ -8,10 +8,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-import java.util.List;
-
 public interface UserGroupRepository extends JpaRepository<UserGroup, Long> {
     void deleteAllByGroup_Id(Long groupId);
+
+    void deleteUserGroupByGroup_IdAndJoiner_Id(Long gid, Long joinerId);
 
     List<UserGroup> findAllByGroup_Id(Long groupId);
 

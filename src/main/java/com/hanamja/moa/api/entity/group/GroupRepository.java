@@ -26,4 +26,12 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
 
     List<Group> findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State state, LocalDateTime currentTime);
 
+    List<Group> findAllByMaker_Id(Long userId);
+
+    void deleteById(Long gid);
+
+    @Modifying(clearAutomatically = true)// 모임이 끝나면 인증샷 등록
+    @Query(value = "UPDATE Group gp SET gp.state = :state WHERE gp.id = :gid")
+    void updateGroupState(@Param(value = "state") State state, @Param(value = "gid")Long gid);
+
 }

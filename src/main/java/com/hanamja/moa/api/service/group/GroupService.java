@@ -1,5 +1,6 @@
 package com.hanamja.moa.api.service.group;
 
+import com.hanamja.moa.api.dto.group.request.KickOutRequestDto;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.RemovingGroupRequestDto;
@@ -18,7 +19,6 @@ import com.hanamja.moa.api.entity.group_hashtag.GroupHashtagRepository;
 import com.hanamja.moa.api.entity.hashtag.Hashtag;
 import com.hanamja.moa.api.entity.hashtag.HashtagRepository;
 import com.hanamja.moa.api.entity.user.User;
-import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
 import com.hanamja.moa.api.entity.user_group.UserGroupRepository;
@@ -348,6 +348,58 @@ public class GroupService {
 
         return GroupInfoResponseDto.from(group, getHashtagStringList(group));
     }
+
+    public void validateGroupMaker(Long userId, Long groupId){
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(
+                        () -> NotFoundException.builder()
+                                .httpStatus(HttpStatus.BAD_REQUEST)
+                                .message("groupId로 group을 찾을 수 없습니다.")
+                                .build());
+
+        if (!group.getId().equals(userId)) {
+            throw NotFoundException.builder()
+                    .httpStatus(HttpStatus.UNAUTHORIZED)
+                    .message("Group 생성자가 아닙니다.")
+                    .build();
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public GroupInfoListResponseDto getGroupListMadeByMe(Long userId){
+        List<GroupInfoResponseDto> response = groupRepository.findAllByMaker_Id(userId).stream()
+                .map(group -> GroupInfoResponseDto.from(group, getHashtagStringList(group)))
+                .collect(Collectors.toList());
+        return GroupInfoListResponseDto.of(response);
+    }
+
+    @Transactional
+    public void kickoutMemberFromGroup(Long uid, KickOutRequestDto kickOutRequestDto){
+        validateGroupMaker(uid, kickOutRequestDto.getGroupId());
+
+        kickOutRequestDto.getUserList().stream()
+                .forEach(userId -> {
+                    userGroupRepository.deleteUserGroupByGroup_IdAndJoiner_Id(kickOutRequestDto.getGroupId(), uid);
+                    // TODO: 알림 테이블에 내용 저장
+                });
+    }
+
+    @Transactional
+    public void cancelGroup(Long uid, Long gid){
+        validateGroupMaker(uid, gid);
+
+        userGroupRepository.deleteAllByGroup_Id(gid);
+        groupRepository.deleteById(gid);
+
+        // TODO: 알림 테이블에 내용 저장
+    }
+
+    @Transactional
+    public void groupRecruitDone(Long uid, Long gid){
+        validateGroupMaker(uid, gid);
+        groupRepository.updateGroupState(State.RECRUITED, gid);
+    }
+
 
     @Transactional
     public GroupCompleteRespDto completeGroup(Long uid, Long gid, MultipartFile image) throws IOException {
