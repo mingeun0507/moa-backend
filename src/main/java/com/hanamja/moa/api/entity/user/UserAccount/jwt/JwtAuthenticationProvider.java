@@ -1,10 +1,9 @@
 package com.hanamja.moa.api.entity.user.UserAccount.jwt;
 
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccountService;
-import com.hanamja.moa.exception.custom.ExpiredTokenException;
-import com.hanamja.moa.exception.custom.UnAuthorizedTokenException;
-import com.hanamja.moa.exception.custom.UnauthorizedException;
+import com.hanamja.moa.exception.custom.UnauthorizedTokenException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -23,7 +22,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         if (authentication.getPrincipal() == null || !jwtTokenUtil.isValidToken(authentication.getPrincipal().toString())) {
 
-            throw UnAuthorizedTokenException.builder().message("인증되지 않은 사용자입니다.").build();
+            throw UnauthorizedTokenException.builder().httpStatus(HttpStatus.UNAUTHORIZED).message("인증되지 않은 사용자입니다.").build();
         }
 
 

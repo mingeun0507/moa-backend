@@ -1,9 +1,9 @@
 package com.hanamja.moa.api.entity.user.UserAccount.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hanamja.moa.exception.custom.CustomException;
 import com.hanamja.moa.exception.custom.ExpiredTokenException;
-import com.hanamja.moa.exception.custom.UnAuthorizedTokenException;
-import com.hanamja.moa.exception.custom.UnauthorizedException;
+import com.hanamja.moa.exception.custom.UnauthorizedTokenException;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.entity.ContentType;
 import org.springframework.http.HttpStatus;
@@ -26,10 +26,10 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
             doFilter(request, response, filterChain);
-        } catch (UnAuthorizedTokenException | ExpiredTokenException e) {
+        } catch (CustomException e) {
             final Map<String, Object> body = new HashMap<>();
             final ObjectMapper mapper = new ObjectMapper();
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setStatus(e.getHttpStatus().value());
             response.setContentType(ContentType.APPLICATION_JSON.getMimeType());
             body.put("message", e.getMessage());
             mapper.writeValue(response.getOutputStream(), body);
