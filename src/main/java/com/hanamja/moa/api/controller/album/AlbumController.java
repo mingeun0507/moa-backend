@@ -1,15 +1,17 @@
 package com.hanamja.moa.api.controller.album;
 
+import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.service.album.AlbumService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @Slf4j
-@RequestMapping(value = "/album")
+@RequestMapping(value = "/api/album")
 @RequiredArgsConstructor
 public class AlbumController {
 
@@ -22,14 +24,14 @@ public class AlbumController {
 
     // TODO: uid -> @AuthenticationPrincipal 변경 필요
     @GetMapping(value = "/all")
-    public ResponseEntity<?> getMyAlbum(@RequestParam(value = "uid")Long uid){
-        return ResponseEntity.ok().body(albumService.getMyAlbumInfo(uid));
+    public ResponseEntity<?> getMyAlbum(@AuthenticationPrincipal UserAccount userAccount){
+        return ResponseEntity.ok().body(albumService.getMyAlbumInfo(userAccount.getUserId()));
     }
 
     // TODO: uid -> @AuthenticationPrincipal 변경 필요
-    @GetMapping(value = "/card")
-    public ResponseEntity<?> getCardInfo(@RequestParam(value = "uid")Long uid,
-                                         @RequestParam(value = "card_id")Long cardId){
-        return ResponseEntity.ok().body(albumService.getCardInfo(uid, cardId));
+    @GetMapping(value = "/card/{card_id}")
+    public ResponseEntity<?> getCardInfo(@AuthenticationPrincipal UserAccount userAccount,
+                                         @PathVariable(value = "card_id")Long cardId){
+        return ResponseEntity.ok().body(albumService.getCardInfo(userAccount.getUserId(), cardId));
     }
 }
