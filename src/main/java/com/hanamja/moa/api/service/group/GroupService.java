@@ -18,6 +18,7 @@ import com.hanamja.moa.api.entity.group_hashtag.GroupHashtagRepository;
 import com.hanamja.moa.api.entity.hashtag.Hashtag;
 import com.hanamja.moa.api.entity.hashtag.HashtagRepository;
 import com.hanamja.moa.api.entity.user.User;
+import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
 import com.hanamja.moa.api.entity.user_group.UserGroupRepository;
@@ -328,8 +329,8 @@ public class GroupService {
         return GroupInfoResponseDto.from(group, getHashtagStringList(group));
     }
 
-    public GroupInfoListResponseDto getMyGroupList(User user) {
-        Long userId = user.getId();
+    public GroupInfoListResponseDto getMyGroupList(Long userId) {
+
         List<Group> groupList = groupRepository.findAllByUserId(userId);
 
         List<GroupInfoResponseDto> items = groupList.stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x))).collect(Collectors.toList());
@@ -395,7 +396,7 @@ public class GroupService {
                     userGroupIdList.retainAll(groupIdList); // 교집합
 
                     memberInfoList.add(GroupCompleteRespDto.MemberInfo.builder()
-                            .userId(user.getId()).username(user.getUsername())
+                            .userId(user.getId()).username(user.getStudentId())
                             .imageLink(user.getImageLink()).meetingCnt((long) userGroupIdList.size())
                             .build());
                 }
