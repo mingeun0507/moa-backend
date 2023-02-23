@@ -12,12 +12,14 @@ import com.hanamja.moa.api.entity.hashtag.Hashtag;
 import com.hanamja.moa.api.entity.hashtag.HashtagRepository;
 import com.hanamja.moa.api.entity.point_history.PointHistory;
 import com.hanamja.moa.api.entity.point_history.PointHistoryRepository;
+import com.hanamja.moa.api.entity.user.Role;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
 import com.hanamja.moa.api.entity.user_group.UserGroupRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +58,8 @@ public class InitDatabaseForLocal {
 
         private final PointHistoryRepository pointHistoryRepository;
 
+        private final PasswordEncoder passwordEncoder;
+
         @Transactional
         public void init() {
 
@@ -70,10 +74,11 @@ public class InitDatabaseForLocal {
                     .builder()
                     .department(software)
                     .studentId("20180268")
-                    .password("12345678")
+                    .password(passwordEncoder.encode("12345678"))
                     .name("김민근")
                     .gender("남자")
                     .imageLink("http://example.com")
+                    .role(Role.ROLE_SENIOR)
                     .point(0L)
                     .build();
 
@@ -81,10 +86,11 @@ public class InitDatabaseForLocal {
                     .builder()
                     .department(software)
                     .studentId("20112011")
-                    .password("12345678")
+                    .password(passwordEncoder.encode("12345678"))
                     .name("서창진")
                     .gender("남자")
                     .imageLink("http://example2.com")
+                    .role(Role.ROLE_SENIOR)
                     .point(0L)
                     .build();
 
@@ -92,10 +98,11 @@ public class InitDatabaseForLocal {
                     .builder()
                     .department(software)
                     .studentId("20232023")
-                    .password("12345678")
+                    .password(passwordEncoder.encode("12345678"))
                     .name("윤석민")
                     .gender("여자")
                     .imageLink("http://example3.com")
+                    .role(Role.ROLE_FRESHMEN)
                     .point(1L)
                     .build();
 
