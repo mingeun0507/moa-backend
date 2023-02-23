@@ -19,6 +19,7 @@ import com.hanamja.moa.api.entity.group_hashtag.GroupHashtagRepository;
 import com.hanamja.moa.api.entity.hashtag.Hashtag;
 import com.hanamja.moa.api.entity.hashtag.HashtagRepository;
 import com.hanamja.moa.api.entity.user.User;
+import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
 import com.hanamja.moa.api.entity.user_group.UserGroupRepository;
@@ -53,10 +54,9 @@ public class GroupService {
     private final AmazonS3Uploader amazonS3Uploader;
 
     @Transactional
-    public GroupInfoResponseDto makeNewGroup(MakingGroupRequestDto makingGroupRequestDto) {
-        // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
-        Long userId = 1L;
-        User user = validateUser(userId);
+    public GroupInfoResponseDto makeNewGroup(UserAccount userAccount, MakingGroupRequestDto makingGroupRequestDto) {
+
+        User user = validateUser(userAccount.getUserId());
 
         // 재학생인지 검증
         validateSenior(user);
@@ -80,11 +80,8 @@ public class GroupService {
     }
 
     @Transactional
-    public GroupInfoResponseDto modifyExistingGroup(ModifyingGroupRequestDto modifyingGroupRequestDto) {
-        // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
-
-        Long userId = 1L;
-        User user = validateUser(userId);
+    public GroupInfoResponseDto modifyExistingGroup(UserAccount userAccount, ModifyingGroupRequestDto modifyingGroupRequestDto) {
+        User user = validateUser(userAccount.getUserId());
 
         // 재학생인지 검증
         validateSenior(user);
@@ -134,9 +131,8 @@ public class GroupService {
     }
 
     @Transactional
-    public GroupInfoResponseDto removeExistingGroup(RemovingGroupRequestDto removingGroupRequestDto) {
-        Long userId = 1L;
-        User user = validateUser(userId);
+    public GroupInfoResponseDto removeExistingGroup(UserAccount userAccount, RemovingGroupRequestDto removingGroupRequestDto) {
+        User user = validateUser(userAccount.getUserId());
 
         // 재학생인지 검증
         validateSenior(user);
@@ -261,12 +257,10 @@ public class GroupService {
         }
     }
 
-    public GroupDetailInfoResponseDto getExistingGroupDetail(Long id) {
-        // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
-        Long userId = 1L;
-        User user = validateUser(userId);
+    public GroupDetailInfoResponseDto getExistingGroupDetail(UserAccount userAccount, Long groupId) {
+        User user = validateUser(userAccount.getUserId());
 
-        Group existingGroup = groupRepository.findById(id).orElseThrow(
+        Group existingGroup = groupRepository.findById(groupId).orElseThrow(
                 () -> NotFoundException
                         .builder()
                         .httpStatus(HttpStatus.BAD_REQUEST)
@@ -276,7 +270,7 @@ public class GroupService {
 
         // 참여자들의 간단한 프로필 추가
         List<GroupDetailInfoResponseDto.SimpleUserInfoDto> simpleUserInfoDtoList =
-                userGroupRepository.findAllByGroup_Id(id).stream()
+                userGroupRepository.findAllByGroup_Id(groupId).stream()
                         .map(x -> GroupDetailInfoResponseDto.SimpleUserInfoDto.from(x.getJoiner()))
                         .collect(Collectors.toList());
 

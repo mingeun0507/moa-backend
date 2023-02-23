@@ -29,24 +29,21 @@ public class GroupController {
     private final GroupService groupService;
 
     @PostMapping
-    public ResponseEntity<GroupInfoResponseDto> makeNewGroup(@RequestBody MakingGroupRequestDto makingGroupRequestDto) {
-        // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
+    public ResponseEntity<GroupInfoResponseDto> makeNewGroup(@AuthenticationPrincipal UserAccount userAccount, @RequestBody MakingGroupRequestDto makingGroupRequestDto) {
 
-        return ResponseEntity.ok(groupService.makeNewGroup(makingGroupRequestDto));
+        return ResponseEntity.ok(groupService.makeNewGroup(userAccount, makingGroupRequestDto));
     }
 
     @PutMapping
-    public ResponseEntity<GroupInfoResponseDto> modifyExistingGroup(@RequestBody ModifyingGroupRequestDto modifyingGroupRequestDto) {
-        // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
+    public ResponseEntity<GroupInfoResponseDto> modifyExistingGroup(@AuthenticationPrincipal UserAccount userAccount, @RequestBody ModifyingGroupRequestDto modifyingGroupRequestDto) {
 
-        return ResponseEntity.ok(groupService.modifyExistingGroup(modifyingGroupRequestDto));
+        return ResponseEntity.ok(groupService.modifyExistingGroup(userAccount, modifyingGroupRequestDto));
     }
 
     @DeleteMapping
-    public ResponseEntity<GroupInfoResponseDto> removeExistingGroup(@RequestBody RemovingGroupRequestDto removingGroupRequestDto) {
-        // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
+    public ResponseEntity<GroupInfoResponseDto> removeExistingGroup(@AuthenticationPrincipal UserAccount userAccount, @RequestBody RemovingGroupRequestDto removingGroupRequestDto) {
 
-        return ResponseEntity.ok(groupService.removeExistingGroup(removingGroupRequestDto));
+        return ResponseEntity.ok(groupService.removeExistingGroup(userAccount, removingGroupRequestDto));
     }
 
     @GetMapping
@@ -56,10 +53,9 @@ public class GroupController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GroupDetailInfoResponseDto> getExistingGroupDetail(@PathVariable Long id) {
-        // TODO: 로그인 구현 후 @AuthenticationPrincipal User user 추가 필요
+    public ResponseEntity<GroupDetailInfoResponseDto> getExistingGroupDetail(@AuthenticationPrincipal UserAccount userAccount, @PathVariable Long id) {
 
-        return ResponseEntity.ok(groupService.getExistingGroupDetail(id));
+        return ResponseEntity.ok(groupService.getExistingGroupDetail(userAccount, id));
     }
         
     @PostMapping("/{groupId}")
