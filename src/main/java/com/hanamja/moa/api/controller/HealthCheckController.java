@@ -1,4 +1,4 @@
-package com.hanamja.moa.controller;
+package com.hanamja.moa.api.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
