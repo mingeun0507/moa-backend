@@ -36,7 +36,6 @@ public class SecurityConfig {
 
 
     public PasswordEncoder getPasswordEncoder() {
-        System.out.println(PasswordEncoderFactories.createDelegatingPasswordEncoder().encode("manna_voca"));
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
