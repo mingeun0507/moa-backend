@@ -19,6 +19,7 @@ import com.hanamja.moa.api.entity.group_hashtag.GroupHashtagRepository;
 import com.hanamja.moa.api.entity.hashtag.Hashtag;
 import com.hanamja.moa.api.entity.hashtag.HashtagRepository;
 import com.hanamja.moa.api.entity.user.User;
+import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
 import com.hanamja.moa.api.entity.user_group.UserGroupRepository;
