@@ -305,11 +305,18 @@ public class GroupService {
         return GroupDetailInfoResponseDto.from(existingGroup, getHashtagStringList(existingGroup), simpleUserInfoDtoList, point);
     }
         
-    public GroupInfoResponseDto join(Long groupId, User user) {
+    public GroupInfoResponseDto join(Long groupId, UserAccount userAccount) {
 
         Group group = groupRepository.findById(groupId).orElseThrow(
                 () -> new NotFoundException("해당 그룹을 찾을 수 없습니다.")
         );
+
+        User user = userRepository.findUserById(userAccount.getUserId())
+                .orElseThrow(() -> NotFoundException.builder()
+                                                    .httpStatus(HttpStatus.NOT_FOUND)
+                                                    .message("해당 유저를 찾을 수 없습니다.")
+                                                    .build());
+
 
         UserGroup userGroup = UserGroup
                 .builder()
@@ -332,9 +339,9 @@ public class GroupService {
         return GroupInfoListResponseDto.of(items);
     }
 
-    public GroupInfoResponseDto quit(Long groupId, User user) {
+    public GroupInfoResponseDto quit(Long groupId, UserAccount userAccount) {
 
-        UserGroup userGroup = userGroupRepository.findByGroupIdAndJoinerId(groupId, user.getId())
+        UserGroup userGroup = userGroupRepository.findByGroupIdAndJoinerId(groupId, userAccount.getUserId())
                 .orElseThrow(() -> new NotFoundException("해당 그룹을 찾을 수 없습니다."));
 
         Group group = userGroup.getGroup();

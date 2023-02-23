@@ -60,12 +60,11 @@ public class GroupController {
         
     @PostMapping("/{groupId}")
     public ResponseEntity<GroupInfoResponseDto> join(
-            @PathVariable("groupId") Long groupId
-            /*, @AuthenticationPrincipal UserAccount userAccount */
+            @PathVariable("groupId") Long groupId,
+            @AuthenticationPrincipal UserAccount userAccount
     ) {
 
-        User user = User.builder().build();
-        GroupInfoResponseDto response = groupService.join(groupId, user);
+        GroupInfoResponseDto response = groupService.join(groupId, userAccount);
 
         return ResponseEntity.ok(response);
     }
@@ -74,20 +73,17 @@ public class GroupController {
     public ResponseEntity<GroupInfoListResponseDto> getMyGroupList(
              @AuthenticationPrincipal UserAccount userAccount) {
 
-        System.out.println(userAccount.getUserId());
-
         GroupInfoListResponseDto response = groupService.getMyGroupList(userAccount.getUserId());
 
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/my")
+    @DeleteMapping("/my/{groupId}")
     public ResponseEntity<GroupInfoResponseDto> quit(
-            @PathVariable("groupId") Long groupId
-            /*, @AuthenticationPrincipal UserAccount userAccount */
+            @PathVariable("groupId") Long groupId,
+            @AuthenticationPrincipal UserAccount userAccount
     ) {
-        User user = User.builder().build();
-        GroupInfoResponseDto response = groupService.quit(groupId, user);
+        GroupInfoResponseDto response = groupService.quit(groupId, userAccount);
 
         return ResponseEntity.ok(response);
     }
