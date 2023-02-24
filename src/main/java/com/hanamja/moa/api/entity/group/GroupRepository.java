@@ -15,16 +15,21 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
     Optional<Group> findById(Long id);
 
     List<Group> findAllByUserId(Long userId);
+
     boolean existsByIdAndMaker_Id(Long gid, Long uid);
 
     @Modifying(clearAutomatically = true)// 모임이 끝나면 인증샷 등록
     @Query(value = "UPDATE Group gp SET gp.imageLink = :imageLink WHERE gp.id = :gid")
-    void updateGroupImage(@Param(value = "imageLink")String imageLink,
-                          @Param(value = "gid")Long gid);
-    
+    void updateGroupImage(@Param(value = "imageLink") String imageLink,
+                          @Param(value = "gid") Long gid);
+
     List<Group> findAllByStateOrderByCreatedAtDesc(State state);
 
     List<Group> findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State state, LocalDateTime currentTime);
+
+    List<Group> findAllByStateAndNameContainsOrderByCreatedAtDesc(State state, String name);
+
+    List<Group> findAllByStateAndMeetingAtAfterAndNameContainsOrderByMeetingAtAscCreatedAtDesc(State state, LocalDateTime currentTime, String name);
 
     List<Group> findAllByMaker_Id(Long userId);
 
@@ -32,6 +37,6 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
 
     @Modifying(clearAutomatically = true)// 모임이 끝나면 인증샷 등록
     @Query(value = "UPDATE Group gp SET gp.state = :state WHERE gp.id = :gid")
-    void updateGroupState(@Param(value = "state") State state, @Param(value = "gid")Long gid);
+    void updateGroupState(@Param(value = "state") State state, @Param(value = "gid") Long gid);
 
 }
