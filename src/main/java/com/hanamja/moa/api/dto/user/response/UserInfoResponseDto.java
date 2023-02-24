@@ -1,5 +1,6 @@
 package com.hanamja.moa.api.dto.user.response;
 
+import com.hanamja.moa.api.entity.user.Gender;
 import com.hanamja.moa.api.entity.user.Role;
 import com.hanamja.moa.api.entity.user.User;
 import lombok.AccessLevel;
@@ -13,7 +14,7 @@ public class UserInfoResponseDto {
     private Long id;
     private String studentId;
     private String name;
-    private String gender;
+    private Gender gender;
     private String imageLink;
     private Long point;
     private String intro;
@@ -21,7 +22,7 @@ public class UserInfoResponseDto {
     private String department;
 
     @Builder
-    public UserInfoResponseDto(Long id, String studentId, String name, String gender, String imageLink, Long point, String intro, Role role, String department) {
+    public UserInfoResponseDto(Long id, String studentId, String name, Gender gender, String imageLink, Long point, String intro, Role role, String department) {
         this.id = id;
         this.studentId = studentId;
         this.name = name;

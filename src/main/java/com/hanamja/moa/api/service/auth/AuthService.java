@@ -49,7 +49,7 @@ public class AuthService {
         }
 
         String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
-        String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole());
+        String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
 
         UserToken userToken = UserToken.builder().user(user).refreshToken(refreshToken).build();
         UserToken savedUserToken = userTokenRepository.save(userToken);
@@ -84,7 +84,7 @@ public class AuthService {
         User user = userToken.getUser();
 
         String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
-        String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole());
+        String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
 
         return RegenerateAccessTokenResponseDto.of(accessToken, refreshToken);
     }

@@ -1,5 +1,6 @@
 package com.hanamja.moa.api.service.group;
 
+import com.hanamja.moa.api.controller.group.SortedBy;
 import com.hanamja.moa.api.dto.group.request.KickOutRequestDto;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
@@ -128,14 +129,14 @@ public class GroupService {
     }
 
     @Transactional
-    public GroupInfoResponseDto removeExistingGroup(UserAccount userAccount, RemovingGroupRequestDto removingGroupRequestDto) {
+    public GroupInfoResponseDto removeExistingGroup(UserAccount userAccount, Long groupId) {
         User user = validateUser(userAccount.getUserId());
 
         // 재학생인지 검증
         validateSenior(user);
 
         // groupId로 group 찾아오기
-        Group existingGroup = groupRepository.findById(removingGroupRequestDto.getId()).orElseThrow(
+        Group existingGroup = groupRepository.findById(groupId).orElseThrow(
                 () -> NotFoundException
                         .builder()
                         .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -150,11 +151,11 @@ public class GroupService {
 
 
         // UserGroup, GroupHashtag에서 해당 Group 모두 삭제
-        userGroupRepository.deleteAllByGroup_Id(removingGroupRequestDto.getId());
-        groupHashtagRepository.deleteAllByGroup_Id(removingGroupRequestDto.getId());
+        userGroupRepository.deleteAllByGroup_Id(groupId);
+        groupHashtagRepository.deleteAllByGroup_Id(groupId);
 
         // Group 삭제
-        groupRepository.deleteById(removingGroupRequestDto.getId());
+        groupRepository.deleteById(groupId);
 
         return removedGroupDto;
     }
@@ -229,8 +230,8 @@ public class GroupService {
         ).collect(Collectors.toList());
     }
 
-    public DataResponseDto<List<GroupInfoResponseDto>> getExistingGroups(String sortedBy) {
-        if (sortedBy.equals("recent")) {
+    public DataResponseDto<List<GroupInfoResponseDto>> getExistingGroups(SortedBy sortedBy) {
+        if (sortedBy == SortedBy.RECENT) {
             return DataResponseDto.<List<GroupInfoResponseDto>>builder()
                     .data(groupRepository
                             .findAllByStateOrderByCreatedAtDesc(State.RECRUITING)
@@ -238,7 +239,7 @@ public class GroupService {
                             .collect(Collectors.toList()
                             )
                     ).build();
-        } else if (sortedBy.equals("soon")) {
+        } else if (sortedBy == SortedBy.SOON) {
             return DataResponseDto.<List<GroupInfoResponseDto>>builder()
                     .data(groupRepository
                             .findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State.RECRUITING, LocalDateTime.now())

@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -21,7 +22,9 @@ public class PointHistoryController {
 
     @Operation(summary = "포인트 내역 조회", description = "포인트 내역 조회")
     @GetMapping
-    public ResponseEntity<DataResponseDto<List<PointHistoryInfoResponseDto>>> getHistoryList(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount) {
+    public ResponseEntity<DataResponseDto<List<PointHistoryInfoResponseDto>>> getHistoryList(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount)
+    {
 
         return ResponseEntity.ok(pointHistoryService.getHistoryList(userAccount));
     }
@@ -29,7 +32,9 @@ public class PointHistoryController {
 
     @Operation(summary = "포인트 내역 삭제", description = "포인트 내역 삭제")
     @DeleteMapping("/{historyId}")
-    public ResponseEntity<PointHistoryInfoResponseDto> removeHistory(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @PathVariable Long historyId) {
+    public ResponseEntity<PointHistoryInfoResponseDto> removeHistory(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
+            @NotNull @PathVariable Long historyId) {
 
         return ResponseEntity.ok(pointHistoryService.removeHistory(userAccount, historyId));
     }
