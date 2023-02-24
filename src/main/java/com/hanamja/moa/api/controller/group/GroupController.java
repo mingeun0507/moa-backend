@@ -12,6 +12,7 @@ import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.service.group.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,46 +33,51 @@ public class GroupController {
 
     private final GroupService groupService;
 
-    @Operation(summary = "makeNewGroup", description = "새로운 모임 만들기")
+    @Operation(summary = "새로운 모임 만들기", description = "새로운 모임 만들기")
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "OK")
     }
 
     )
     @PostMapping
-    public ResponseEntity<GroupInfoResponseDto> makeNewGroup(@AuthenticationPrincipal UserAccount userAccount, @RequestBody MakingGroupRequestDto makingGroupRequestDto) {
+    public ResponseEntity<GroupInfoResponseDto> makeNewGroup(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @RequestBody MakingGroupRequestDto makingGroupRequestDto) {
 
         return ResponseEntity.ok(groupService.makeNewGroup(userAccount, makingGroupRequestDto));
     }
 
+    @Operation(summary = "기존 모임 수정하기", description = "기존 모임 수정하기")
     @PutMapping
-    public ResponseEntity<GroupInfoResponseDto> modifyExistingGroup(@AuthenticationPrincipal UserAccount userAccount, @RequestBody ModifyingGroupRequestDto modifyingGroupRequestDto) {
+    public ResponseEntity<GroupInfoResponseDto> modifyExistingGroup(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @RequestBody ModifyingGroupRequestDto modifyingGroupRequestDto) {
 
         return ResponseEntity.ok(groupService.modifyExistingGroup(userAccount, modifyingGroupRequestDto));
     }
 
+    @Operation(summary = "기존 모임 삭제하기", description = "기존 모임 삭제하기")
     @DeleteMapping
-    public ResponseEntity<GroupInfoResponseDto> removeExistingGroup(@AuthenticationPrincipal UserAccount userAccount, @RequestBody RemovingGroupRequestDto removingGroupRequestDto) {
+    public ResponseEntity<GroupInfoResponseDto> removeExistingGroup(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @RequestBody RemovingGroupRequestDto removingGroupRequestDto) {
 
         return ResponseEntity.ok(groupService.removeExistingGroup(userAccount, removingGroupRequestDto));
     }
 
+    @Operation(summary = "기존 모임 조회하기", description = "기존 모임 조회하기")
     @GetMapping
     public ResponseEntity<DataResponseDto<List<GroupInfoResponseDto>>> getExistingGroups(@RequestParam String sortedBy) {
 
         return ResponseEntity.ok(groupService.getExistingGroups(sortedBy));
     }
 
+    @Operation(summary = "기존 모임 상세 조회하기", description = "기존 모임 상세 조회하기")
     @GetMapping("/{id}")
-    public ResponseEntity<GroupDetailInfoResponseDto> getExistingGroupDetail(@AuthenticationPrincipal UserAccount userAccount, @PathVariable Long id) {
+    public ResponseEntity<GroupDetailInfoResponseDto> getExistingGroupDetail(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @PathVariable Long id) {
 
         return ResponseEntity.ok(groupService.getExistingGroupDetail(userAccount, id));
     }
-        
+
+    @Operation(summary = "모임 참가하기", description = "모임 참가하기")
     @PostMapping("/{groupId}")
     public ResponseEntity<GroupInfoResponseDto> join(
             @PathVariable("groupId") Long groupId,
-            @AuthenticationPrincipal UserAccount userAccount
+            @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount
     ) {
 
         GroupInfoResponseDto response = groupService.join(groupId, userAccount);
@@ -79,49 +85,55 @@ public class GroupController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "내 모임 조회하기", description = "내 모임 조회하기")
     @GetMapping("/my")
     public ResponseEntity<GroupInfoListResponseDto> getMyGroupList(
-             @AuthenticationPrincipal UserAccount userAccount) {
+            @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount) {
 
         GroupInfoListResponseDto response = groupService.getMyGroupList(userAccount.getUserId());
 
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "모임 탈퇴하기", description = "모임 탈퇴하기")
     @DeleteMapping("/my/{groupId}")
     public ResponseEntity<GroupInfoResponseDto> quit(
             @PathVariable("groupId") Long groupId,
-            @AuthenticationPrincipal UserAccount userAccount
+            @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount
     ) {
         GroupInfoResponseDto response = groupService.quit(groupId, userAccount);
 
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "내가 만든 모임 보기", description = "내가 만든 모임 보기")
     @GetMapping(value = "/maker")
-    public ResponseEntity<GroupInfoListResponseDto> getGroupListMadeMyMe(@AuthenticationPrincipal UserAccount userAccount){
+    public ResponseEntity<GroupInfoListResponseDto> getGroupListMadeMyMe(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount){
         GroupInfoListResponseDto groupListMadeByMe = groupService.getGroupListMadeByMe(userAccount.getUserId());
         return ResponseEntity.ok().body(groupListMadeByMe);
     }
 
+    @Operation(summary = "모임원 강퇴하기", description = "모임원 강퇴하기")
     @DeleteMapping(value = "/out")
-    public ResponseEntity<?> outMemberFromGroup(@AuthenticationPrincipal UserAccount userAccount,
+    public ResponseEntity<?> outMemberFromGroup(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
                                                 @RequestBody KickOutRequestDto kickOutRequestDto){
         groupService.kickoutMemberFromGroup(userAccount.getUserId(), kickOutRequestDto);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping(value = "/cancel/{gid}")
-    public ResponseEntity<?> cancelGroup(@AuthenticationPrincipal UserAccount userAccount,
-                                         @PathVariable Long gid){
-        groupService.cancelGroup(userAccount.getUserId(), gid);
+    @Operation(summary = "모임 취소하기", description = "모임 취소하기")
+    @DeleteMapping(value = "/cancel/{groupId}")
+    public ResponseEntity<?> cancelGroup(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
+                                         @PathVariable Long groupId){
+        groupService.cancelGroup(userAccount.getUserId(), groupId);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping(value = "/recruit/end/{gid}")
-    public ResponseEntity<?> recruitDone(@AuthenticationPrincipal UserAccount userAccount,
-                                         @PathVariable Long gid){
-        groupService.groupRecruitDone(userAccount.getUserId(), gid);
+    @Operation(summary = "모임 모집 마감하기", description = "모임 모집 마감하기")
+    @PutMapping(value = "/recruit/end/{groupId}")
+    public ResponseEntity<?> recruitDone(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
+                                         @PathVariable Long groupId){
+        groupService.groupRecruitDone(userAccount.getUserId(), groupId);
         return ResponseEntity.ok().build();
     }
 
@@ -130,8 +142,9 @@ public class GroupController {
      * 승민 TODO
      * 1. 인증샷 업로드가 되면 imageLink 및 진행상황 complete 로 업데이트 - PUT
      */
+    @Operation(summary = "카드 만들기", description = "카드 만들기")
     @PostMapping(value = "/complete")
-    public ResponseEntity<?> makeCard(@AuthenticationPrincipal UserAccount userAccount,
+    public ResponseEntity<?> makeCard(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
                                       @RequestPart(value = "gid") Long gid,
                                       @RequestPart(value = "image") MultipartFile image) throws IOException {
         // 모임 완료 후 -> card 생성하는 로직

@@ -4,6 +4,8 @@ import com.hanamja.moa.api.dto.point_history.response.PointHistoryInfoResponseDt
 import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.service.point_history.PointHistoryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,15 +19,17 @@ import java.util.List;
 public class PointHistoryController {
     private final PointHistoryService pointHistoryService;
 
+    @Operation(summary = "포인트 내역 조회", description = "포인트 내역 조회")
     @GetMapping
-    public ResponseEntity<DataResponseDto<List<PointHistoryInfoResponseDto>>> getHistoryList(@AuthenticationPrincipal UserAccount userAccount) {
+    public ResponseEntity<DataResponseDto<List<PointHistoryInfoResponseDto>>> getHistoryList(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount) {
 
         return ResponseEntity.ok(pointHistoryService.getHistoryList(userAccount));
     }
 
 
+    @Operation(summary = "포인트 내역 삭제", description = "포인트 내역 삭제")
     @DeleteMapping("/{historyId}")
-    public ResponseEntity<PointHistoryInfoResponseDto> removeHistory(@AuthenticationPrincipal UserAccount userAccount, @PathVariable Long historyId) {
+    public ResponseEntity<PointHistoryInfoResponseDto> removeHistory(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @PathVariable Long historyId) {
 
         return ResponseEntity.ok(pointHistoryService.removeHistory(userAccount, historyId));
     }
