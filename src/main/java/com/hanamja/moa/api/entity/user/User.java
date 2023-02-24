@@ -20,6 +20,8 @@ import java.util.List;
 @Table(name = "MOA_USER")
 public class User {
 
+    public static final String FRESHMAN_YEAR = String.valueOf(Year.now().getValue()).substring(2);
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -34,7 +36,7 @@ public class User {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "gender", nullable = false)
+    @Column(name = "gender")
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
@@ -77,7 +79,7 @@ public class User {
     private List<PointHistory> pointHistoryList;
 
     @Builder
-    public User(String studentId, String password, String name, Gender gender, String imageLink, Long point, String intro, Role role, Department department, boolean isOnboarded, boolean isActive) {
+    public User(String studentId, String password, String name, Gender gender, String imageLink, Long point, String intro, Department department, boolean isOnboarded, boolean isActive) {
         this.studentId = studentId;
         this.password = password;
         this.name = name;
@@ -85,7 +87,7 @@ public class User {
         this.imageLink = imageLink;
         this.point = point;
         this.intro = intro;
-        this.role = role;
+        this.role = studentId.startsWith(FRESHMAN_YEAR) ? Role.ROLE_FRESHMEN : Role.ROLE_SENIOR;
         this.department = department;
         this.isOnboarded = isOnboarded;
         this.isActive = isActive;
@@ -97,7 +99,7 @@ public class User {
     }
 
     // 온보딩용 업데이트 함수
-    public void updateOnboardingInfo(Gender gender, Department department, String imageLink) {
+    public void updateOnBoardingInfo(Gender gender, Department department, String imageLink) {
         this.gender = gender;
         this.department = department;
         this.imageLink = imageLink == null ? this.imageLink : imageLink;
