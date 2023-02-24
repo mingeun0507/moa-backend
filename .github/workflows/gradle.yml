@@ -26,6 +26,16 @@ jobs:
       with:
         java-version: '11'
         distribution: 'temurin'
+    
+    - name: Copy Prod
+      env:
+          OCCUPY_PROD: ${{ secrets.OCCUPY_PROD }}
+          OCCUPY_PROD_DIR: src/main/resources
+          # OCCUPY_PROD_TEST_DIR: src/test/resources
+          OCCUPY_PROD_DIR_FILE_NAME: application-prod.yml
+      run: echo $OCCUPY_PROD | base64 --decode > $OCCUPY_PROD_DIR/$OCCUPY_PROD_DIR_FILE_NAME
+           # echo $OCCUPY_PROD | base64 --decode > $OCCUPY_PROD_TEST_DIR/$OCCUPY_PROD_DIR_FILE_NAME
+        
     - name: Copy Secret
       env:
           OCCUPY_SECRET: ${{ secrets.OCCUPY_SECRET }}
