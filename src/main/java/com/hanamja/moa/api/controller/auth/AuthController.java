@@ -5,6 +5,7 @@ import com.hanamja.moa.api.dto.auth.request.OnBoardingRequestDto;
 import com.hanamja.moa.api.dto.auth.request.RegenerateAccessTokenRequestDto;
 import com.hanamja.moa.api.dto.auth.response.LoginResponseDto;
 import com.hanamja.moa.api.dto.auth.response.RegenerateAccessTokenResponseDto;
+import com.hanamja.moa.api.dto.user.request.SignUpRequestDto;
 import com.hanamja.moa.api.dto.user.response.UserInfoResponseDto;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.service.auth.AuthService;
@@ -26,6 +27,14 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+
+    @Operation(summary = "회원가입")
+    @PostMapping("/sign-up")
+    public ResponseEntity<UserInfoResponseDto> signUp(@Validated @RequestBody SignUpRequestDto signUpRequestDto) {
+        UserInfoResponseDto responseDto = authService.signUp(signUpRequestDto);
+
+        return ResponseEntity.ok(responseDto);
+    }
 
     @Operation(summary = "로그인")
     @PostMapping("/login")

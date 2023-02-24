@@ -5,6 +5,7 @@ import com.hanamja.moa.api.dto.auth.request.OnBoardingRequestDto;
 import com.hanamja.moa.api.dto.auth.request.RegenerateAccessTokenRequestDto;
 import com.hanamja.moa.api.dto.auth.response.LoginResponseDto;
 import com.hanamja.moa.api.dto.auth.response.RegenerateAccessTokenResponseDto;
+import com.hanamja.moa.api.dto.user.request.SignUpRequestDto;
 import com.hanamja.moa.api.dto.user.response.UserInfoResponseDto;
 import com.hanamja.moa.api.entity.department.Department;
 import com.hanamja.moa.api.entity.department.DepartmentRepository;
@@ -15,6 +16,7 @@ import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.api.entity.user_token.UserToken;
 import com.hanamja.moa.api.entity.user_token.UserTokenRepository;
 import com.hanamja.moa.exception.custom.NotFoundException;
+import com.hanamja.moa.exception.custom.UserInputException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -69,7 +71,7 @@ public class AuthService {
                         () -> new NotFoundException("해당하는 학부를 찾을 수 없습니다.")
                 );
 
-        foundUser.updateOnboardingInfo(onBoardingRequestDto.getGender(), department, onBoardingRequestDto.getImageLink());
+        foundUser.updateOnBoardingInfo(onBoardingRequestDto.getGender(), department, onBoardingRequestDto.getImageLink());
         userRepository.save(foundUser);
 
         return UserInfoResponseDto.from(foundUser);
@@ -87,5 +89,19 @@ public class AuthService {
         String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
 
         return RegenerateAccessTokenResponseDto.of(accessToken, refreshToken);
+    }
+
+    public UserInfoResponseDto signUp(SignUpRequestDto signUpRequestDto) {
+        User user = User.builder()
+                .studentId(signUpRequestDto.getStudentId())
+                .password(passwordEncoder.encode(signUpRequestDto.getPassword()))
+                .name(signUpRequestDto.getName())
+                .build();
+        if (userRepository.existsByStudentId(signUpRequestDto.getStudentId())) {
+            throw UserInputException.builder().message("이미 존재하는 학번입니다.").httpStatus(HttpStatus.BAD_REQUEST).build();
+        }
+        User savedUser = userRepository.save(user);
+
+        return UserInfoResponseDto.from(savedUser);
     }
 }
