@@ -20,9 +20,10 @@ public class UserInfoResponseDto {
     private String intro;
     private Role role;
     private String department;
+    private boolean isNotified;
 
     @Builder
-    public UserInfoResponseDto(Long id, String studentId, String name, Gender gender, String imageLink, Long point, String intro, Role role, String department) {
+    public UserInfoResponseDto(Long id, String studentId, String name, Gender gender, String imageLink, Long point, String intro, Role role, String department, boolean isNotified) {
         this.id = id;
         this.studentId = studentId;
         this.name = name;
@@ -32,6 +33,7 @@ public class UserInfoResponseDto {
         this.intro = intro;
         this.role = role;
         this.department = department;
+        this.isNotified = isNotified;
     }
 
     public static UserInfoResponseDto from(User user) {
@@ -45,6 +47,7 @@ public class UserInfoResponseDto {
                 .intro(user.getIntro())
                 .role(user.getRole())
                 .department(user.getDepartment() != null ? user.getDepartment().getName() : null)
+                .isNotified(user.getIsNotified())
                 .build();
     }
 }
