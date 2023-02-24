@@ -1,7 +1,5 @@
 package com.hanamja.moa.api.dto.group.request;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,14 +10,13 @@ import java.util.List;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class KickOutRequestDto {
 
     @NotNull
-    @JsonProperty(value = "group_id")
     private Long groupId;
 
     @NotNull
-    @JsonProperty(value = "user_list")
     private List<Long> userList;
 
     @NotNull
