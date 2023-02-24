@@ -2,6 +2,7 @@ package com.hanamja.moa.config;
 
 import com.hanamja.moa.api.entity.user.UserAccount.jwt.JwtAuthenticationFilter;
 import com.hanamja.moa.api.entity.user.UserAccount.jwt.JwtExceptionFilter;
+import com.hanamja.moa.api.entity.user.UserAccount.jwt.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;
@@ -9,6 +10,7 @@ import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
@@ -25,9 +27,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtTokenUtil jwtTokenUtil;
 
-    private final JwtExceptionFilter jwtExceptionFilter;
+    private final AuthenticationManager authenticationManager;
 
     private final CorsConfig corsConfig;
 
@@ -38,7 +40,7 @@ public class SecurityConfig {
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
         return (web) -> web.ignoring()
-                .antMatchers("/**");
+                .antMatchers("/h2-console/**", "/health/check");
     }
 
 
@@ -72,8 +74,8 @@ public class SecurityConfig {
 
                 .and()
                 .addFilter(corsConfig.corsFilter())
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(jwtExceptionFilter, JwtAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenUtil, authenticationManager), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtExceptionFilter(), JwtAuthenticationFilter.class)
 
                 .build();
     }
