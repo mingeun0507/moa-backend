@@ -49,8 +49,11 @@ public class GroupInfoResponseDto {
     @Schema(description = "모임 해시태그 리스트")
     private List<String> hashtags;
 
+    @Schema(description = "모임 생성자 정보")
+    private SimpleUserInfoResponseDto groupMakerInfo;
+
     @Builder
-    public GroupInfoResponseDto(Long id, String name, String description, State state, Long maxPeopleNum, Long currentPeopleNum, LocalDateTime createdAt, LocalDateTime modifiedAt, LocalDateTime meetingAt, String imageLink, List<String> hashtags) {
+    public GroupInfoResponseDto(Long id, String name, String description, State state, Long maxPeopleNum, Long currentPeopleNum, LocalDateTime createdAt, LocalDateTime modifiedAt, LocalDateTime meetingAt, String imageLink, List<String> hashtags, SimpleUserInfoResponseDto groupMakerInfo) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -62,6 +65,7 @@ public class GroupInfoResponseDto {
         this.meetingAt = meetingAt;
         this.imageLink = imageLink;
         this.hashtags = hashtags;
+        this.groupMakerInfo = groupMakerInfo;
     }
 
     public static GroupInfoResponseDto from(Group group, List<String> hashtags) {
@@ -78,6 +82,7 @@ public class GroupInfoResponseDto {
                 .meetingAt(group.getMeetingAt())
                 .imageLink(group.getImageLink())
                 .hashtags(hashtags)
+                .groupMakerInfo(SimpleUserInfoResponseDto.from(group.getMaker()))
                 .build();
     }
 
