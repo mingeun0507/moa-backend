@@ -42,7 +42,6 @@ public class AuthController {
         return ResponseEntity.ok(authService.onBoardUser(userAccount, onBoardingRequestDto));
     }
 
-
     @Operation(summary = "토큰 재발급")
     @PostMapping("/regenerate-access-token")
     public ResponseEntity<RegenerateAccessTokenResponseDto> regenerateAccessToken(
