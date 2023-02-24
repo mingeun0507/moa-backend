@@ -77,7 +77,7 @@ public class User {
     private List<PointHistory> pointHistoryList;
 
     @Builder
-    public User(String studentId, String password, String name, String gender, String imageLink, Long point, String intro, Role role, Department department, boolean isOnboarded, boolean isActive) {
+    public User(String studentId, String password, String name, Gender gender, String imageLink, Long point, String intro, Role role, Department department, boolean isOnboarded, boolean isActive) {
         this.studentId = studentId;
         this.password = password;
         this.name = name;
