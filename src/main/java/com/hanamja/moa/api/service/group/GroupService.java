@@ -16,6 +16,8 @@ import com.hanamja.moa.api.entity.group_hashtag.GroupHashtag;
 import com.hanamja.moa.api.entity.group_hashtag.GroupHashtagRepository;
 import com.hanamja.moa.api.entity.hashtag.Hashtag;
 import com.hanamja.moa.api.entity.hashtag.HashtagRepository;
+import com.hanamja.moa.api.entity.notification.Notification;
+import com.hanamja.moa.api.entity.notification.NotificationRepository;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.entity.user.UserRepository;
@@ -49,6 +51,7 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final GroupHashtagRepository groupHashtagRepository;
     private final HashtagRepository hashtagRepository;
+    private final NotificationRepository notificationRepository;
     private final AmazonS3Uploader amazonS3Uploader;
 
     @Transactional
@@ -370,24 +373,67 @@ public class GroupService {
     }
 
     @Transactional
-    public void kickoutMemberFromGroup(Long uid, KickOutRequestDto kickOutRequestDto){
+    public GroupInfoResponseDto kickOutMemberFromGroup(Long uid, KickOutRequestDto kickOutRequestDto) {
+        User existingUser = validateUser(uid);
         validateGroupMaker(uid, kickOutRequestDto.getGroupId());
+        Group existingGroup = groupRepository.findById(kickOutRequestDto.getGroupId()).orElseThrow();
 
-        kickOutRequestDto.getUserList().stream()
+        kickOutRequestDto.getUserList()
                 .forEach(userId -> {
-                    userGroupRepository.deleteUserGroupByGroup_IdAndJoiner_Id(kickOutRequestDto.getGroupId(), uid);
-                    // TODO: 알림 테이블에 내용 저장
-                });
+                            userGroupRepository.deleteUserGroupByGroup_IdAndJoiner_Id(kickOutRequestDto.getGroupId(), userId);
+
+                            // 각 유저에게 알림 보내기
+                            User receiver = userRepository.findById(userId).orElseThrow(
+                                    () -> NotFoundException.builder()
+                                            .httpStatus(HttpStatus.BAD_REQUEST)
+                                            .message("userId로 user를 찾을 수 없습니다.")
+                                            .build()
+                            );
+
+                            notificationRepository.save(
+                                    Notification
+                                            .builder()
+                                            .sender(existingUser)
+                                            .receiver(receiver)
+                                            .content(existingUser.getName() + "님이 '" + existingGroup.getName() + "'에서 " + receiver.getName() + "님을 내보냈어요.")
+                                            .reason(kickOutRequestDto.getReason())
+                                            .isBadged(true)
+                                            .build()
+                            );
+                        }
+                );
+
+        return GroupInfoResponseDto.from(existingGroup, getHashtagStringList(existingGroup));
     }
 
     @Transactional
-    public void cancelGroup(Long uid, Long gid){
+    public GroupInfoResponseDto cancelGroup(Long uid, Long gid) {
+        User groupMaker = validateUser(uid);
         validateGroupMaker(uid, gid);
+        Group existingGroup = groupRepository.findById(gid).orElseThrow();
 
+        // 모임 취소 알림 보내기
+        userGroupRepository.findAllByGroup_Id(gid).stream()
+                .map(UserGroup::getJoiner)
+                .forEach(joiner -> {
+                    notificationRepository.save(
+                            Notification
+                                    .builder()
+                                    .sender(groupMaker)
+                                    .receiver(joiner)
+                                    .content(groupMaker.getName() + "님이 '" + existingGroup.getName() + "'을 취소했어요.")
+                                    .reason("모임 생성자: " + groupMaker.getName() + "님")
+                                    .isBadged(true)
+                                    .build()
+                    );
+                });
+        List<String> hashtagStringList = getHashtagStringList(existingGroup);
+
+        groupHashtagRepository.deleteAllByGroup_Id(gid);
         userGroupRepository.deleteAllByGroup_Id(gid);
         groupRepository.deleteById(gid);
 
-        // TODO: 알림 테이블에 내용 저장
+        return GroupInfoResponseDto.from(existingGroup, hashtagStringList);
     }
 
     @Transactional
