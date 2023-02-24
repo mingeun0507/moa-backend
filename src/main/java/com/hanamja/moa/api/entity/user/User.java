@@ -101,11 +101,16 @@ public class User {
         this.gender = gender;
         this.department = department;
         this.imageLink = imageLink == null ? this.imageLink : imageLink;
+        this.isOnboarded = true;
     }
 
     // 마이페이지 수정용 업데이트 함수
     public void updateUserinfo(String imageLink, String intro) {
         this.imageLink = imageLink == null ? this.imageLink : imageLink;
         this.intro = intro == null ? this.intro : intro;
+    }
+
+    public void updateProfileImage(String profileImageUrl) {
+        this.imageLink = profileImageUrl;
     }
 }
