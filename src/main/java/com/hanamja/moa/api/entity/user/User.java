@@ -75,6 +75,10 @@ public class User {
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
 
+    @Column(name = "is_notified", nullable = false)
+    private Boolean isNotified;
+
+
     @OneToMany(mappedBy = "owner")
     private List<PointHistory> pointHistoryList;
 
@@ -91,6 +95,7 @@ public class User {
         this.department = department;
         this.isOnboarded = false;
         this.isActive = true;
+        this.isNotified = false;
     }
 
     public boolean isFreshman() {
@@ -114,5 +119,13 @@ public class User {
 
     public void updateProfileImage(String profileImageUrl) {
         this.imageLink = profileImageUrl;
+    }
+
+    public void notifyUser() {
+        this.isNotified = true;
+    }
+
+    public void unNotifyUser() {
+        this.isNotified = false;
     }
 }
