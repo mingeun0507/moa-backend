@@ -44,7 +44,7 @@ public class UserInfoResponseDto {
                 .point(user.getPoint())
                 .intro(user.getIntro())
                 .role(user.getRole())
-                .department(user.getDepartment().getName())
+                .department(user.getDepartment() != null ? user.getDepartment().getName() : null)
                 .build();
     }
 }
