@@ -2,12 +2,8 @@ package com.hanamja.moa.api.entity.user.UserAccount.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanamja.moa.exception.custom.CustomException;
-import com.hanamja.moa.exception.custom.ExpiredTokenException;
-import com.hanamja.moa.exception.custom.UnauthorizedTokenException;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.entity.ContentType;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -19,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RequiredArgsConstructor
-@Component
 public class JwtExceptionFilter extends OncePerRequestFilter {
 
     @Override
