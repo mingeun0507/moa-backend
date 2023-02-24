@@ -19,6 +19,7 @@ public class Swagger2Config {
                 .builder()
                 .group("moa-apis")
                 .pathsToMatch("/api/**")
+                .pathsToExclude("/api/auth/login")
                 .build();
     }
 

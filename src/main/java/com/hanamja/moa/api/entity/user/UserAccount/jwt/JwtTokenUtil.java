@@ -23,7 +23,7 @@ public class JwtTokenUtil {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
 
-    private static final int ACCESS_TOKEN_EXPIRATION_MS = 69 * 60 * 1000;
+    private static final int ACCESS_TOKEN_EXPIRATION_MS = 60 * 60 * 1000;
 
     private static final int REFRESH_TOKEN_EXPIRATION_MS = 14 * 24 * 60 * 60 * 1000;
 
@@ -48,7 +48,7 @@ public class JwtTokenUtil {
                 .compact();
     }
 
-    public String generateRefreshToken(long userId, String studentId, Role role) {
+    public String generateRefreshToken(long userId, String studentId, Role role, boolean isActive) {
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + REFRESH_TOKEN_EXPIRATION_MS);
@@ -60,6 +60,7 @@ public class JwtTokenUtil {
 
         claims.put("user_id", userId);
         claims.put("role", role);
+        claims.put("is_active", isActive);
 
         return Jwts.builder()
                 .setClaims(claims)
