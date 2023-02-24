@@ -72,6 +72,12 @@ public class User {
 //    @OneToMany(mappedBy = "metUser")
 //    private List<Album> metAlbumList;
 
+    @Column(name = "is_onboarded", nullable = false)
+    private boolean isOnboarded;
+
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive;
+
     @OneToMany(mappedBy = "owner")
     private List<PointHistory> pointHistoryList;
 

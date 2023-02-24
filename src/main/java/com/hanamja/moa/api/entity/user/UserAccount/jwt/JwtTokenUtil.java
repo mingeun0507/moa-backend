@@ -28,7 +28,7 @@ public class JwtTokenUtil {
     private static final int REFRESH_TOKEN_EXPIRATION_MS = 14 * 24 * 60 * 60 * 1000;
 
     // jwt 토큰 생성
-    public String generateAccessToken(long userId, String studentId, Role role) {
+    public String generateAccessToken(long userId, String studentId, Role role, boolean isActive) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + ACCESS_TOKEN_EXPIRATION_MS);
         Claims claims = Jwts.claims()
@@ -39,6 +39,7 @@ public class JwtTokenUtil {
         claims.put("user_id", userId);
         claims.put("student_id", studentId);
         claims.put("role", role);
+        claims.put("is_active", isActive);
 
 
         return Jwts.builder()
@@ -77,8 +78,11 @@ public class JwtTokenUtil {
     // Jwt Token의 유효성 및 만료 기간 검사
     public boolean isValidToken(String token) {
         try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
-            return true;
+            Jws<Claims> claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
+
+            boolean isActive = claims.getBody().get("is_active", Boolean.class);
+
+            return isActive;
         } catch (Exception e) {
             log.error(e.getMessage());
             return false;

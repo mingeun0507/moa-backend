@@ -4,10 +4,7 @@ import com.hanamja.moa.api.dto.group.request.KickOutRequestDto;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.RemovingGroupRequestDto;
-import com.hanamja.moa.api.dto.group.response.GroupCompleteRespDto;
-import com.hanamja.moa.api.dto.group.response.GroupDetailInfoResponseDto;
-import com.hanamja.moa.api.dto.group.response.GroupInfoListResponseDto;
-import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
+import com.hanamja.moa.api.dto.group.response.*;
 import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.album.Album;
 import com.hanamja.moa.api.entity.album.AlbumRepository;
@@ -269,13 +266,10 @@ public class GroupService {
         );
 
         // 참여자들의 간단한 프로필 추가
-        List<GroupDetailInfoResponseDto.SimpleUserInfoDto> simpleUserInfoDtoList =
+        List<SimpleUserInfoResponseDto> simpleUserInfoDtoList =
                 userGroupRepository.findAllByGroup_Id(groupId).stream()
-                        .map(x -> GroupDetailInfoResponseDto.SimpleUserInfoDto.from(x.getJoiner()))
+                        .map(x -> SimpleUserInfoResponseDto.from(x.getJoiner()))
                         .collect(Collectors.toList());
-
-        // 생성자의 간단한 프로필 추가
-        simpleUserInfoDtoList.add(0, GroupDetailInfoResponseDto.SimpleUserInfoDto.from(existingGroup.getMaker()));
 
         // 포인트 정산
         int point = 0;

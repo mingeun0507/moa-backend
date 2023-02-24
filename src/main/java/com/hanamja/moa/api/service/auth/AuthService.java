@@ -48,13 +48,13 @@ public class AuthService {
                     .build();
         }
 
-        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getRole());
+        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
         String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole());
 
         UserToken userToken = UserToken.builder().user(user).refreshToken(refreshToken).build();
         UserToken savedUserToken = userTokenRepository.save(userToken);
 
-        return LoginResponseDto.of(accessToken, savedUserToken.getRefreshToken());
+        return LoginResponseDto.of(accessToken, savedUserToken.getRefreshToken(), user.isOnboarded(), user.isActive());
     }
 
     @Transactional
@@ -83,7 +83,7 @@ public class AuthService {
 
         User user = userToken.getUser();
 
-        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getRole());
+        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
         String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole());
 
         return RegenerateAccessTokenResponseDto.of(accessToken, refreshToken);
