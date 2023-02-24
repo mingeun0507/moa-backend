@@ -122,16 +122,14 @@ public class GroupController {
     @DeleteMapping(value = "/out")
     public ResponseEntity<?> outMemberFromGroup(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
                                                 @Validated @ModelAttribute KickOutRequestDto kickOutRequestDto){
-        groupService.kickoutMemberFromGroup(userAccount.getUserId(), kickOutRequestDto);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(groupService.kickOutMemberFromGroup(userAccount.getUserId(), kickOutRequestDto));
     }
 
     @Operation(summary = "모임 취소하기", description = "모임 취소하기")
     @DeleteMapping(value = "/cancel/{groupId}")
     public ResponseEntity<?> cancelGroup(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
                                          @NotNull @PathVariable Long groupId){
-        groupService.cancelGroup(userAccount.getUserId(), groupId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(groupService.cancelGroup(userAccount.getUserId(), groupId));
     }
 
     @Operation(summary = "모임 모집 마감하기", description = "모임 모집 마감하기")

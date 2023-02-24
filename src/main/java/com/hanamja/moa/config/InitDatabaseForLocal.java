@@ -81,6 +81,8 @@ public class InitDatabaseForLocal {
                     .imageLink("http://example.com")
                     .role(Role.ROLE_SENIOR)
                     .point(0L)
+                    .isActive(true)
+                    .isOnboarded(true)
                     .build();
 
             User changjin = User
@@ -93,6 +95,8 @@ public class InitDatabaseForLocal {
                     .imageLink("http://example2.com")
                     .role(Role.ROLE_SENIOR)
                     .point(0L)
+                    .isActive(true)
+                    .isOnboarded(true)
                     .build();
 
             User seokmin = User
@@ -105,6 +109,8 @@ public class InitDatabaseForLocal {
                     .imageLink("http://example3.com")
                     .role(Role.ROLE_FRESHMEN)
                     .point(1L)
+                    .isActive(true)
+                    .isOnboarded(true)
                     .build();
 
             userRepository.save(mingeun);
