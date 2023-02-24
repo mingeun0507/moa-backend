@@ -13,7 +13,6 @@ import com.hanamja.moa.api.entity.hashtag.HashtagRepository;
 import com.hanamja.moa.api.entity.point_history.PointHistory;
 import com.hanamja.moa.api.entity.point_history.PointHistoryRepository;
 import com.hanamja.moa.api.entity.user.Gender;
-import com.hanamja.moa.api.entity.user.Role;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
@@ -79,7 +78,6 @@ public class InitDatabaseForLocal {
                     .name("김민근")
                     .gender(Gender.MALE)
                     .imageLink("http://example.com")
-                    .role(Role.ROLE_SENIOR)
                     .point(0L)
                     .isActive(true)
                     .isOnboarded(true)
@@ -88,12 +86,11 @@ public class InitDatabaseForLocal {
             User changjin = User
                     .builder()
                     .department(software)
-                    .studentId("20112011")
+                    .studentId("20232011")
                     .password(passwordEncoder.encode("12345678"))
                     .name("서창진")
                     .gender(Gender.MALE)
                     .imageLink("http://example2.com")
-                    .role(Role.ROLE_SENIOR)
                     .point(0L)
                     .isActive(true)
                     .isOnboarded(true)
@@ -107,7 +104,6 @@ public class InitDatabaseForLocal {
                     .name("윤석민")
                     .gender(Gender.FEMALE)
                     .imageLink("http://example3.com")
-                    .role(Role.ROLE_FRESHMEN)
                     .point(1L)
                     .isActive(true)
                     .isOnboarded(true)
