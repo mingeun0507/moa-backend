@@ -503,10 +503,35 @@ public class GroupService {
             return GroupCompleteRespDto.builder()
                     .memberInfoList(memberInfoList).groupImageLink(imageLink)
                     .build();
-        }else{
+        } else {
             // throw new 잘못된 요청 case 리턴하기
             return GroupCompleteRespDto.builder()
                     .memberInfoList(null).groupImageLink(null)
+                    .build();
+        }
+    }
+
+    public DataResponseDto<List<GroupInfoResponseDto>> searchGroupByKeyWord(String keyword, SortedBy sortedBy) {
+        if (sortedBy == SortedBy.RECENT) {
+            return DataResponseDto.<List<GroupInfoResponseDto>>builder()
+                    .data(groupRepository
+                            .findAllByStateAndNameContainsOrderByCreatedAtDesc(State.RECRUITING, keyword)
+                            .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                            .collect(Collectors.toList()
+                            )
+                    ).build();
+        } else if (sortedBy == SortedBy.SOON) {
+            return DataResponseDto.<List<GroupInfoResponseDto>>builder()
+                    .data(groupRepository
+                            .findAllByStateAndMeetingAtAfterAndNameContainsOrderByMeetingAtAscCreatedAtDesc(State.RECRUITING, LocalDateTime.now(), keyword)
+                            .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                            .collect(Collectors.toList())
+                    ).build();
+        } else {
+            throw InvalidParameterException
+                    .builder()
+                    .httpStatus(HttpStatus.BAD_REQUEST)
+                    .message("올바르지 않은 Query String입니다.")
                     .build();
         }
     }

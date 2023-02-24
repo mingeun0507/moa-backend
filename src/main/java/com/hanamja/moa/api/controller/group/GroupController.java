@@ -152,4 +152,10 @@ public class GroupController {
         GroupCompleteRespDto groupCompleteRespDto = groupService.completeGroup(userAccount.getUserId(), gid, image);
         return ResponseEntity.ok().body(groupCompleteRespDto);
     }
+
+    @Operation(summary = "모임 검색하기", description = "모임 검색하기")
+    @GetMapping("/search")
+    public ResponseEntity<DataResponseDto<List<GroupInfoResponseDto>>> searchGroupByKeyword(@RequestParam String keyword, @RequestParam SortedBy sortedBy) {
+        return ResponseEntity.ok(groupService.searchGroupByKeyWord(keyword, sortedBy));
+    }
 }
