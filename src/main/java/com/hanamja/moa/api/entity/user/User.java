@@ -54,7 +54,7 @@ public class User {
     private Role role;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dept_id", nullable = false)
+    @JoinColumn(name = "dept_id")
     private Department department;
 
     @OneToMany(mappedBy = "owner")
@@ -79,7 +79,7 @@ public class User {
     private List<PointHistory> pointHistoryList;
 
     @Builder
-    public User(String studentId, String password, String name, Gender gender, String imageLink, Long point, String intro, Department department, boolean isOnboarded, boolean isActive) {
+    public User(String studentId, String password, String name, Gender gender, String imageLink, Long point, String intro, Department department) {
         this.studentId = studentId;
         this.password = password;
         this.name = name;
@@ -89,8 +89,8 @@ public class User {
         this.intro = intro;
         this.role = studentId.startsWith(FRESHMAN_YEAR) ? Role.ROLE_FRESHMEN : Role.ROLE_SENIOR;
         this.department = department;
-        this.isOnboarded = isOnboarded;
-        this.isActive = isActive;
+        this.isOnboarded = false;
+        this.isActive = true;
     }
 
     public boolean isFreshman() {
