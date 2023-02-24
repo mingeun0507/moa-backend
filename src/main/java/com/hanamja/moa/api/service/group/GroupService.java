@@ -401,6 +401,7 @@ public class GroupService {
                             );
 
                             receiver.notifyUser();
+                    userRepository.save(receiver);
                         }
                 );
 
@@ -429,6 +430,7 @@ public class GroupService {
                     );
 
                     joiner.notifyUser();
+                    userRepository.save(joiner);
                 });
         List<String> hashtagStringList = getHashtagStringList(existingGroup);
 

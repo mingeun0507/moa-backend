@@ -10,6 +10,7 @@ import com.hanamja.moa.exception.custom.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +24,7 @@ public class NotificationService {
 
     private final UserRepository userRepository;
 
+    @Transactional
     public DataResponseDto<List<NotificationResponseDto>> getNotifications(UserAccount userAccount) {
         User existingUser = validateUser(userAccount);
 
@@ -32,6 +34,7 @@ public class NotificationService {
                 .collect(Collectors.toList());
 
         existingUser.unNotifyUser();
+        userRepository.save(existingUser);
 
         return DataResponseDto.<List<NotificationResponseDto>>builder()
                 .data(notificationList)
