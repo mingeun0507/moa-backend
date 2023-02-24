@@ -79,8 +79,6 @@ public class InitDatabaseForLocal {
                     .gender(Gender.MALE)
                     .imageLink("http://example.com")
                     .point(0L)
-                    .isActive(true)
-                    .isOnboarded(true)
                     .build();
 
             User changjin = User
@@ -92,8 +90,6 @@ public class InitDatabaseForLocal {
                     .gender(Gender.MALE)
                     .imageLink("http://example2.com")
                     .point(0L)
-                    .isActive(true)
-                    .isOnboarded(true)
                     .build();
 
             User seokmin = User
@@ -105,8 +101,6 @@ public class InitDatabaseForLocal {
                     .gender(Gender.FEMALE)
                     .imageLink("http://example3.com")
                     .point(1L)
-                    .isActive(true)
-                    .isOnboarded(true)
                     .build();
 
             userRepository.save(mingeun);
