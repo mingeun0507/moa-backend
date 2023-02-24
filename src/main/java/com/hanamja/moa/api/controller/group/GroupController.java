@@ -9,9 +9,12 @@ import com.hanamja.moa.api.dto.group.response.GroupDetailInfoResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoListResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
 import com.hanamja.moa.api.dto.util.DataResponseDto;
-import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.service.group.GroupService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -22,12 +25,19 @@ import java.io.IOException;
 import java.util.List;
 
 @RequiredArgsConstructor
+@Tag(name = "groups", description = "모임 관련 API")
 @RestController
 @RequestMapping("/api/group")
 public class GroupController {
 
     private final GroupService groupService;
 
+    @Operation(summary = "makeNewGroup", description = "새로운 모임 만들기")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "OK")
+    }
+
+    )
     @PostMapping
     public ResponseEntity<GroupInfoResponseDto> makeNewGroup(@AuthenticationPrincipal UserAccount userAccount, @RequestBody MakingGroupRequestDto makingGroupRequestDto) {
 
