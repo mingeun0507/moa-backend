@@ -4,7 +4,6 @@ import com.hanamja.moa.api.controller.group.SortedBy;
 import com.hanamja.moa.api.dto.group.request.KickOutRequestDto;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
-import com.hanamja.moa.api.dto.group.request.RemovingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.response.*;
 import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.album.Album;
@@ -400,6 +399,8 @@ public class GroupService {
                                             .isBadged(true)
                                             .build()
                             );
+
+                            receiver.notifyUser();
                         }
                 );
 
@@ -426,6 +427,8 @@ public class GroupService {
                                     .isBadged(true)
                                     .build()
                     );
+
+                    joiner.notifyUser();
                 });
         List<String> hashtagStringList = getHashtagStringList(existingGroup);
 
