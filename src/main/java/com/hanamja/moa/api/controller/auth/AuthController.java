@@ -8,6 +8,8 @@ import com.hanamja.moa.api.dto.auth.response.RegenerateAccessTokenResponseDto;
 import com.hanamja.moa.api.dto.user.response.UserInfoResponseDto;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.service.auth.AuthService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +26,7 @@ public class AuthController {
 
     private final AuthService authService;
 
+    @Operation(summary = "로그인")
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
         LoginResponseDto responseDto = authService.login(loginRequestDto);
@@ -31,18 +34,23 @@ public class AuthController {
         return ResponseEntity.ok(responseDto);
     }
 
+
+    @Operation(summary = "내 정보 조회")
     @GetMapping(value = "/info")
-    public ResponseEntity<?> myInfo(@AuthenticationPrincipal UserAccount userAccount) {
+    public ResponseEntity<?> myInfo(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount) {
         String studentId = userAccount.getStudentId();
         return ResponseEntity.ok().body(studentId);
     }
 
+    @Operation(summary = "온보딩")
     @PutMapping("/on-boarding")
-    public ResponseEntity<UserInfoResponseDto> onBoardUser(@AuthenticationPrincipal UserAccount userAccount, @RequestBody OnBoardingRequestDto onBoardingRequestDto) {
+    public ResponseEntity<UserInfoResponseDto> onBoardUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @RequestBody OnBoardingRequestDto onBoardingRequestDto) {
 
         return ResponseEntity.ok(authService.onBoardUser(userAccount, onBoardingRequestDto));
     }
 
+
+    @Operation(summary = "토큰 재발급")
     @PostMapping("/regenerate-access-token")
     public ResponseEntity<RegenerateAccessTokenResponseDto> regenerateAccessToken(
             @RequestBody RegenerateAccessTokenRequestDto requestDto
