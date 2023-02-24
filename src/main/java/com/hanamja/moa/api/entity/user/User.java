@@ -41,7 +41,8 @@ public class User {
     private String name;
 
     @Column(name = "gender", nullable = false)
-    private String gender;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     @Column(name = "image_link")
     private String imageLink;
@@ -82,7 +83,7 @@ public class User {
     private List<PointHistory> pointHistoryList;
 
     @Builder
-    public User(String studentId, String password, String name, String gender, String imageLink, Long point, String intro, Role role, Department department) {
+    public User(String studentId, String password, String name, Gender gender, String imageLink, Long point, String intro, Role role, Department department) {
         this.studentId = studentId;
         this.password = password;
         this.name = name;
@@ -100,7 +101,7 @@ public class User {
     }
 
     // 온보딩용 업데이트 함수
-    public void updateOnboardingInfo(String gender, Department department, String imageLink) {
+    public void updateOnboardingInfo(Gender gender, Department department, String imageLink) {
         this.gender = gender;
         this.department = department;
         this.imageLink = imageLink == null ? this.imageLink : imageLink;

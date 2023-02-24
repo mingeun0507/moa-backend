@@ -6,16 +6,24 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class MakingGroupRequestDto {
 
+    @NotNull
     private String name;
+
+    @NotNull
     private String description;
+
+    @NotNull
     private Long maxPeopleNum;
+
     private LocalDateTime meetingAt;
+
     private String hashtags;
 
     public static Group toEntity(MakingGroupRequestDto makingGroupRequestDto, User user) {

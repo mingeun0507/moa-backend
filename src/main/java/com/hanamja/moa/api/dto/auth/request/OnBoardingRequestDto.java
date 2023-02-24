@@ -1,19 +1,26 @@
 package com.hanamja.moa.api.dto.auth.request;
 
+import com.hanamja.moa.api.entity.user.Gender;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OnBoardingRequestDto {
-    private String gender;
+
+
+    private Gender gender;
+
+    @NotNull
     private String department;
     private String imageLink;
 
     @Builder
-    public OnBoardingRequestDto(String gender, String department, String imageLink) {
+    public OnBoardingRequestDto(Gender gender, String department, String imageLink) {
         this.gender = gender;
         this.department = department;
         this.imageLink = imageLink;
