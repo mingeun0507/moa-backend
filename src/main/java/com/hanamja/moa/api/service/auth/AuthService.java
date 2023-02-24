@@ -92,6 +92,7 @@ public class AuthService {
     }
 
     public UserInfoResponseDto signUp(SignUpRequestDto signUpRequestDto) {
+
         User user = User.builder()
                 .studentId(signUpRequestDto.getStudentId())
                 .password(passwordEncoder.encode(signUpRequestDto.getPassword()))

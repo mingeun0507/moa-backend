@@ -30,7 +30,14 @@ public class AuthController {
 
     @Operation(summary = "회원가입")
     @PostMapping("/sign-up")
-    public ResponseEntity<UserInfoResponseDto> signUp(@Validated @RequestBody SignUpRequestDto signUpRequestDto) {
+    public ResponseEntity<UserInfoResponseDto> signUp(
+            @RequestHeader(value="Authorization") String authorization,
+            @Validated @RequestBody SignUpRequestDto signUpRequestDto)
+    {
+        if (!authorization.equals("Bearer " + "tIJ47cDR6cwXM43w")){
+            throw new IllegalArgumentException("토큰이 일치하지 않습니다.");
+        }
+
         UserInfoResponseDto responseDto = authService.signUp(signUpRequestDto);
 
         return ResponseEntity.ok(responseDto);
