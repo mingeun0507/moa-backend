@@ -3,7 +3,6 @@ package com.hanamja.moa.api.controller.group;
 import com.hanamja.moa.api.dto.group.request.KickOutRequestDto;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
-import com.hanamja.moa.api.dto.group.request.RemovingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.response.GroupCompleteRespDto;
 import com.hanamja.moa.api.dto.group.response.GroupDetailInfoResponseDto;
 import com.hanamja.moa.api.dto.group.response.GroupInfoListResponseDto;
@@ -13,7 +12,6 @@ import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.service.group.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -73,9 +71,9 @@ public class GroupController {
     @GetMapping("/{groupId}")
     public ResponseEntity<GroupDetailInfoResponseDto> getExistingGroupDetail(
             @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
-            @NotNull @PathVariable Long id) {
+            @NotNull @PathVariable Long groupId) {
 
-        return ResponseEntity.ok(groupService.getExistingGroupDetail(userAccount, id));
+        return ResponseEntity.ok(groupService.getExistingGroupDetail(userAccount, groupId));
     }
 
     @Operation(summary = "모임 참가하기", description = "모임 참가하기")
