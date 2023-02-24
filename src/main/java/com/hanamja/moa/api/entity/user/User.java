@@ -9,16 +9,10 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.time.Year;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -83,7 +77,7 @@ public class User {
     private List<PointHistory> pointHistoryList;
 
     @Builder
-    public User(String studentId, String password, String name, Gender gender, String imageLink, Long point, String intro, Role role, Department department) {
+    public User(String studentId, String password, String name, String gender, String imageLink, Long point, String intro, Role role, Department department, boolean isOnboarded, boolean isActive) {
         this.studentId = studentId;
         this.password = password;
         this.name = name;
@@ -93,6 +87,8 @@ public class User {
         this.intro = intro;
         this.role = role;
         this.department = department;
+        this.isOnboarded = isOnboarded;
+        this.isActive = isActive;
     }
 
     public boolean isFreshman() {
