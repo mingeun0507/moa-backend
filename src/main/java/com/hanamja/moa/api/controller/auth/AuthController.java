@@ -35,14 +35,6 @@ public class AuthController {
         return ResponseEntity.ok(responseDto);
     }
 
-
-    @Operation(summary = "내 정보 조회")
-    @GetMapping(value = "/info")
-    public ResponseEntity<?> myInfo(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount) {
-        String studentId = userAccount.getStudentId();
-        return ResponseEntity.ok().body(studentId);
-    }
-
     @Operation(summary = "온보딩")
     @PutMapping("/on-boarding")
     public ResponseEntity<UserInfoResponseDto> onBoardUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @Validated @RequestBody OnBoardingRequestDto onBoardingRequestDto) {
