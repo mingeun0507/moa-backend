@@ -271,9 +271,6 @@ public class GroupService {
                         .map(x -> SimpleUserInfoResponseDto.from(x.getJoiner()))
                         .collect(Collectors.toList());
 
-        // 생성자의 간단한 프로필 추가
-        simpleUserInfoDtoList.add(0, SimpleUserInfoResponseDto.from(existingGroup.getMaker()));
-
         // 포인트 정산
         int point = 0;
 
