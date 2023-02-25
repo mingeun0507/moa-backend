@@ -39,4 +39,8 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
     @Query(value = "UPDATE Group gp SET gp.state = :state WHERE gp.id = :gid")
     void updateGroupState(@Param(value = "state") State state, @Param(value = "gid") Long gid);
 
+    @Query(value = "SELECT g FROM Group AS g JOIN FETCH UserGroup AS ug " +
+            "WHERE ug.joiner.id = :uid AND g.state = :state " +
+            "ORDER BY g.createdAt DESC")
+    List<Group> findAllJoinGroupByUserId(@Param(value = "uid") Long uid, @Param(value = "state") int state);
 }

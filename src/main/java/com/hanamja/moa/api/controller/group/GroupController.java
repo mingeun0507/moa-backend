@@ -3,10 +3,7 @@ package com.hanamja.moa.api.controller.group;
 import com.hanamja.moa.api.dto.group.request.KickOutRequestDto;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
-import com.hanamja.moa.api.dto.group.response.GroupCompleteRespDto;
-import com.hanamja.moa.api.dto.group.response.GroupDetailInfoResponseDto;
-import com.hanamja.moa.api.dto.group.response.GroupInfoListResponseDto;
-import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
+import com.hanamja.moa.api.dto.group.response.*;
 import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.service.group.GroupService;
@@ -90,12 +87,12 @@ public class GroupController {
 
     @Operation(summary = "내 모임 조회하기", description = "내 모임 조회하기")
     @GetMapping("/my")
-    public ResponseEntity<GroupInfoListResponseDto> getMyGroupList(
+    public ResponseEntity<DataResponseDto<GroupStateInfoResponseDto>> getMyGroupList(
             @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount) {
 
-        GroupInfoListResponseDto response = groupService.getMyGroupList(userAccount.getUserId());
+        DataResponseDto<GroupStateInfoResponseDto> myGroupList = groupService.getMyGroupList(userAccount.getUserId());
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok().body(myGroupList);
     }
 
     @Operation(summary = "모임 탈퇴하기", description = "모임 탈퇴하기")

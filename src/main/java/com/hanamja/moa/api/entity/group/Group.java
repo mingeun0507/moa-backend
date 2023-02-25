@@ -31,6 +31,7 @@ public class Group {
     private String description;
 
     @Column(name = "state")
+    @Enumerated(value = EnumType.STRING)
     private State state;
 
     @Column(name = "max_num", nullable = false)
