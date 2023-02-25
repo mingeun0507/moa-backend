@@ -340,15 +340,15 @@ public class GroupService {
         if (group.getMaxPeopleNum() <= group.getUserGroupList().size()) {
             throw UserInputException.builder().httpStatus(HttpStatus.BAD_REQUEST).message("모집인원이 초과된 그룹입니다.").build();
         }
-
         UserGroup userGroup = UserGroup
                                 .builder()
                                     .progress("")
                                     .joiner(user)
                                     .group(group)
                                 .build();
-
         userGroupRepository.save(userGroup);
+
+        group.setCurrentPeopleNum(Long.valueOf(userGroupRepository.findAllByGroup_Id(groupId).size()));
 
         return GroupInfoResponseDto.from(group, getHashtagStringList(group));
     }
