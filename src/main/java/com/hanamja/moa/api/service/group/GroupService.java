@@ -314,13 +314,28 @@ public class GroupService {
                                                     .message("해당 유저를 찾을 수 없습니다.")
                                                     .build());
 
+        if (userGroupRepository.existsByGroupIdAndJoinerId(groupId, userAccount.getUserId())) {
+            throw new UserInputException("이미 참여한 그룹입니다.");
+        }
+
+        if (group.getState() == State.RECRUITED || group.getState() == State.DONE) {
+            throw new UserInputException("모집이 마감된 그룹입니다.");
+        }
+
+        if (group.getMeetingAt().isBefore(LocalDateTime.now())) {
+            throw new UserInputException("모임이 이미 시작된 그룹입니다.");
+        }
+
+        if (group.getMaxPeopleNum() <= group.getUserGroupList().size()) {
+            throw new UserInputException("모집인원이 초과된 그룹입니다.");
+        }
 
         UserGroup userGroup = UserGroup
-                .builder()
-                .progress("")
-                .joiner(user)
-                .group(group)
-                .build();
+                                .builder()
+                                    .progress("")
+                                    .joiner(user)
+                                    .group(group)
+                                .build();
 
         userGroupRepository.save(userGroup);
 
