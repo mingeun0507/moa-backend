@@ -72,9 +72,8 @@ public class AuthService {
                 );
 
         foundUser.updateOnBoardingInfo(onBoardingRequestDto.getGender(), department, onBoardingRequestDto.getImageLink());
-        userRepository.save(foundUser);
 
-        return UserInfoResponseDto.from(foundUser);
+        return UserInfoResponseDto.from(userRepository.save(foundUser));
     }
 
     public RegenerateAccessTokenResponseDto regenerateAccessToken(RegenerateAccessTokenRequestDto requestDto) {
