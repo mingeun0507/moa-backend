@@ -353,25 +353,22 @@ public class GroupService {
         return GroupInfoResponseDto.from(group, getHashtagStringList(group));
     }
 
-    public DataResponseDto<GroupStateInfoResponseDto> getMyGroupList(Long userId) {
-        // user_group 에서 내 id 가 있는 group 다 찾기
-        // 해당 그룹 정보 : {item : {RECRUITING : {}, RECRUITED : {}, DONE : {}}}
-//        List<Group> groups = groupRepository.findAllJoinGroupByUserId(userId);
-        List<GroupStateInfoResponseDto.Data> dataList = new ArrayList<>();
+    public DataResponseDto<List<GroupStateInfoResponseDto>> getMyGroupList(Long userId) {
+        List<GroupStateInfoResponseDto> dto = new ArrayList<>();
 
         Arrays.stream(State.values()).collect(Collectors.toList())
                         .stream()
                         .forEach(state -> {
-                            List<GroupInfoResponseDto> groupInfos = groupRepository.findAllJoinGroupByUserId(userId, state.ordinal()).stream()
+                            List<GroupInfoResponseDto> groupInfos = groupRepository.findAllJoinGroupByUserId(userId, state).stream()
                                     .map(group -> GroupInfoResponseDto.from(group, getHashtagStringList(group)))
                                     .collect(Collectors.toList());
 
-                            dataList.add(GroupStateInfoResponseDto.Data.builder()
+                            dto.add(GroupStateInfoResponseDto.builder()
                                             .state(state).groups(groupInfos)
                                             .build());
                         });
-        return DataResponseDto.<GroupStateInfoResponseDto>builder()
-                .data(GroupStateInfoResponseDto.of(dataList))
+        return DataResponseDto.<List<GroupStateInfoResponseDto>>builder()
+                .data(dto)
                 .build();
     }
 

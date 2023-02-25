@@ -11,23 +11,17 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class GroupStateInfoResponseDto {
-    private List<Data> info;
+    private State state;
+    private List<GroupInfoResponseDto> groups;
 
     @Builder
-    public static class Data {
-        private State state;
-        private List<GroupInfoResponseDto> groups;
+    public GroupStateInfoResponseDto(State state, List<GroupInfoResponseDto> groups) {
+        this.state = state;
+        this.groups = groups;
     }
 
-    @Builder
-    public GroupStateInfoResponseDto(List<Data> info) {
-        this.info = info;
-    }
-
-    public static GroupStateInfoResponseDto of (List<Data> data) {
-        GroupStateInfoResponseDto dto = new GroupStateInfoResponseDto();
-        dto.info = data;
-
-        return dto;
+    public static GroupStateInfoResponseDto of (State state, List<GroupInfoResponseDto> groups) {
+        return GroupStateInfoResponseDto.builder()
+                .state(state).groups(groups).build();
     }
 }

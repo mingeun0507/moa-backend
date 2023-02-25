@@ -87,10 +87,10 @@ public class GroupController {
 
     @Operation(summary = "내 모임 조회하기", description = "내 모임 조회하기")
     @GetMapping("/my")
-    public ResponseEntity<DataResponseDto<GroupStateInfoResponseDto>> getMyGroupList(
+    public ResponseEntity<DataResponseDto<List<GroupStateInfoResponseDto>>> getMyGroupList(
             @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount) {
 
-        DataResponseDto<GroupStateInfoResponseDto> myGroupList = groupService.getMyGroupList(userAccount.getUserId());
+        DataResponseDto<List<GroupStateInfoResponseDto>> myGroupList = groupService.getMyGroupList(userAccount.getUserId());
 
         return ResponseEntity.ok().body(myGroupList);
     }
