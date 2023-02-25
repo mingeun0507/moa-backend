@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 public class OnBoardingRequestDto {
 
 
+    @NotNull
     private Gender gender;
 
     @NotNull
