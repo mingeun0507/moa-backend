@@ -39,6 +39,7 @@ public class AuthController {
             @RequestHeader(value="Authorization") String authorization,
             @Validated @RequestBody SignUpRequestDto signUpRequestDto)
     {
+
         if (!authorization.equals("Bearer " + googleFormCustomAuthKey)){
             throw new UnauthorizedException("토큰이 일치하지 않습니다.");
         }
