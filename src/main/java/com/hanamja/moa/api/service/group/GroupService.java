@@ -372,7 +372,7 @@ public class GroupService {
                                 .message("groupId로 group을 찾을 수 없습니다.")
                                 .build());
 
-        if (!group.getId().equals(userId)) {
+        if (!group.getMaker().getId().equals(userId)) {
             throw NotFoundException.builder()
                     .httpStatus(HttpStatus.UNAUTHORIZED)
                     .message("Group 생성자가 아닙니다.")
