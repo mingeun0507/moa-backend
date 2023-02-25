@@ -20,12 +20,14 @@ public class UserPointRankResponseDto {
         private Long userId;
         private Long rank;
         private String username;
+        private String img;
         private Long point;
 
         public static RankTab of (User user, Long rank){
             return RankTab.builder()
                     .userId(user.getId()).rank(rank)
-                    .username(user.getName()).point(user.getPoint())
+                    .username(user.getName()).img(user.getImageLink())
+                    .point(user.getPoint())
                     .build();
         }
     }
