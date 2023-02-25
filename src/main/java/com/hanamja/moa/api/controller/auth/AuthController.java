@@ -9,11 +9,13 @@ import com.hanamja.moa.api.dto.user.request.SignUpRequestDto;
 import com.hanamja.moa.api.dto.user.response.UserInfoResponseDto;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.service.auth.AuthService;
+import com.hanamja.moa.exception.custom.UnauthorizedException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -28,14 +30,17 @@ public class AuthController {
 
     private final AuthService authService;
 
+    @Value("${google-form-custom-auth-key}")
+    private String googleFormCustomAuthKey;
+
     @Operation(summary = "회원가입")
     @PostMapping("/sign-up")
     public ResponseEntity<UserInfoResponseDto> signUp(
             @RequestHeader(value="Authorization") String authorization,
             @Validated @RequestBody SignUpRequestDto signUpRequestDto)
     {
-        if (!authorization.equals("Bearer " + "tIJ47cDR6cwXM43w")){
-            throw new IllegalArgumentException("토큰이 일치하지 않습니다.");
+        if (!authorization.equals("Bearer " + googleFormCustomAuthKey)){
+            throw new UnauthorizedException("토큰이 일치하지 않습니다.");
         }
 
         UserInfoResponseDto responseDto = authService.signUp(signUpRequestDto);
