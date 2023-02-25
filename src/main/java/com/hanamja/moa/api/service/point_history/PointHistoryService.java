@@ -1,9 +1,11 @@
 package com.hanamja.moa.api.service.point_history;
 
 import com.hanamja.moa.api.dto.point_history.response.PointHistoryInfoResponseDto;
+import com.hanamja.moa.api.dto.user.response.UserPointRankResponseDto;
 import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.point_history.PointHistory;
 import com.hanamja.moa.api.entity.point_history.PointHistoryRepository;
+import com.hanamja.moa.api.entity.user.Role;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.entity.user.UserRepository;
@@ -13,7 +15,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -84,5 +88,27 @@ public class PointHistoryService {
                         .message("유효하지 않은 사용자입니다.")
                         .build()
         );
+    }
+
+    @Transactional(readOnly = true)
+    public DataResponseDto<List<UserPointRankResponseDto>> getUserPointRank(){
+        List<UserPointRankResponseDto> responseDtos = new ArrayList<>();
+
+        responseDtos.add(UserPointRankResponseDto.of("FRESHMAN",
+                userRepository.findTop20ByRoleOrderByPointDesc(Role.ROLE_FRESHMEN)));
+        responseDtos.add(UserPointRankResponseDto.of("SENIORS",
+                userRepository.findTop20ByRoleOrderByPointDesc(Role.ROLE_SENIOR)));
+
+        return DataResponseDto.<List<UserPointRankResponseDto>>builder().data(responseDtos).build();
+    }
+
+    @Transactional(readOnly = true)
+    public DataResponseDto<UserPointRankResponseDto.RankTab> getRank(Long userId){
+        User user = userRepository.findUserById(userId)
+                .orElseThrow(() -> new NotFoundException("해당 유저가 없습니다. id=" + userId));
+        int rank = userRepository.getUserRank(userId, user.getRole());
+        return DataResponseDto.<UserPointRankResponseDto.RankTab>builder()
+                .data(UserPointRankResponseDto.RankTab.of(user, Long.valueOf(rank)))
+                .build();
     }
 }
