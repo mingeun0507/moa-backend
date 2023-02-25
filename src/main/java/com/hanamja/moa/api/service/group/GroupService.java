@@ -201,7 +201,7 @@ public class GroupService {
 
     @Transactional
     protected List<Hashtag> saveHashtags(String hashtagString) {
-        List<String> hashtagStringList = new java.util.ArrayList<>(List.of(hashtagString.split("#")));
+        List<String> hashtagStringList = !hashtagString.isEmpty() ? new ArrayList<>(List.of(hashtagString.split("#"))) : new ArrayList<>();
         hashtagStringList.remove(0);
 
         return hashtagStringList.stream().map(
@@ -314,13 +314,30 @@ public class GroupService {
                                                     .message("해당 유저를 찾을 수 없습니다.")
                                                     .build());
 
+        System.out.println("??????" + userGroupRepository.existsByGroupIdAndJoinerId(groupId, userAccount.getUserId()));
+
+        if (userGroupRepository.existsByGroupIdAndJoinerId(groupId, userAccount.getUserId())) {
+            throw UserInputException.builder().httpStatus(HttpStatus.BAD_REQUEST).message("이미 참여한 그룹입니다.").build();
+        }
+
+        if (group.getState() == State.RECRUITED || group.getState() == State.DONE) {
+            throw UserInputException.builder().httpStatus(HttpStatus.BAD_REQUEST).message("모집이 마감된 그룹입니다.").build();
+        }
+
+        if (group.getMeetingAt().isBefore(LocalDateTime.now())) {
+            throw UserInputException.builder().httpStatus(HttpStatus.BAD_REQUEST).message("모임이 이미 시작된 그룹입니다.").build();
+        }
+
+        if (group.getMaxPeopleNum() <= group.getUserGroupList().size()) {
+            throw UserInputException.builder().httpStatus(HttpStatus.BAD_REQUEST).message("모집인원이 초과된 그룹입니다.").build();
+        }
 
         UserGroup userGroup = UserGroup
-                .builder()
-                .progress("")
-                .joiner(user)
-                .group(group)
-                .build();
+                                .builder()
+                                    .progress("")
+                                    .joiner(user)
+                                    .group(group)
+                                .build();
 
         userGroupRepository.save(userGroup);
 

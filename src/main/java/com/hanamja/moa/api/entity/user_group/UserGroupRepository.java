@@ -25,4 +25,6 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, Long> {
     @Query(value = "UPDATE UserGroup ug SET ug.progress = :state WHERE ug.group.id = :gid")
     void updateProgress(@Param(value = "state") String state,
                         @Param(value = "gid") Long gid);
+
+    boolean existsByGroupIdAndJoinerId(Long groupId, Long userId);
 }
