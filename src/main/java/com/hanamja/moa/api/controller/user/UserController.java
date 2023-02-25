@@ -35,16 +35,4 @@ public class UserController {
 
         return ResponseEntity.ok(responseDto);
     }
-
-    @Operation(summary = "프로필 사진 수정")
-    @PutMapping(value = "/profile-image")
-    public ResponseEntity<UserInfoResponseDto> updateProfileImage(
-            @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, MultipartFile profileImage) throws IOException {
-
-        String profileImageUrl = amazonS3Uploader.saveFileAndGetUrl(profileImage);
-
-        UserInfoResponseDto responseDto = userService.updateProfileImage(userAccount.getUserId(), profileImageUrl);
-
-        return ResponseEntity.ok(responseDto);
-    }
 }
