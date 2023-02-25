@@ -105,4 +105,8 @@ public class Group {
         this.state = newState;
         // 모임 상태 변경 시 사용할 메소드
     }
+
+    public void setCurrentPeopleNum(Long size){
+        this.currentPeopleNum = size;
+    }
 }
