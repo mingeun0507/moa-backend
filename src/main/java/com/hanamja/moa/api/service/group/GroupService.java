@@ -333,7 +333,7 @@ public class GroupService {
             throw UserInputException.builder().httpStatus(HttpStatus.BAD_REQUEST).message("모집이 마감된 그룹입니다.").build();
         }
 
-        if (group.getMeetingAt().isBefore(LocalDateTime.now())) {
+        if (group.getMeetingAt() != null && group.getMeetingAt().isBefore(LocalDateTime.now())) {
             throw UserInputException.builder().httpStatus(HttpStatus.BAD_REQUEST).message("모임이 이미 시작된 그룹입니다.").build();
         }
 
@@ -348,7 +348,9 @@ public class GroupService {
                                 .build();
         userGroupRepository.save(userGroup);
 
-        group.setCurrentPeopleNum(Long.valueOf(userGroupRepository.findAllByGroup_Id(groupId).size()));
+        Long currNum = Long.valueOf(userGroupRepository.findAllByGroup_Id(groupId).size());
+        group.updateCurrentPeopleNum(currNum);
+        groupRepository.save(group);
 
         return GroupInfoResponseDto.from(group, getHashtagStringList(group));
     }

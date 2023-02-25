@@ -96,6 +96,10 @@ public class Group {
         // 참여했을 떄 인원수 늘려주는 메소드
     }
 
+    public void updateCurrentPeopleNum(Long currNum){
+        this.currentPeopleNum = currNum;
+    }
+
     public Boolean isFull() {
         return Objects.equals(this.currentPeopleNum, this.maxPeopleNum);
         // 인원수 늘리기 전에 체크하는 메소드
