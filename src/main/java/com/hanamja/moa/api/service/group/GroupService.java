@@ -37,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -67,6 +68,14 @@ public class GroupService {
         Group newGroup = MakingGroupRequestDto.toEntity(makingGroupRequestDto, user);
         groupRepository.save(newGroup);
 
+        UserGroup userGroup = UserGroup
+                .builder()
+                .progress("")
+                .joiner(user)
+                .group(newGroup)
+                .build();
+
+        userGroupRepository.save(userGroup);
         // GroupHashtag 생성 및 Group과의 관계 설정, 저장
         hashtagList.stream().map(
                 x -> GroupHashtag
@@ -344,13 +353,26 @@ public class GroupService {
         return GroupInfoResponseDto.from(group, getHashtagStringList(group));
     }
 
-    public GroupInfoListResponseDto getMyGroupList(Long userId) {
+    public DataResponseDto<GroupStateInfoResponseDto> getMyGroupList(Long userId) {
+        // user_group 에서 내 id 가 있는 group 다 찾기
+        // 해당 그룹 정보 : {item : {RECRUITING : {}, RECRUITED : {}, DONE : {}}}
+//        List<Group> groups = groupRepository.findAllJoinGroupByUserId(userId);
+        List<GroupStateInfoResponseDto.Data> dataList = new ArrayList<>();
 
-        List<Group> groupList = groupRepository.findAllByUserId(userId);
+        Arrays.stream(State.values()).collect(Collectors.toList())
+                        .stream()
+                        .forEach(state -> {
+                            List<GroupInfoResponseDto> groupInfos = groupRepository.findAllJoinGroupByUserId(userId, state.ordinal()).stream()
+                                    .map(group -> GroupInfoResponseDto.from(group, getHashtagStringList(group)))
+                                    .collect(Collectors.toList());
 
-        List<GroupInfoResponseDto> items = groupList.stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x))).collect(Collectors.toList());
-
-        return GroupInfoListResponseDto.of(items);
+                            dataList.add(GroupStateInfoResponseDto.Data.builder()
+                                            .state(state).groups(groupInfos)
+                                            .build());
+                        });
+        return DataResponseDto.<GroupStateInfoResponseDto>builder()
+                .data(GroupStateInfoResponseDto.of(dataList))
+                .build();
     }
 
     public GroupInfoResponseDto quit(Long groupId, UserAccount userAccount) {
