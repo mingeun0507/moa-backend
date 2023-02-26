@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AlbumRepository extends JpaRepository<Album, Long> {
     Boolean existsByOwner_IdAndMetUser_Id(Long ownerId, Long metUserId);
@@ -19,4 +20,6 @@ public interface AlbumRepository extends JpaRepository<Album, Long> {
     void updateBadgeState(@Param(value = "state")boolean state,
                           @Param(value = "mid")Long mid,
                           @Param(value = "oid")Long oid);
+
+    Optional<Album> findByOwner_IdAndMetUser_Id(Long oid, Long mid);
 }

@@ -24,6 +24,14 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, Long> {
     @Query(value = "SELECT ug FROM UserGroup ug WHERE ug.joiner.id = :uid AND ug.group.state = :state")
     List<UserGroup> findAllDoneGroupByUserId(@Param(value = "uid") Long uid, @Param(value = "state") State state);
 
+    @Query(value = "SELECT uug FROM UserGroup uug WHERE uug.joiner.id <> :uid " +
+            "AND uug.group.id in (SELECT ug.group.id FROM UserGroup ug WHERE ug.joiner.id = :uid AND ug.group.state = :state)")
+    List<UserGroup> findAllDoneGroupJoinUserId(@Param(value = "uid") Long uid, @Param(value = "state") State state);
+
+    @Query(value = "SELECT uug FROM UserGroup uug WHERE uug.joiner.id <> :uid and uug.joiner.id = :jid " +
+            "AND uug.group.id in (SELECT ug.group.id FROM UserGroup ug WHERE ug.joiner.id = :uid AND ug.group.state = :state)")
+    List<UserGroup> findOnePersonCard(@Param(value = "uid") Long uid, @Param(value = "jid") Long jid, @Param(value = "state") State state);
+
     List<UserGroup> findAllByJoiner_IdAndProgress(Long uid, String progress);
     
     @Modifying(clearAutomatically = true)
