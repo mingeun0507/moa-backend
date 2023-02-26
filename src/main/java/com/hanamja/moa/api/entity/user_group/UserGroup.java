@@ -44,4 +44,8 @@ public class UserGroup {
         this.joiner = joiner;
         this.group = group;
     }
+
+    public void updateMeetingImg(String meetingImg){
+        this.meetingImg = meetingImg;
+    }
 }

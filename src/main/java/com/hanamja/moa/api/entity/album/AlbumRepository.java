@@ -10,6 +10,8 @@ import java.util.List;
 public interface AlbumRepository extends JpaRepository<Album, Long> {
     Boolean existsByOwner_IdAndMetUser_Id(Long ownerId, Long metUserId);
     boolean existsByMetUser_Id(Long uid);
+
+    @Query(value = "SELECT a FROM Album a JOIN FETCH a.owner WHERE a.owner.id = :oid")
     List<Album> findAllByOwner_Id(Long oid);
 
     @Modifying(clearAutomatically = true)

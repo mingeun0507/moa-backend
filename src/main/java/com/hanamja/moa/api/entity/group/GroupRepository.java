@@ -14,15 +14,18 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
 
     Optional<Group> findById(Long id);
 
+    @Query(value = "SELECT g FROM Group g JOIN FETCH UserGroup ug ON g.id = ug.group.id WHERE g.id = :gid")
+    Group findGroupByGid(@Param(value = "gid")Long gid);
+
     List<Group> findAllByUserId(Long userId);
 
     boolean existsByIdAndMaker_Id(Long gid, Long uid);
 
     @Modifying(clearAutomatically = true)// 모임이 끝나면 인증샷 등록
-    @Query(value = "UPDATE Group gp SET gp.imageLink = :imageLink WHERE gp.id = :gid")
-    void updateGroupImage(@Param(value = "imageLink") String imageLink,
-                          @Param(value = "gid") Long gid);
-
+    @Query(value = "UPDATE Group gp SET gp.imageLink = :imageLink, gp.state = :state WHERE gp.id = :gid")
+    void updateCompleteGroup(@Param(value = "imageLink") String imageLink,
+                          @Param(value = "gid") Long gid, @Param(value = "state")State state);
+    List<Group> findAllByIdAndState(Long gid, State state);
     List<Group> findAllByStateOrderByCreatedAtDesc(State state);
 
     List<Group> findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State state, LocalDateTime currentTime);
