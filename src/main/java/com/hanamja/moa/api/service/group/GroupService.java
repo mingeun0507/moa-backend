@@ -488,65 +488,69 @@ public class GroupService {
 
     @Transactional
     public GroupCompleteRespDto completeGroup(Long uid, Long gid, MultipartFile image) throws IOException {
-        if(groupRepository.existsByIdAndMaker_Id(gid, uid)){
-            String imageLink = amazonS3Uploader.saveFileAndGetUrl(image);
+        // 모임 완료하면 카드 앞면 사진 업데이트
+        if(!groupRepository.existsByIdAndMaker_Id(gid, uid)){
+            throw NotFoundException.builder()
+                    .httpStatus(HttpStatus.UNAUTHORIZED)
+                    .message("Group 생성자가 아닙니다.")
+                    .build();
+        }
+        Group group = groupRepository.findGroupByGid(gid);
 
-            // Group 이랑 UserGroup 이랑 join 해서 업데이트 같이하고싶은데 생각이 안난다...
-            groupRepository.updateGroupImage(imageLink, gid);
-            userGroupRepository.updateProgress("DONE", gid);
+        String imageLink = amazonS3Uploader.saveFileAndGetUrl(image);
+        groupRepository.updateCompleteGroup(imageLink, gid, State.DONE);
 
-            // gid 받아서 group 에 속해있는 user 앨범 findAll
-            // 앨범마다 group 유저 정보 체크해서 없으면 카드 추가
-            // 있으면 badged -> true 로 변경
-            List<User> groupJoinUsers = userGroupRepository.findAllByGroup_Id(gid).stream()
-                    .map(UserGroup::getJoiner).collect(Collectors.toList());
+        // 앨범마다 group 유저 정보 체크해서 없으면 카드 추가, 있으면 badged -> true 로 변경
+        List<User> groupJoinUsers = userGroupRepository.findAllByGroup_Id(gid).stream()
+                .map(UserGroup::getJoiner).collect(Collectors.toList());
 
-            groupJoinUsers.forEach(albumOwner -> {
-                List<User> metUsers = albumRepository.findAllByOwner_Id(albumOwner.getId()).stream()
-                        .map(Album::getMetUser).collect(Collectors.toList());
+        List<GroupCompleteRespDto.Card> cardList = new ArrayList<>();
 
-                groupJoinUsers.forEach(groupJoinUser -> {
-                    if(albumOwner.getId() != groupJoinUser.getId() && !metUsers.contains(groupJoinUser)){
-                        albumRepository.save(Album.builder()
-                                .owner(albumOwner).metUser(groupJoinUser).isBadged(true)
-                                .build());
-                    }else{
-                        albumRepository.updateBadgeState(true, groupJoinUser.getId(), albumOwner.getId());
-                    }
-                });
-            });
+        groupJoinUsers.forEach(albumOwner -> {
+            List<Long> metUsersIdList = albumRepository.findAllByOwner_Id(albumOwner.getId()).stream()
+                    .map(Album::getMetUser).map(User::getId).collect(Collectors.toList());
 
-            // 위에 update 과정 끝나면 gid 로 user info 토대로 response data 구축하기
-            // 모임에 참여했던 user 의 프사, 이름, 만난 날짜, 위에서 저장한 모임 사진 url
-            List<GroupCompleteRespDto.MemberInfo> memberInfoList = new ArrayList<>();
+            List<Long> albumOwnerGroupIdList = userGroupRepository.findAllDoneGroupByUserId(albumOwner.getId(), State.DONE).stream()
+                    .map(UserGroup::getGroup).map(Group::getId)
+                    .collect(Collectors.toList());
 
-            List<Long> groupIdList = userGroupRepository.findAllByJoiner_IdAndProgress(uid,"DONE").stream()
-                    .map(UserGroup::getId).collect(Collectors.toList());
+            groupJoinUsers.forEach(groupJoinUser -> {
+                userGroupRepository.updateFrontCardImg(groupJoinUser.getImageLink(), gid, groupJoinUser.getId());
+                // TODO: POINT 정산 관련 논의 필요
+                userRepository.updateUserPoint(groupJoinUser.getId(), 500L);
 
-            groupJoinUsers.forEach(user -> {
-                if (!user.getId().equals(uid)) {
-                    // 만난 횟수 : uid 가 참여한 group_id 리스트 중에 user.getId()가
-                    // 속한 group_id 리스트 중에 겹치는거 중에 progress 가 DONE 인 것
-                    List<Long> userGroupIdList = userGroupRepository.findAllByJoiner_IdAndProgress(user.getId(), "DONE").stream()
-                            .map(UserGroup::getId).collect(Collectors.toList());
+                if(albumOwner.getId() != groupJoinUser.getId() && !metUsersIdList.contains(groupJoinUser.getId())){
+                    log.info("albumOwner : {}, joiner : {}",albumOwner.getName(), groupJoinUser.getName());
+                    albumRepository.save(Album.builder()
+                            .owner(albumOwner).metUser(groupJoinUser).isBadged(true)
+                            .build());
+                }else{
+                    albumRepository.updateBadgeState(true, groupJoinUser.getId(), albumOwner.getId());
+                }
 
-                    userGroupIdList.retainAll(groupIdList); // 교집합
+                if (!albumOwner.getId().equals(groupJoinUser.getId()) && !groupJoinUser.getId().equals(uid)) {
+                    List<Long> joinGroupIdList = userGroupRepository.findAllDoneGroupByUserId(groupJoinUser.getId(), State.DONE).stream()
+                            .map(UserGroup::getGroup).map(Group::getId)
+                            .collect(Collectors.toList());// 모임참여자가 참여했던 그룹 id 리스트
 
-                    memberInfoList.add(GroupCompleteRespDto.MemberInfo.builder()
-                            .userId(user.getId()).username(user.getStudentId())
-                            .imageLink(user.getImageLink()).meetingCnt((long) userGroupIdList.size())
+                    joinGroupIdList.retainAll(albumOwnerGroupIdList); // albumOwner 가 참여했던 그룹 id 리스트
+
+                    cardList.add(GroupCompleteRespDto.Card.builder()
+                            .userId(groupJoinUser.getId())
+                            .username(groupJoinUser.getName())
+                            .meetingAt(group.getMeetingAt())
+                            .meetingCnt(Long.valueOf(joinGroupIdList.size()))
+                            .frontImage(groupJoinUser.getImageLink())
+                            .backImage(imageLink)
                             .build());
                 }
             });
-            return GroupCompleteRespDto.builder()
-                    .memberInfoList(memberInfoList).groupImageLink(imageLink)
-                    .build();
-        } else {
-            // throw new 잘못된 요청 case 리턴하기
-            return GroupCompleteRespDto.builder()
-                    .memberInfoList(null).groupImageLink(null)
-                    .build();
-        }
+        });
+
+        return GroupCompleteRespDto.builder()
+                .cardList(cardList)
+                .build();
+
     }
 
     public DataResponseDto<List<GroupInfoResponseDto>> searchGroupByKeyWord(String keyword, SortedBy sortedBy) {
