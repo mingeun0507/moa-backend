@@ -37,6 +37,7 @@ public class AuthService {
 
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public LoginResponseDto login(LoginRequestDto loginRequestDto) {
         User user = userRepository.findByStudentId(loginRequestDto.getStudentId()).orElseThrow(
                 () -> NotFoundException.builder().message("유저를 찾을 수 없습니다.")
@@ -54,9 +55,14 @@ public class AuthService {
         String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
 
         UserToken userToken = UserToken.builder().user(user).refreshToken(refreshToken).build();
-        UserToken savedUserToken = userTokenRepository.save(userToken);
 
-        return LoginResponseDto.of(accessToken, savedUserToken.getRefreshToken(), user.isOnboarded(), user.isActive());
+        if (userTokenRepository.existsByUser_Id(user.getId())){
+            userTokenRepository.updateRefreshToken(user.getId(), refreshToken);
+        } else {
+            userTokenRepository.save(userToken);
+        }
+
+        return LoginResponseDto.of(accessToken, refreshToken, user.isOnboarded(), user.isActive());
     }
 
     @Transactional
@@ -76,6 +82,7 @@ public class AuthService {
         return UserInfoResponseDto.from(userRepository.save(foundUser));
     }
 
+    @Transactional
     public RegenerateAccessTokenResponseDto regenerateAccessToken(RegenerateAccessTokenRequestDto requestDto) {
 
         UserToken userToken = userTokenRepository.findByRefreshToken(requestDto.getRefreshToken()).orElseThrow(
@@ -86,6 +93,8 @@ public class AuthService {
 
         String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
         String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
+
+        userTokenRepository.updateRefreshToken(user.getId(), refreshToken);
 
         return RegenerateAccessTokenResponseDto.of(accessToken, refreshToken);
     }
