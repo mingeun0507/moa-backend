@@ -142,9 +142,13 @@ public class GroupController {
      */
     @Operation(summary = "카드 만들기", description = "카드 만들기")
     @PostMapping(value = "/complete")
-    public ResponseEntity<?> makeCard(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
-                                      @RequestPart(value = "gid") Long gid,
-                                      @RequestPart(value = "image") MultipartFile image) throws IOException {
+    public ResponseEntity<GroupCompleteRespDto> makeCard
+    (
+              @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
+              @RequestParam(value = "gid") Long gid,
+              @RequestParam(value = "image") MultipartFile image
+    ) throws IOException
+    {
         // 모임 완료 후 -> card 생성하는 로직
         GroupCompleteRespDto groupCompleteRespDto = groupService.completeGroup(userAccount.getUserId(), gid, image);
         return ResponseEntity.ok().body(groupCompleteRespDto);
