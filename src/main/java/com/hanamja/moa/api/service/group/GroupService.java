@@ -243,20 +243,27 @@ public class GroupService {
 
     public DataResponseDto<List<GroupInfoResponseDto>> getExistingGroups(SortedBy sortedBy) {
         if (sortedBy == SortedBy.RECENT) {
+            List<GroupInfoResponseDto> resultDtoList = groupRepository
+                    .findAllByStateAndMeetingAtAfterOrderByCreatedAtDesc(State.RECRUITING, LocalDateTime.now())
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList());
+            resultDtoList.addAll(groupRepository
+                    .findAllByStateAndMeetingAtOrderByCreatedAtDesc(State.RECRUITING, null)
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList()));
             return DataResponseDto.<List<GroupInfoResponseDto>>builder()
-                    .data(groupRepository
-                            .findAllByStateOrderByCreatedAtDesc(State.RECRUITING)
-                            .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
-                            .collect(Collectors.toList()
-                            )
-                    ).build();
+                    .data(resultDtoList).build();
         } else if (sortedBy == SortedBy.SOON) {
+            List<GroupInfoResponseDto> resultDtoList = groupRepository
+                    .findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State.RECRUITING, LocalDateTime.now())
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList());
+            resultDtoList.addAll(groupRepository
+                    .findAllByStateAndMeetingAtOrderByCreatedAtDesc(State.RECRUITING, null)
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList()));
             return DataResponseDto.<List<GroupInfoResponseDto>>builder()
-                    .data(groupRepository
-                            .findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State.RECRUITING, LocalDateTime.now())
-                            .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
-                            .collect(Collectors.toList())
-                    ).build();
+                    .data(resultDtoList).build();
         } else {
             throw InvalidParameterException
                     .builder()
@@ -553,28 +560,13 @@ public class GroupService {
 
     }
 
-    public DataResponseDto<List<GroupInfoResponseDto>> searchGroupByKeyWord(String keyword, SortedBy sortedBy) {
-        if (sortedBy == SortedBy.RECENT) {
-            return DataResponseDto.<List<GroupInfoResponseDto>>builder()
-                    .data(groupRepository
-                            .findAllByStateAndNameContainsOrderByCreatedAtDesc(State.RECRUITING, keyword)
-                            .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
-                            .collect(Collectors.toList()
-                            )
-                    ).build();
-        } else if (sortedBy == SortedBy.SOON) {
-            return DataResponseDto.<List<GroupInfoResponseDto>>builder()
-                    .data(groupRepository
-                            .findAllByStateAndMeetingAtAfterAndNameContainsOrderByMeetingAtAscCreatedAtDesc(State.RECRUITING, LocalDateTime.now(), keyword)
-                            .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
-                            .collect(Collectors.toList())
-                    ).build();
-        } else {
-            throw InvalidParameterException
-                    .builder()
-                    .httpStatus(HttpStatus.BAD_REQUEST)
-                    .message("올바르지 않은 Query String입니다.")
-                    .build();
-        }
+    public DataResponseDto<List<GroupInfoResponseDto>> searchGroupByKeyword(String keyword) {
+        List<GroupInfoResponseDto> resultDtoList = groupRepository
+                .findAllByStateAndNameContainsOrderByCreatedAtDesc(State.RECRUITING, keyword)
+                .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                .collect(Collectors.toList());
+
+        return DataResponseDto.<List<GroupInfoResponseDto>>builder()
+                .data(resultDtoList).build();
     }
 }
