@@ -1,6 +1,7 @@
 package com.hanamja.moa.api.entity.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -19,5 +20,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(value = "SELECT COUNT(u) FROM User u " +
             "WHERE u.point >= (SELECT uu.point FROM User uu WHERE uu.id = :uid AND uu.role = :role) AND u.role = :role")
     int getUserRank(@Param(value = "uid") Long uid, @Param(value = "role")Role role);
+
+    @Modifying(clearAutomatically = true)
+    @Query(value = "UPDATE User u SET u.point = u.point + :point WHERE u.id = :uid")
+    void updateUserPoint(@Param(value = "uid") Long uid, @Param(value = "point") Long point);
 
 }

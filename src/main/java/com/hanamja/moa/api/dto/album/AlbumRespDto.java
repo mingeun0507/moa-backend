@@ -1,13 +1,12 @@
 package com.hanamja.moa.api.dto.album;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 public class AlbumRespDto {
     @JsonProperty(value = "user_id")
     private Long userId;
@@ -30,5 +29,9 @@ public class AlbumRespDto {
         this.imageLink = imageLink;
         this.meetingCnt = meetingCnt;
         this.isBadged = isBadged;
+    }
+
+    public void plusMeetingCnt(){
+        this.meetingCnt++;
     }
 }
