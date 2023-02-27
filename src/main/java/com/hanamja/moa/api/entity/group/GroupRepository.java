@@ -24,15 +24,21 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
     @Modifying(clearAutomatically = true)// 모임이 끝나면 인증샷 등록
     @Query(value = "UPDATE Group gp SET gp.imageLink = :imageLink, gp.state = :state WHERE gp.id = :gid")
     void updateCompleteGroup(@Param(value = "imageLink") String imageLink,
-                          @Param(value = "gid") Long gid, @Param(value = "state")State state);
+                             @Param(value = "gid") Long gid, @Param(value = "state") State state);
+
     List<Group> findAllByIdAndState(Long gid, State state);
-    List<Group> findAllByStateOrderByCreatedAtDesc(State state);
+
+    List<Group> findAllByStateAndMeetingAtAfterOrderByCreatedAtDesc(State state, LocalDateTime currentTime);
 
     List<Group> findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State state, LocalDateTime currentTime);
 
-    List<Group> findAllByStateAndNameContainsOrderByCreatedAtDesc(State state, String name);
+    List<Group> findAllByStateAndMeetingAtOrderByCreatedAtDesc(State state, LocalDateTime currentTime);
 
-    List<Group> findAllByStateAndMeetingAtAfterAndNameContainsOrderByMeetingAtAscCreatedAtDesc(State state, LocalDateTime currentTime, String name);
+
+    @Query(value = "SELECT distinct g FROM Group g JOIN FETCH GroupHashtag gh ON g.id = gh.group.id JOIN FETCH Hashtag h ON gh.hashtag.id = h.id WHERE (g.name LIKE %:keyword% OR h.name LIKE %:keyword%) AND g.state = 'RECRUITING' ORDER BY g.createdAt DESC")
+    List<Group> searchGroupByKeyword(@Param(value = "keyword") String keyword);
+
+    List<Group> findAllByStateAndNameContainsOrderByCreatedAtDesc(State state, String name);
 
     List<Group> findAllByMaker_Id(Long userId);
 

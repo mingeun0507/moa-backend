@@ -156,7 +156,7 @@ public class GroupController {
 
     @Operation(summary = "모임 검색하기", description = "모임 검색하기")
     @GetMapping("/search")
-    public ResponseEntity<DataResponseDto<List<GroupInfoResponseDto>>> searchGroupByKeyword(@RequestParam String keyword, @RequestParam SortedBy sortedBy) {
-        return ResponseEntity.ok(groupService.searchGroupByKeyWord(keyword, sortedBy));
+    public ResponseEntity<DataResponseDto<List<GroupInfoResponseDto>>> searchGroupByKeyword(@RequestParam String keyword) {
+        return ResponseEntity.ok(groupService.searchGroupByKeyword(keyword));
     }
 }

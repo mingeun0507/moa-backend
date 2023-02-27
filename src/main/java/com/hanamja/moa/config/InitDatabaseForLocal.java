@@ -131,6 +131,15 @@ public class InitDatabaseForLocal {
 
             groupRepository.save(CC);
 
+            UserGroup mingeunToCC = UserGroup
+                    .builder()
+                    .joiner(mingeun)
+                    .group(CC)
+                    .progress("대기")
+                    .build();
+
+            if (!CC.isFull()) CC.addCurrentPeopleNum();
+
             UserGroup seokminToCC = UserGroup
                     .builder()
                     .joiner(seokmin)
@@ -162,6 +171,7 @@ public class InitDatabaseForLocal {
             // else throw CustomException
 
             groupRepository.save(LOL);
+            userGroupRepository.save(mingeunToCC);
             userGroupRepository.save(seokminToCC);
             userGroupRepository.save(changjinToCC);
             userGroupRepository.save(mingeunToLOL);
@@ -227,7 +237,9 @@ public class InitDatabaseForLocal {
             PointHistory mingeunPointHistory1 = PointHistory
                     .builder()
                     .title("CC 강의")
-                    .message("윤석민 50점, 윤석민 100점\n모임 참여점수 150점")
+                    .message("모임 점수: 400점\n" +
+                            "카드 점수: 윤석민 100점, 서창진 100점\n" +
+                            "총 점수: 600점")
                     .point(300L)
                     .owner(mingeun)
                     .build();
@@ -235,7 +247,9 @@ public class InitDatabaseForLocal {
             PointHistory mingeunPointHistory2 = PointHistory
                     .builder()
                     .title("협곡 데이트")
-                    .message("윤석민 50점, 윤석민 100점\n모임 참여점수 150점")
+                    .message("모임 점수: 400점\n" +
+                            "카드 점수: 윤석민 100점, 서창진 100점\n" +
+                            "총 점수: 600점")
                     .point(500L)
                     .owner(mingeun)
                     .build();
@@ -243,7 +257,9 @@ public class InitDatabaseForLocal {
             PointHistory seokminPointHistory1 = PointHistory
                     .builder()
                     .title("협곡 데이트")
-                    .message("윤석민 50점, 윤석민 100점\n모임 참여점수 150점")
+                    .message("모임 점수: 400점\n" +
+                            "카드 점수: 윤석민 100점, 서창진 100점\n" +
+                            "총 점수: 600점")
                     .point(400L)
                     .owner(seokmin)
                     .build();

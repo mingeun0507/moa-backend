@@ -17,6 +17,8 @@ import com.hanamja.moa.api.entity.hashtag.Hashtag;
 import com.hanamja.moa.api.entity.hashtag.HashtagRepository;
 import com.hanamja.moa.api.entity.notification.Notification;
 import com.hanamja.moa.api.entity.notification.NotificationRepository;
+import com.hanamja.moa.api.entity.point_history.PointHistory;
+import com.hanamja.moa.api.entity.point_history.PointHistoryRepository;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.entity.user.UserRepository;
@@ -39,6 +41,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -52,6 +55,7 @@ public class GroupService {
     private final GroupHashtagRepository groupHashtagRepository;
     private final HashtagRepository hashtagRepository;
     private final NotificationRepository notificationRepository;
+    private final PointHistoryRepository pointHistoryRepository;
     private final AmazonS3Uploader amazonS3Uploader;
 
     @Transactional
@@ -243,20 +247,27 @@ public class GroupService {
 
     public DataResponseDto<List<GroupInfoResponseDto>> getExistingGroups(SortedBy sortedBy) {
         if (sortedBy == SortedBy.RECENT) {
+            List<GroupInfoResponseDto> resultDtoList = groupRepository
+                    .findAllByStateAndMeetingAtAfterOrderByCreatedAtDesc(State.RECRUITING, LocalDateTime.now())
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList());
+            resultDtoList.addAll(groupRepository
+                    .findAllByStateAndMeetingAtOrderByCreatedAtDesc(State.RECRUITING, null)
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList()));
             return DataResponseDto.<List<GroupInfoResponseDto>>builder()
-                    .data(groupRepository
-                            .findAllByStateOrderByCreatedAtDesc(State.RECRUITING)
-                            .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
-                            .collect(Collectors.toList()
-                            )
-                    ).build();
+                    .data(resultDtoList).build();
         } else if (sortedBy == SortedBy.SOON) {
+            List<GroupInfoResponseDto> resultDtoList = groupRepository
+                    .findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State.RECRUITING, LocalDateTime.now())
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList());
+            resultDtoList.addAll(groupRepository
+                    .findAllByStateAndMeetingAtOrderByCreatedAtDesc(State.RECRUITING, null)
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList()));
             return DataResponseDto.<List<GroupInfoResponseDto>>builder()
-                    .data(groupRepository
-                            .findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State.RECRUITING, LocalDateTime.now())
-                            .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
-                            .collect(Collectors.toList())
-                    ).build();
+                    .data(resultDtoList).build();
         } else {
             throw InvalidParameterException
                     .builder()
@@ -287,9 +298,9 @@ public class GroupService {
         int point = 0;
 
         // 모임 참여 3회까지는 점수 부여 - 300, 400, 500
-        switch (userGroupRepository.countAllByJoiner_Id(user.getId())) {
+        switch (userGroupRepository.countAllByJoiner_IdAndGroup_State(user.getId(), State.DONE)) {
             case 0:
-                point += 300;
+                point = 300;
                 break;
             case 1:
                 point = 400;
@@ -301,6 +312,9 @@ public class GroupService {
 
         // 현재 참여자가 내 앨범에 저장된 사람이면 50, 아니면 100
         for (var x : simpleUserInfoDtoList) {
+            if (x.getId().equals(user.getId())) {
+                continue;
+            }
             if (albumRepository.existsByOwner_IdAndMetUser_Id(user.getId(), x.getId())) {
                 point += 50;
             } else if (!user.getId().equals(x.getId())) {
@@ -499,6 +513,7 @@ public class GroupService {
                     .build();
         }
         Group group = groupRepository.findGroupByGid(gid);
+        String groupMakerName = group.getMaker().getName();
 
         String imageLink = amazonS3Uploader.saveFileAndGetUrl(image);
         groupRepository.updateCompleteGroup(imageLink, gid, State.DONE);
@@ -513,41 +528,90 @@ public class GroupService {
             List<Long> metUsersIdList = albumRepository.findAllByOwner_Id(albumOwner.getId()).stream()
                     .map(Album::getMetUser).map(User::getId).collect(Collectors.toList());
 
-            List<Long> albumOwnerGroupIdList = userGroupRepository.findAllDoneGroupByUserId(albumOwner.getId(), State.DONE).stream()
-                    .map(UserGroup::getGroup).map(Group::getId)
-                    .collect(Collectors.toList());
+            Long albumOwnerPoint = 0L;
+            StringBuilder albumOwnerPointHistoryMessage = new StringBuilder();
 
-            groupJoinUsers.forEach(groupJoinUser -> {
+            switch (userGroupRepository.countAllByJoiner_IdAndGroup_State(albumOwner.getId(), State.DONE)) {
+                case 0:
+                    albumOwnerPoint += 300L;
+                    albumOwnerPointHistoryMessage.append("모임 점수: 300점\n");
+                    break;
+                case 1:
+                    albumOwnerPoint += 400L;
+                    albumOwnerPointHistoryMessage.append("모임 점수: 400점\n");
+                    break;
+                case 2:
+                    albumOwnerPoint += 500L;
+                    albumOwnerPointHistoryMessage.append("모임 점수: 500점\n");
+                    break;
+            }
+            albumOwnerPointHistoryMessage.append("카드 점수: ");
+            log.info("Initial point: Add {} ({})", albumOwnerPoint, albumOwner.getName());
+
+
+            for (User groupJoinUser : groupJoinUsers) {
                 userGroupRepository.updateFrontCardImg(groupJoinUser.getImageLink(), gid, groupJoinUser.getId());
-                // TODO: POINT 정산 관련 논의 필요
-                userRepository.updateUserPoint(groupJoinUser.getId(), 500L);
 
-                if(albumOwner.getId() != groupJoinUser.getId() && !metUsersIdList.contains(groupJoinUser.getId())){
-                    log.info("albumOwner : {}, joiner : {}",albumOwner.getName(), groupJoinUser.getName());
+                if (!Objects.equals(albumOwner.getId(), groupJoinUser.getId()) && !metUsersIdList.contains(groupJoinUser.getId())) {
+                    log.info("albumOwner : {}, joiner : {}", albumOwner.getName(), groupJoinUser.getName());
+                    log.info("New card created: Add 100 point to {} ({})", albumOwnerPoint, albumOwner.getName());
+                    albumOwnerPointHistoryMessage.append(groupJoinUser.getName()).append(" 100점, ");
+                    albumOwnerPoint += 100;
+
                     albumRepository.save(Album.builder()
                             .owner(albumOwner).metUser(groupJoinUser).isBadged(true)
                             .build());
-                }else{
+
+                    notificationRepository.save(
+                            Notification
+                                    .builder()
+                                    .sender(albumOwner)
+                                    .receiver(albumOwner)
+                                    .content(groupJoinUser.getName() + "님과의 카드를 만들었어요.")
+                                    .reason("모임 생성자: " + groupMakerName + "님")
+                                    .isBadged(true)
+                                    .build()
+                    );
+
+                    albumOwner.notifyUser();
+                    userRepository.save(albumOwner);
+
+                } else if (!Objects.equals(albumOwner.getId(), groupJoinUser.getId())) { // 이미 카드가 있으면
+                    log.info("Card already exist: Add 50 point to {} ({})", albumOwnerPoint, albumOwner.getName());
+                    albumOwnerPointHistoryMessage.append(groupJoinUser.getName()).append(" 50점, ");
+                    albumOwnerPoint += 50;
                     albumRepository.updateBadgeState(true, groupJoinUser.getId(), albumOwner.getId());
                 }
+            }
 
-                if (!albumOwner.getId().equals(groupJoinUser.getId()) && !groupJoinUser.getId().equals(uid)) {
-                    List<Long> joinGroupIdList = userGroupRepository.findAllDoneGroupByUserId(groupJoinUser.getId(), State.DONE).stream()
-                            .map(UserGroup::getGroup).map(Group::getId)
-                            .collect(Collectors.toList());// 모임참여자가 참여했던 그룹 id 리스트
+            if (!albumOwner.getId().equals(uid)) {
+                List<UserGroup> onePersonCard = userGroupRepository.findOnePersonCard(uid, albumOwner.getId(), State.DONE);
 
-                    joinGroupIdList.retainAll(albumOwnerGroupIdList); // albumOwner 가 참여했던 그룹 id 리스트
+                cardList.add(GroupCompleteRespDto.Card.builder()
+                        .userId(albumOwner.getId())
+                        .username(albumOwner.getName())
+                        .meetingAt(group.getMeetingAt())
+                        .meetingCnt(Long.valueOf(onePersonCard.size()))
+                        .frontImage(albumOwner.getImageLink())
+                        .backImage(imageLink)
+                        .build());
+            }
 
-                    cardList.add(GroupCompleteRespDto.Card.builder()
-                            .userId(groupJoinUser.getId())
-                            .username(groupJoinUser.getName())
-                            .meetingAt(group.getMeetingAt())
-                            .meetingCnt(Long.valueOf(joinGroupIdList.size()))
-                            .frontImage(groupJoinUser.getImageLink())
-                            .backImage(imageLink)
-                            .build());
-                }
-            });
+            albumOwnerPointHistoryMessage.replace(albumOwnerPointHistoryMessage.length() - 2, albumOwnerPointHistoryMessage.length(), "\n");
+            albumOwnerPointHistoryMessage.append("총 점수: ").append(albumOwnerPoint).append("점");
+
+            pointHistoryRepository.save(
+                    PointHistory
+                            .builder()
+                            .point(albumOwnerPoint)
+                            .title(group.getName())
+                            .message(albumOwnerPointHistoryMessage.toString())
+                            .owner(albumOwner)
+                            .build()
+            );
+
+            userRepository.addUserPoint(albumOwner.getId(), albumOwnerPoint);
+
         });
 
         return GroupCompleteRespDto.builder()
@@ -556,28 +620,13 @@ public class GroupService {
 
     }
 
-    public DataResponseDto<List<GroupInfoResponseDto>> searchGroupByKeyWord(String keyword, SortedBy sortedBy) {
-        if (sortedBy == SortedBy.RECENT) {
-            return DataResponseDto.<List<GroupInfoResponseDto>>builder()
-                    .data(groupRepository
-                            .findAllByStateAndNameContainsOrderByCreatedAtDesc(State.RECRUITING, keyword)
-                            .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
-                            .collect(Collectors.toList()
-                            )
-                    ).build();
-        } else if (sortedBy == SortedBy.SOON) {
-            return DataResponseDto.<List<GroupInfoResponseDto>>builder()
-                    .data(groupRepository
-                            .findAllByStateAndMeetingAtAfterAndNameContainsOrderByMeetingAtAscCreatedAtDesc(State.RECRUITING, LocalDateTime.now(), keyword)
-                            .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
-                            .collect(Collectors.toList())
-                    ).build();
-        } else {
-            throw InvalidParameterException
-                    .builder()
-                    .httpStatus(HttpStatus.BAD_REQUEST)
-                    .message("올바르지 않은 Query String입니다.")
-                    .build();
-        }
+    public DataResponseDto<List<GroupInfoResponseDto>> searchGroupByKeyword(String keyword) {
+        List<GroupInfoResponseDto> resultDtoList = groupRepository
+                .searchGroupByKeyword(keyword)
+                .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                .collect(Collectors.toList());
+
+        return DataResponseDto.<List<GroupInfoResponseDto>>builder()
+                .data(resultDtoList).build();
     }
 }
