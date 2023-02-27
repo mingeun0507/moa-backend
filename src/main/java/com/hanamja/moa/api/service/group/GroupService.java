@@ -615,7 +615,7 @@ public class GroupService {
 
     public DataResponseDto<List<GroupInfoResponseDto>> searchGroupByKeyword(String keyword) {
         List<GroupInfoResponseDto> resultDtoList = groupRepository
-                .findAllByStateAndNameContainsOrderByCreatedAtDesc(State.RECRUITING, keyword)
+                .searchGroupByKeyword(keyword)
                 .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
                 .collect(Collectors.toList());
 
