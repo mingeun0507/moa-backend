@@ -17,8 +17,8 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, Long> {
     @Query(value = "SELECT ug FROM UserGroup ug JOIN FETCH ug.joiner WHERE ug.group.id = :gid")
     List<UserGroup> findAllByGroup_Id(@Param(value = "gid") Long gid);
 
-    int countAllByJoiner_Id(Long userId);
-    
+    int countAllByJoiner_IdAndGroup_State(Long userId, State state);
+
     Optional<UserGroup> findByGroupIdAndJoinerId(Long groupId, Long joinerId);
 
     @Query(value = "SELECT ug FROM UserGroup ug WHERE ug.joiner.id = :uid AND ug.group.state = :state")
