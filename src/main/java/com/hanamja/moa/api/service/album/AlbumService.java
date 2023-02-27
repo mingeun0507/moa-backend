@@ -44,7 +44,7 @@ public class AlbumService {
 
                     response.add(AlbumRespDto.builder()
                             .userId(userGroup.getJoiner().getId())
-                            .username(userGroup.getJoiner().getStudentId())
+                            .username(userGroup.getJoiner().getName())
                             .imageLink(userGroup.getJoiner().getImageLink())
                             .meetingCnt(meetingCnt)
                             .isBadged(album.getIsBadged())
