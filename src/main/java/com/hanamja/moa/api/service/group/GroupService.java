@@ -17,6 +17,8 @@ import com.hanamja.moa.api.entity.hashtag.Hashtag;
 import com.hanamja.moa.api.entity.hashtag.HashtagRepository;
 import com.hanamja.moa.api.entity.notification.Notification;
 import com.hanamja.moa.api.entity.notification.NotificationRepository;
+import com.hanamja.moa.api.entity.point_history.PointHistory;
+import com.hanamja.moa.api.entity.point_history.PointHistoryRepository;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.entity.user.UserRepository;
@@ -39,6 +41,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -52,6 +55,7 @@ public class GroupService {
     private final GroupHashtagRepository groupHashtagRepository;
     private final HashtagRepository hashtagRepository;
     private final NotificationRepository notificationRepository;
+    private final PointHistoryRepository pointHistoryRepository;
     private final AmazonS3Uploader amazonS3Uploader;
 
     @Transactional
@@ -294,9 +298,9 @@ public class GroupService {
         int point = 0;
 
         // 모임 참여 3회까지는 점수 부여 - 300, 400, 500
-        switch (userGroupRepository.countAllByJoiner_Id(user.getId())) {
+        switch (userGroupRepository.countAllByJoiner_IdAndGroup_State(user.getId(), State.DONE)) {
             case 0:
-                point += 300;
+                point = 300;
                 break;
             case 1:
                 point = 400;
@@ -308,6 +312,9 @@ public class GroupService {
 
         // 현재 참여자가 내 앨범에 저장된 사람이면 50, 아니면 100
         for (var x : simpleUserInfoDtoList) {
+            if (x.getId().equals(user.getId())) {
+                continue;
+            }
             if (albumRepository.existsByOwner_IdAndMetUser_Id(user.getId(), x.getId())) {
                 point += 50;
             } else if (!user.getId().equals(x.getId())) {
@@ -503,6 +510,7 @@ public class GroupService {
                     .build();
         }
         Group group = groupRepository.findGroupByGid(gid);
+        String groupMakerName = group.getMaker().getName();
 
         String imageLink = amazonS3Uploader.saveFileAndGetUrl(image);
         groupRepository.updateCompleteGroup(imageLink, gid, State.DONE);
@@ -521,17 +529,54 @@ public class GroupService {
                     .map(UserGroup::getGroup).map(Group::getId)
                     .collect(Collectors.toList());
 
-            groupJoinUsers.forEach(groupJoinUser -> {
-                userGroupRepository.updateFrontCardImg(groupJoinUser.getImageLink(), gid, groupJoinUser.getId());
-                // TODO: POINT 정산 관련 논의 필요
-                userRepository.updateUserPoint(groupJoinUser.getId(), 500L);
+            Long albumOwnerPoint = 0L;
+            StringBuilder albumOwnerPointHistoryMessage = new StringBuilder();
 
-                if(albumOwner.getId() != groupJoinUser.getId() && !metUsersIdList.contains(groupJoinUser.getId())){
-                    log.info("albumOwner : {}, joiner : {}",albumOwner.getName(), groupJoinUser.getName());
+            switch (userGroupRepository.countAllByJoiner_IdAndGroup_State(albumOwner.getId(), State.DONE)) {
+                case 0:
+                    albumOwnerPoint += 300L;
+                    albumOwnerPointHistoryMessage.append("모임 점수: 300점\n");
+                    break;
+                case 1:
+                    albumOwnerPoint += 400L;
+                    albumOwnerPointHistoryMessage.append("모임 점수: 400점\n");
+                    break;
+                case 2:
+                    albumOwnerPoint += 500L;
+                    albumOwnerPointHistoryMessage.append("모임 점수: 500점\n");
+                    break;
+            }
+            albumOwnerPointHistoryMessage.append("카드 점수: ");
+            log.info("Initial point: Add {} ({})", albumOwnerPoint, albumOwner.getName());
+
+
+            for (User groupJoinUser : groupJoinUsers) {
+                userGroupRepository.updateFrontCardImg(groupJoinUser.getImageLink(), gid, groupJoinUser.getId());
+
+                if (!Objects.equals(albumOwner.getId(), groupJoinUser.getId()) && !metUsersIdList.contains(groupJoinUser.getId())) {
+                    log.info("albumOwner : {}, joiner : {}", albumOwner.getName(), groupJoinUser.getName());
+                    log.info("New card created: Add 100 point to {} ({})", albumOwnerPoint, albumOwner.getName());
+                    albumOwnerPointHistoryMessage.append(groupJoinUser.getName()).append(" 100점, ");
+                    albumOwnerPoint += 100;
+
                     albumRepository.save(Album.builder()
                             .owner(albumOwner).metUser(groupJoinUser).isBadged(true)
                             .build());
-                }else{
+
+                    notificationRepository.save(
+                            Notification
+                                    .builder()
+                                    .sender(albumOwner)
+                                    .receiver(albumOwner)
+                                    .content(groupJoinUser.getName() + "님과의 카드를 만들었어요.")
+                                    .reason("모임 생성자: " + groupMakerName + "님")
+                                    .isBadged(true)
+                                    .build()
+                    );
+                } else if (!Objects.equals(albumOwner.getId(), groupJoinUser.getId())) { // 이미 카드가 있으면
+                    log.info("Card already exist: Add 50 point to {} ({})", albumOwnerPoint, albumOwner.getName());
+                    albumOwnerPointHistoryMessage.append(groupJoinUser.getName()).append(" 50점, ");
+                    albumOwnerPoint += 50;
                     albumRepository.updateBadgeState(true, groupJoinUser.getId(), albumOwner.getId());
                 }
 
@@ -551,7 +596,22 @@ public class GroupService {
                             .backImage(imageLink)
                             .build());
                 }
-            });
+            }
+            albumOwnerPointHistoryMessage.replace(albumOwnerPointHistoryMessage.length() - 2, albumOwnerPointHistoryMessage.length(), "\n");
+            albumOwnerPointHistoryMessage.append("총 점수: ").append(albumOwnerPoint).append("점");
+
+            pointHistoryRepository.save(
+                    PointHistory
+                            .builder()
+                            .point(albumOwnerPoint)
+                            .title(group.getName())
+                            .message(albumOwnerPointHistoryMessage.toString())
+                            .owner(albumOwner)
+                            .build()
+            );
+
+            userRepository.addUserPoint(albumOwner.getId(), albumOwnerPoint);
+
         });
 
         return GroupCompleteRespDto.builder()
