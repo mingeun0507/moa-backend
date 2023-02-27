@@ -21,9 +21,10 @@ public class UserInfoResponseDto {
     private Role role;
     private String department;
     private boolean isNotified;
+    private int rank;
 
     @Builder
-    public UserInfoResponseDto(Long id, String studentId, String name, Gender gender, String imageLink, Long point, String intro, Role role, String department, boolean isNotified) {
+    public UserInfoResponseDto(Long id, String studentId, String name, Gender gender, String imageLink, Long point, String intro, Role role, String department, boolean isNotified, int rank) {
         this.id = id;
         this.studentId = studentId;
         this.name = name;
@@ -34,6 +35,7 @@ public class UserInfoResponseDto {
         this.role = role;
         this.department = department;
         this.isNotified = isNotified;
+        this.rank = rank;
     }
 
     public static UserInfoResponseDto from(User user) {
@@ -48,6 +50,22 @@ public class UserInfoResponseDto {
                 .role(user.getRole())
                 .department(user.getDepartment() != null ? user.getDepartment().getName() : null)
                 .isNotified(user.getIsNotified())
+                .build();
+    }
+
+    public static UserInfoResponseDto from(User user, int rank) {
+        return UserInfoResponseDto.builder()
+                .id(user.getId())
+                .studentId(user.getStudentId())
+                .name(user.getName())
+                .gender(user.getGender())
+                .imageLink(user.getImageLink())
+                .point(user.getPoint())
+                .intro(user.getIntro())
+                .role(user.getRole())
+                .department(user.getDepartment() != null ? user.getDepartment().getName() : null)
+                .isNotified(user.getIsNotified())
+                .rank(rank)
                 .build();
     }
 }

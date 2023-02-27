@@ -1,7 +1,6 @@
 package com.hanamja.moa.api.service.user;
 
 import com.hanamja.moa.api.dto.user.response.UserInfoResponseDto;
-import com.hanamja.moa.api.dto.user.response.UserTotalInfoResponseDto;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.exception.custom.NotFoundException;
@@ -14,13 +13,10 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public UserTotalInfoResponseDto getUserInfo(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("해당 유저가 없습니다. id=" + userId));
-
-       return UserTotalInfoResponseDto.builder()
-                .info(UserInfoResponseDto.from(user))
-                .rank(userRepository.getUserRank(userId, user.getRole()))
-                .build();
+    public UserInfoResponseDto getUserInfo(Long userId) {
+       User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("해당 유저가 없습니다. id=" + userId));
+       int rank = userRepository.getUserRank(userId, user.getRole());
+       return UserInfoResponseDto.from(user, rank);
     }
 
     public UserInfoResponseDto updateProfileImage(Long userId, String profileImageUrl) {

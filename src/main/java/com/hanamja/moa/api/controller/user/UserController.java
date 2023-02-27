@@ -1,6 +1,6 @@
 package com.hanamja.moa.api.controller.user;
 
-import com.hanamja.moa.api.dto.user.response.UserTotalInfoResponseDto;
+import com.hanamja.moa.api.dto.user.response.UserInfoResponseDto;
 import com.hanamja.moa.api.service.user.UserService;
 import com.hanamja.moa.utils.s3.AmazonS3Uploader;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,7 +26,7 @@ public class UserController {
 
     @Operation(summary = "유저 정보 조회")
     @GetMapping(value = "/{userId}/info")
-    public ResponseEntity<UserTotalInfoResponseDto> myInfo(@PathVariable("userId") Long userId) {
+    public ResponseEntity<UserInfoResponseDto> myInfo(@PathVariable("userId") Long userId) {
         return ResponseEntity.ok().body(userService.getUserInfo(userId));
     }
 }
