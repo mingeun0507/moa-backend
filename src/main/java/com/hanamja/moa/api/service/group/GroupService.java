@@ -525,10 +525,6 @@ public class GroupService {
             List<Long> metUsersIdList = albumRepository.findAllByOwner_Id(albumOwner.getId()).stream()
                     .map(Album::getMetUser).map(User::getId).collect(Collectors.toList());
 
-            List<Long> albumOwnerGroupIdList = userGroupRepository.findAllDoneGroupByUserId(albumOwner.getId(), State.DONE).stream()
-                    .map(UserGroup::getGroup).map(Group::getId)
-                    .collect(Collectors.toList());
-
             Long albumOwnerPoint = 0L;
             StringBuilder albumOwnerPointHistoryMessage = new StringBuilder();
 
@@ -579,24 +575,21 @@ public class GroupService {
                     albumOwnerPoint += 50;
                     albumRepository.updateBadgeState(true, groupJoinUser.getId(), albumOwner.getId());
                 }
-
-                if (!albumOwner.getId().equals(groupJoinUser.getId()) && !groupJoinUser.getId().equals(uid)) {
-                    List<Long> joinGroupIdList = userGroupRepository.findAllDoneGroupByUserId(groupJoinUser.getId(), State.DONE).stream()
-                            .map(UserGroup::getGroup).map(Group::getId)
-                            .collect(Collectors.toList());// 모임참여자가 참여했던 그룹 id 리스트
-
-                    joinGroupIdList.retainAll(albumOwnerGroupIdList); // albumOwner 가 참여했던 그룹 id 리스트
-
-                    cardList.add(GroupCompleteRespDto.Card.builder()
-                            .userId(groupJoinUser.getId())
-                            .username(groupJoinUser.getName())
-                            .meetingAt(group.getMeetingAt())
-                            .meetingCnt(Long.valueOf(joinGroupIdList.size()))
-                            .frontImage(groupJoinUser.getImageLink())
-                            .backImage(imageLink)
-                            .build());
-                }
             }
+
+            if (!albumOwner.getId().equals(uid)) {
+                List<UserGroup> onePersonCard = userGroupRepository.findOnePersonCard(uid, albumOwner.getId(), State.DONE);
+
+                cardList.add(GroupCompleteRespDto.Card.builder()
+                        .userId(albumOwner.getId())
+                        .username(albumOwner.getName())
+                        .meetingAt(group.getMeetingAt())
+                        .meetingCnt(Long.valueOf(onePersonCard.size()))
+                        .frontImage(albumOwner.getImageLink())
+                        .backImage(imageLink)
+                        .build());
+            }
+
             albumOwnerPointHistoryMessage.replace(albumOwnerPointHistoryMessage.length() - 2, albumOwnerPointHistoryMessage.length(), "\n");
             albumOwnerPointHistoryMessage.append("총 점수: ").append(albumOwnerPoint).append("점");
 
