@@ -89,7 +89,7 @@ public class User {
         this.name = name;
         this.gender = gender;
         this.imageLink = imageLink;
-        this.point = point;
+        this.point = 0L;
         this.intro = intro;
         this.role = studentId.startsWith(FRESHMAN_YEAR) ? Role.ROLE_FRESHMEN : Role.ROLE_SENIOR;
         this.department = department;
