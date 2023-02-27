@@ -14,18 +14,20 @@ public class PointHistoryInfoResponseDto {
     private Long id;
     private String title;
     private Long point;
-    private String cardMessage;
     private String groupMessage;
+    private String cardMessage;
+    private String totalPointMessage;
     private LocalDateTime createdAt;
 
     @Builder
-    public PointHistoryInfoResponseDto(Long id, String title, Long point, String cardMessage, String groupMessage, LocalDateTime createdAt) {
+    public PointHistoryInfoResponseDto(Long id, String title, Long point, String cardMessage, String groupMessage, LocalDateTime createdAt, String totalPointMessage) {
         this.id = id;
         this.title = title;
         this.point = point;
         this.cardMessage = cardMessage;
         this.groupMessage = groupMessage;
         this.createdAt = createdAt;
+        this.totalPointMessage = totalPointMessage;
     }
 
     public static PointHistoryInfoResponseDto from(PointHistory pointHistory) {
@@ -35,8 +37,9 @@ public class PointHistoryInfoResponseDto {
                 .id(pointHistory.getId())
                 .title(pointHistory.getTitle())
                 .point(pointHistory.getPoint())
-                .cardMessage(splitMessages[0])
-                .groupMessage(splitMessages[1])
+                .groupMessage(splitMessages[0])
+                .cardMessage(splitMessages[1])
+                .totalPointMessage(splitMessages[2])
                 .createdAt(pointHistory.getCreatedAt())
                 .build();
     }
