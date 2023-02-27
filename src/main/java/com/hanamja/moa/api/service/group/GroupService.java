@@ -443,6 +443,9 @@ public class GroupService {
                         }
                 );
 
+        Long currNum = Long.valueOf(userGroupRepository.findAllByGroup_Id(kickOutRequestDto.getGroupId()).size());
+        existingGroup.updateCurrentPeopleNum(currNum);
+
         return GroupInfoResponseDto.from(existingGroup, getHashtagStringList(existingGroup));
     }
 
