@@ -131,6 +131,15 @@ public class InitDatabaseForLocal {
 
             groupRepository.save(CC);
 
+            UserGroup mingeunToCC = UserGroup
+                    .builder()
+                    .joiner(mingeun)
+                    .group(CC)
+                    .progress("대기")
+                    .build();
+
+            if (!CC.isFull()) CC.addCurrentPeopleNum();
+
             UserGroup seokminToCC = UserGroup
                     .builder()
                     .joiner(seokmin)
@@ -162,6 +171,7 @@ public class InitDatabaseForLocal {
             // else throw CustomException
 
             groupRepository.save(LOL);
+            userGroupRepository.save(mingeunToCC);
             userGroupRepository.save(seokminToCC);
             userGroupRepository.save(changjinToCC);
             userGroupRepository.save(mingeunToLOL);
