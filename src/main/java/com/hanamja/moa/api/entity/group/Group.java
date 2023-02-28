@@ -96,11 +96,16 @@ public class Group {
         // 참여했을 떄 인원수 늘려주는 메소드
     }
 
-    public void updateCurrentPeopleNum(Long currNum){
+    public void subtractCurrentPeopleNum() {
+        this.currentPeopleNum--;
+        // 탈퇴했을 때 인원수 줄여주는 메소드
+    }
+
+    public void updateCurrentPeopleNum(Long currNum) {
         this.currentPeopleNum = currNum;
     }
 
-    public void updateNullMeetingAt(){
+    public void updateNullMeetingAt() {
         this.meetingAt = LocalDateTime.now();
     }
 

@@ -384,13 +384,16 @@ public class GroupService {
                 .build();
     }
 
+    @Transactional
     public GroupInfoResponseDto quit(Long groupId, UserAccount userAccount) {
 
         UserGroup userGroup = userGroupRepository.findByGroupIdAndJoinerId(groupId, userAccount.getUserId())
                 .orElseThrow(() -> new NotFoundException("해당 그룹을 찾을 수 없습니다."));
 
         Group group = userGroup.getGroup();
+        group.subtractCurrentPeopleNum();
         userGroupRepository.delete(userGroup);
+        groupRepository.save(group);
 
         return GroupInfoResponseDto.from(group, getHashtagStringList(group));
     }
