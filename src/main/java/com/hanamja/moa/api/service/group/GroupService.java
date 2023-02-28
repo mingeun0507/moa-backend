@@ -38,10 +38,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -578,12 +575,12 @@ public class GroupService {
             }
 
             if (!albumOwner.getId().equals(uid)) {
+                Optional<LocalDateTime> meetingAt = Optional.ofNullable(group.getMeetingAt());
                 List<UserGroup> onePersonCard = userGroupRepository.findOnePersonCard(uid, albumOwner.getId(), State.DONE);
-
                 cardList.add(GroupCompleteRespDto.Card.builder()
                         .userId(albumOwner.getId())
                         .username(albumOwner.getName())
-                        .meetingAt(group.getMeetingAt())
+                        .meetingAt(meetingAt)
                         .meetingCnt(Long.valueOf(onePersonCard.size()))
                         .frontImage(albumOwner.getImageLink())
                         .backImage(imageLink)
