@@ -42,7 +42,7 @@ public class SecurityConfig {
         return (web) -> web.ignoring()
                 .antMatchers(
                         "/h2-console/**",
-                        "/health/check",
+                        "/health/**",
                         "/v3/api-docs/**",
                         "/swagger-resources/**",
                         "/swagger-ui/**");
