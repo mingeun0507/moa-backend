@@ -35,10 +35,7 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
     List<Group> findAllByStateAndMeetingAtOrderByCreatedAtDesc(State state, LocalDateTime currentTime);
 
 
-    @Query(value = "select distinct *\n" +
-            "from moa_group mg, moa_group_hashtag mgh, moa_hashtag mh\n" +
-            "where mg.name like :keyword or mh.name like :keyword and mg.group_id = mgh.group_id and mgh.hashtag_id = mh.hashtag_id\n" +
-            "order by mg.created_at desc", nativeQuery = true)
+    @Query(value = "SELECT distinct g FROM Group g JOIN FETCH GroupHashtag gh ON g.id = gh.group.id JOIN FETCH Hashtag h ON gh.hashtag.id = h.id WHERE (g.name LIKE %:keyword% OR h.name LIKE %:keyword%) AND g.state = 'RECRUITING' ORDER BY g.createdAt DESC")
     List<Group> searchGroupByKeyword(@Param(value = "keyword") String keyword);
 
     List<Group> findAllByStateAndNameContainsOrderByCreatedAtDesc(State state, String name);

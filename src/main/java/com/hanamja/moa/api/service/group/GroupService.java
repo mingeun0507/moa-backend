@@ -566,6 +566,10 @@ public class GroupService {
                                     .isBadged(true)
                                     .build()
                     );
+
+                    albumOwner.notifyUser();
+                    userRepository.save(albumOwner);
+
                 } else if (!Objects.equals(albumOwner.getId(), groupJoinUser.getId())) { // 이미 카드가 있으면
                     log.info("Card already exist: Add 50 point to {} ({})", albumOwnerPoint, albumOwner.getName());
                     albumOwnerPointHistoryMessage.append(groupJoinUser.getName()).append(" 50점, ");
@@ -612,7 +616,7 @@ public class GroupService {
 
     public DataResponseDto<List<GroupInfoResponseDto>> searchGroupByKeyword(String keyword) {
         List<GroupInfoResponseDto> resultDtoList = groupRepository
-                .findAllByStateAndNameContainsOrderByCreatedAtDesc(State.RECRUITING, keyword)
+                .searchGroupByKeyword(keyword)
                 .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
                 .collect(Collectors.toList());
 
