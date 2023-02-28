@@ -62,6 +62,7 @@ public class AlbumService {
         User metUser = userRepository.findUserById(metUserId).orElseThrow(
                 () -> new NotFoundException("해당하는 사용자를 찾을 수 없습니다.")
         );
+        albumRepository.updateBadgeState(false, metUserId, uid);
 
         List<UserGroup> onePersonCard = userGroupRepository.findOnePersonCard(uid, metUserId, State.DONE);
         onePersonCard.stream()
