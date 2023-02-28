@@ -20,7 +20,7 @@ import java.util.List;
 @Table(name = "MOA_USER")
 public class User {
 
-    public static final String FRESHMAN_YEAR = String.valueOf(Year.now().getValue()).substring(2);
+    public static final String FRESHMAN_YEAR = String.valueOf(Year.now().getValue()).substring(4);
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
