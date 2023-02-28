@@ -1,6 +1,6 @@
 package com.hanamja.moa.api.service.group;
 
-import com.hanamja.moa.api.controller.group.SortedBy;
+import com.hanamja.moa.api.controller.SortedBy;
 import com.hanamja.moa.api.dto.group.request.KickOutRequestDto;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
@@ -518,7 +518,7 @@ public class GroupService {
         if (!Optional.ofNullable(group.getMeetingAt()).isPresent()){
             group.updateNullMeetingAt();
         }
-        groupRepository.updateCompleteGroup(imageLink, gid, State.DONE);
+        groupRepository.updateCompleteGroup(imageLink, LocalDateTime.now() , gid, State.DONE);
 
         // 앨범마다 group 유저 정보 체크해서 없으면 카드 추가, 있으면 badged -> true 로 변경
         List<User> groupJoinUsers = userGroupRepository.findAllByGroup_Id(gid).stream()
