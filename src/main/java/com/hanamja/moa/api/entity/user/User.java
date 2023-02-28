@@ -94,7 +94,7 @@ public class User {
         this.role = studentId.startsWith(FRESHMAN_YEAR) ? Role.ROLE_FRESHMEN : Role.ROLE_SENIOR;
         this.department = department;
         this.isOnboarded = false;
-        this.isActive = false;
+        this.isActive = true;
         this.isNotified = false;
     }
 
@@ -112,9 +112,11 @@ public class User {
     }
 
     // 마이페이지 수정용 업데이트 함수
-    public void updateUserinfo(String imageLink, String intro) {
+    public void modifyUserInfo(Gender gender, Department department, String intro, String imageLink) {
+        this.gender = gender;
+        this.department = department;
+        this.intro = intro;
         this.imageLink = imageLink == null ? this.imageLink : imageLink;
-        this.intro = intro == null ? this.intro : intro;
     }
 
     public void updateProfileImage(String profileImageUrl) {
