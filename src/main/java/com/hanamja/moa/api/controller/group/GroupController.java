@@ -1,5 +1,6 @@
 package com.hanamja.moa.api.controller.group;
 
+import com.hanamja.moa.api.controller.SortedBy;
 import com.hanamja.moa.api.dto.group.request.KickOutRequestDto;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;

@@ -22,8 +22,8 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
     boolean existsByIdAndMaker_Id(Long gid, Long uid);
 
     @Modifying(clearAutomatically = true)// 모임이 끝나면 인증샷 등록
-    @Query(value = "UPDATE Group gp SET gp.imageLink = :imageLink, gp.state = :state WHERE gp.id = :gid")
-    void updateCompleteGroup(@Param(value = "imageLink") String imageLink,
+    @Query(value = "UPDATE Group gp SET gp.imageLink = :imageLink, gp.state = :state, gp.modifiedAt = :now WHERE gp.id = :gid")
+    void updateCompleteGroup(@Param(value = "imageLink") String imageLink, @Param(value = "now") LocalDateTime now,
                              @Param(value = "gid") Long gid, @Param(value = "state") State state);
 
     List<Group> findAllByIdAndState(Long gid, State state);
@@ -52,4 +52,5 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
             "WHERE ug.joiner.id = :uid AND g.state = :state " +
             "ORDER BY g.createdAt DESC")
     List<Group> findAllJoinGroupByUserId(@Param(value = "uid") Long uid, @Param(value = "state") State state);
+
 }
