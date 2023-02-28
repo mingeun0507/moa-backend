@@ -34,7 +34,7 @@ public class AmazonS3Uploader {
 
         BufferedImage bufferedImage = ImageIO.read(multipartFile.getInputStream());
 
-        if (!(bufferedImage.getHeight() < 720 && bufferedImage.getWidth() < 720)){
+        if (bufferedImage.getHeight() > 720 && bufferedImage.getWidth() > 720){
             bufferedImage = resizeImage(bufferedImage, (int) (bufferedImage.getWidth()*0.5), (int) (bufferedImage.getHeight()*0.5));
             multipartFile = convertBufferedImageToMultipartFile(bufferedImage);
         }
