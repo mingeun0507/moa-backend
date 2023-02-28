@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -147,7 +146,7 @@ public class GroupController {
               @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
               @RequestParam(value = "gid") Long gid,
               @RequestParam(value = "image") MultipartFile image
-    ) throws IOException
+    ) throws Exception
     {
         // 모임 완료 후 -> card 생성하는 로직
         GroupCompleteRespDto groupCompleteRespDto = groupService.completeGroup(userAccount.getUserId(), gid, image);

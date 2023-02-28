@@ -36,7 +36,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -501,7 +500,7 @@ public class GroupService {
 
 
     @Transactional
-    public GroupCompleteRespDto completeGroup(Long uid, Long gid, MultipartFile image) throws IOException {
+    public GroupCompleteRespDto completeGroup(Long uid, Long gid, MultipartFile image) throws Exception {
         // 모임 완료하면 카드 앞면 사진 업데이트
         if(!groupRepository.existsByIdAndMaker_Id(gid, uid)){
             throw NotFoundException.builder()
