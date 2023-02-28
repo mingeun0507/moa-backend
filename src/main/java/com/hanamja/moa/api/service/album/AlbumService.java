@@ -1,5 +1,6 @@
 package com.hanamja.moa.api.service.album;
 
+import com.hanamja.moa.api.controller.SortedBy;
 import com.hanamja.moa.api.dto.album.AlbumRespDto;
 import com.hanamja.moa.api.dto.album.CardRespDto;
 import com.hanamja.moa.api.dto.util.DataResponseDto;
@@ -29,11 +30,14 @@ public class AlbumService {
     private final AlbumRepository albumRepository;
 
     @Transactional(readOnly = true)
-    public DataResponseDto<List<AlbumRespDto>> getMyAlbumInfo(Long uid){
+    public DataResponseDto<List<AlbumRespDto>> getMyAlbumInfo(Long uid, SortedBy sort){
         List<AlbumRespDto> response = new ArrayList<>();
-        // state가 done이고 joiner에 uid가 포함된 group 들의 user group 모두 찾기
-        userGroupRepository.findAllDoneGroupJoinUserId(uid, State.DONE).stream()
-                .forEach(user -> {
+        List<User> users = sort.equals(SortedBy.RECENT) ?
+                userGroupRepository.findMyAlbumUserSortByNewest(uid, State.DONE)
+                :
+                userGroupRepository.findMyAlbumUserSortByAlphabet(uid, State.DONE);
+
+        users.stream().forEach(user -> {
                     Album album = albumRepository.findByOwner_IdAndMetUser_Id(uid, user.getId())
                             .orElseThrow(() -> NotFoundException.builder()
                                     .httpStatus(HttpStatus.BAD_REQUEST)
@@ -56,7 +60,7 @@ public class AlbumService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public DataResponseDto<CardRespDto> getCardInfo(Long uid, Long metUserId){
         List<CardRespDto.CardInfo> cardInfos = new ArrayList<>();
         User metUser = userRepository.findUserById(metUserId).orElseThrow(
