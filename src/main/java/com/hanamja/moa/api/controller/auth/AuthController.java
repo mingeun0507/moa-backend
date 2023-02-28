@@ -59,7 +59,9 @@ public class AuthController {
 
     @Operation(summary = "온보딩")
     @PutMapping("/on-boarding")
-    public ResponseEntity<UserInfoResponseDto> onBoardUser(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @Validated @RequestBody OnBoardingRequestDto onBoardingRequestDto) {
+    public ResponseEntity<UserInfoResponseDto> onBoardUser(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
+            @Validated @RequestBody OnBoardingRequestDto onBoardingRequestDto) {
 
         return ResponseEntity.ok(authService.onBoardUser(userAccount, onBoardingRequestDto));
     }
