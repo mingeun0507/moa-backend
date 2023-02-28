@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -36,11 +35,11 @@ public class GroupCompleteRespDto {
         private String backImage;
 
         @Builder
-        public Card(Long userId, String username, Long meetingCnt, Optional<LocalDateTime> meetingAt, String frontImage, String backImage) {
+        public Card(Long userId, String username, Long meetingCnt, LocalDateTime meetingAt, String frontImage, String backImage) {
             this.userId = userId;
             this.username = username;
             this.meetingCnt = meetingCnt;
-            this.meetingAt = meetingAt.isPresent() ? meetingAt.get() : LocalDateTime.now();
+            this.meetingAt = meetingAt;
             this.frontImage = frontImage;
             this.backImage = backImage;
         }
