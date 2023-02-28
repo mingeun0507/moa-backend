@@ -6,13 +6,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+
 @RequiredArgsConstructor
 @RestController
 @RequestMapping(value = "/health")
 public class HealthCheckController {
 
     @GetMapping(value = "/check")
-    public ResponseEntity<?> serverCheck(){
+    public ResponseEntity<?> serverCheck() {
         return ResponseEntity.ok().body("server check");
+    }
+
+    @GetMapping(value = "/time")
+    public ResponseEntity<LocalDateTime> serverTime() {
+        return ResponseEntity.ok().body(LocalDateTime.now());
     }
 }
