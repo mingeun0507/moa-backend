@@ -513,6 +513,9 @@ public class GroupService {
         String groupMakerName = group.getMaker().getName();
 
         String imageLink = amazonS3Uploader.saveFileAndGetUrl(image);
+        if (!Optional.ofNullable(group.getMeetingAt()).isPresent()){
+            group.updateNullMeetingAt();
+        }
         groupRepository.updateCompleteGroup(imageLink, gid, State.DONE);
 
         // 앨범마다 group 유저 정보 체크해서 없으면 카드 추가, 있으면 badged -> true 로 변경
@@ -582,12 +585,11 @@ public class GroupService {
             }
 
             if (!albumOwner.getId().equals(uid)) {
-                Optional<LocalDateTime> meetingAt = Optional.ofNullable(group.getMeetingAt());
                 List<UserGroup> onePersonCard = userGroupRepository.findOnePersonCard(uid, albumOwner.getId(), State.DONE);
                 cardList.add(GroupCompleteRespDto.Card.builder()
                         .userId(albumOwner.getId())
                         .username(albumOwner.getName())
-                        .meetingAt(meetingAt)
+                        .meetingAt(group.getMeetingAt())
                         .meetingCnt(Long.valueOf(onePersonCard.size()))
                         .frontImage(albumOwner.getImageLink())
                         .backImage(imageLink)

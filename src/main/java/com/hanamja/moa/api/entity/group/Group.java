@@ -100,6 +100,10 @@ public class Group {
         this.currentPeopleNum = currNum;
     }
 
+    public void updateNullMeetingAt(){
+        this.meetingAt = LocalDateTime.now();
+    }
+
     public Boolean isFull() {
         return Objects.equals(this.currentPeopleNum, this.maxPeopleNum);
         // 인원수 늘리기 전에 체크하는 메소드
