@@ -33,19 +33,19 @@ public class AlbumService {
         List<AlbumRespDto> response = new ArrayList<>();
         // state가 done이고 joiner에 uid가 포함된 group 들의 user group 모두 찾기
         userGroupRepository.findAllDoneGroupJoinUserId(uid, State.DONE).stream()
-                .forEach(userGroup -> {
-                    Album album = albumRepository.findByOwner_IdAndMetUser_Id(uid, userGroup.getJoiner().getId())
+                .forEach(user -> {
+                    Album album = albumRepository.findByOwner_IdAndMetUser_Id(uid, user.getId())
                             .orElseThrow(() -> NotFoundException.builder()
                                     .httpStatus(HttpStatus.BAD_REQUEST)
                                     .message("album 정보를 찾을 수 없습니다.")
                                     .build());
 
-                    int meetingCnt = userGroupRepository.findOnePersonCard(uid, userGroup.getJoiner().getId(), State.DONE).size();
+                    int meetingCnt = userGroupRepository.findOnePersonCard(uid, user.getId(), State.DONE).size();
 
                     response.add(AlbumRespDto.builder()
-                            .userId(userGroup.getJoiner().getId())
-                            .username(userGroup.getJoiner().getName())
-                            .imageLink(userGroup.getJoiner().getImageLink())
+                            .userId(user.getId())
+                            .username(user.getName())
+                            .imageLink(user.getImageLink())
                             .meetingCnt(meetingCnt)
                             .isBadged(album.getIsBadged())
                             .build());

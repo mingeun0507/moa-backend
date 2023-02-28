@@ -1,6 +1,7 @@
 package com.hanamja.moa.api.entity.user_group;
 
 import com.hanamja.moa.api.entity.group.State;
+import com.hanamja.moa.api.entity.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -24,12 +25,12 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, Long> {
     @Query(value = "SELECT ug FROM UserGroup ug WHERE ug.joiner.id = :uid AND ug.group.state = :state")
     List<UserGroup> findAllDoneGroupByUserId(@Param(value = "uid") Long uid, @Param(value = "state") State state);
 
-    @Query(value = "SELECT uug FROM UserGroup uug WHERE uug.joiner.id <> :uid " +
-            "AND uug.group.id in (SELECT ug.group.id FROM UserGroup ug WHERE ug.joiner.id = :uid AND ug.group.state = :state)")
-    List<UserGroup> findAllDoneGroupJoinUserId(@Param(value = "uid") Long uid, @Param(value = "state") State state);
+    @Query(value = "SELECT distinct uug.joiner FROM UserGroup uug WHERE uug.joiner.id <> :uid " +
+            "AND uug.group.id in (SELECT distinct ug.group.id FROM UserGroup ug WHERE ug.joiner.id = :uid AND ug.group.state = :state) ORDER BY uug.joiner.name ASC")
+    List<User> findAllDoneGroupJoinUserId(@Param(value = "uid") Long uid, @Param(value = "state") State state);
 
     @Query(value = "SELECT uug FROM UserGroup uug WHERE uug.joiner.id <> :uid and uug.joiner.id = :jid " +
-            "AND uug.group.id in (SELECT ug.group.id FROM UserGroup ug WHERE ug.joiner.id = :uid AND ug.group.state = :state)")
+            "AND uug.group.id in (SELECT ug.group.id FROM UserGroup ug WHERE ug.joiner.id = :uid AND ug.group.state = :state) ORDER BY uug.joiner.name ASC ")
     List<UserGroup> findOnePersonCard(@Param(value = "uid") Long uid, @Param(value = "jid") Long jid, @Param(value = "state") State state);
 
     List<UserGroup> findAllByJoiner_IdAndProgress(Long uid, String progress);
