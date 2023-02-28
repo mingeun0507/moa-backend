@@ -1,5 +1,6 @@
 package com.hanamja.moa.api.controller.album;
 
+import com.hanamja.moa.api.controller.SortedBy;
 import com.hanamja.moa.api.dto.album.AlbumRespDto;
 import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
@@ -10,10 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,8 +31,9 @@ public class AlbumController {
 
     @Operation(summary = "앨범 정보 가져오기", description = "앨범 정보 가져오기")
     @GetMapping(value = "/all")
-    public ResponseEntity<DataResponseDto<List<AlbumRespDto>>> getMyAlbum(@AuthenticationPrincipal UserAccount userAccount){
-        return ResponseEntity.ok().body(albumService.getMyAlbumInfo(userAccount.getUserId()));
+    public ResponseEntity<DataResponseDto<List<AlbumRespDto>>> getMyAlbum(
+            @AuthenticationPrincipal UserAccount userAccount, @RequestParam(value = "sort") SortedBy sort){
+        return ResponseEntity.ok().body(albumService.getMyAlbumInfo(userAccount.getUserId(), sort));
     }
 
     @Operation(summary = "카드 정보 가져오기", description = "카드 정보 가져오기")
