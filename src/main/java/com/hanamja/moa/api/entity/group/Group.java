@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -83,10 +85,12 @@ public class Group {
 
     // 모임 정보 수정에 대한 update 메소드
     public void modifyGroupInfo(String name, String description, LocalDateTime meetingAt, Long maxPeopleNum) {
+        LocalDateTime convertMeetingAt = ZonedDateTime.of(meetingAt, ZoneId.of("Asia/Seoul"))
+                .toLocalDateTime();
         this.name = name;
         this.description = description;
         this.modifiedAt = LocalDateTime.now();
-        this.meetingAt = meetingAt;
+        this.meetingAt = convertMeetingAt;
         this.maxPeopleNum = maxPeopleNum;
     }
 
@@ -105,8 +109,8 @@ public class Group {
         this.currentPeopleNum = currNum;
     }
 
-    public void updateNullMeetingAt() {
-        this.meetingAt = LocalDateTime.now();
+    public void updateNullMeetingAt(LocalDateTime now) {
+        this.meetingAt = now;
     }
 
     public Boolean isFull() {

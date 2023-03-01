@@ -37,6 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -504,6 +506,7 @@ public class GroupService {
 
     @Transactional
     public GroupCompleteRespDto completeGroup(Long uid, Long gid, MultipartFile image) throws Exception {
+        LocalDateTime now = ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("Asia/Seoul")).toLocalDateTime();
         // 모임 완료하면 카드 앞면 사진 업데이트
         if(!groupRepository.existsByIdAndMaker_Id(gid, uid)){
             throw NotFoundException.builder()
@@ -516,9 +519,9 @@ public class GroupService {
 
         String imageLink = amazonS3Uploader.saveFileAndGetUrl(image);
         if (!Optional.ofNullable(group.getMeetingAt()).isPresent()){
-            group.updateNullMeetingAt();
+            group.updateNullMeetingAt(now);
         }
-        groupRepository.updateCompleteGroup(imageLink, LocalDateTime.now() , gid, State.DONE);
+        groupRepository.updateCompleteGroup(imageLink, now, gid, State.DONE);
 
         // 앨범마다 group 유저 정보 체크해서 없으면 카드 추가, 있으면 badged -> true 로 변경
         List<User> groupJoinUsers = userGroupRepository.findAllByGroup_Id(gid).stream()
@@ -643,8 +646,9 @@ public class GroupService {
                     .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
                     .collect(Collectors.toList());
         } else if (sortedBy == SortedBy.SOON) {
+            LocalDateTime now = ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("Asia/Seoul")).toLocalDateTime();
             resultDtoList = groupRepository
-                    .searchGroupByMeetingAtAndKeyword(LocalDateTime.now(), keyword)
+                    .searchGroupByMeetingAtAndKeyword(now, keyword)
                     .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
                     .collect(Collectors.toList());
         } else {
