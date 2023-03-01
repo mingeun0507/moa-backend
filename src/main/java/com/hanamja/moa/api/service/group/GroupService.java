@@ -630,4 +630,28 @@ public class GroupService {
         return DataResponseDto.<List<GroupInfoResponseDto>>builder()
                 .data(resultDtoList).build();
     }
+
+    public DataResponseDto<List<GroupInfoResponseDto>> searchAndSortGroupByKeyword(String keyword, SortedBy sortedBy) {
+        List<GroupInfoResponseDto> resultDtoList;
+        if (sortedBy == SortedBy.RECENT) {
+            resultDtoList = groupRepository
+                    .searchGroupByKeyword(keyword)
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList());
+        } else if (sortedBy == SortedBy.SOON) {
+            resultDtoList = groupRepository
+                    .searchGroupByMeetingAtAndKeyword(LocalDateTime.now(), keyword)
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList());
+        } else {
+            throw InvalidParameterException
+                    .builder()
+                    .httpStatus(HttpStatus.BAD_REQUEST)
+                    .message("Invalid sortedBy parameter")
+                    .build();
+        }
+
+        return DataResponseDto.<List<GroupInfoResponseDto>>builder()
+                .data(resultDtoList).build();
+    }
 }
