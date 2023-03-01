@@ -1,6 +1,6 @@
 package com.hanamja.moa.api.service.group;
 
-import com.hanamja.moa.api.controller.SortedBy;
+import com.hanamja.moa.api.controller.group.SortedBy;
 import com.hanamja.moa.api.dto.group.request.KickOutRequestDto;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
@@ -569,13 +569,13 @@ public class GroupService {
                         albumOwnerPoint += 100;
 
                         albumRepository.save(Album.builder()
-                                .owner(albumOwner).metUser(groupJoinUser).isBadged(true)
+                                .owner(albumOwner).updatedAt(now).metUser(groupJoinUser).isBadged(true)
                                 .build());
                     } else {
                         log.info("Card already exist: Add 50 point to {} ({})", albumOwnerPoint, albumOwner.getName());
                         albumOwnerPointHistoryMessage.append(groupJoinUser.getName()).append(" 50점, ");
                         albumOwnerPoint += 50;
-                        albumRepository.updateBadgeState(true, groupJoinUser.getId(), albumOwner.getId());
+                        albumRepository.updateBadgeState(true, now, groupJoinUser.getId(), albumOwner.getId());
                     }
                 }
             }
