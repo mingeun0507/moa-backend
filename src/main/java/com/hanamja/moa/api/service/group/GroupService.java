@@ -450,7 +450,6 @@ public class GroupService {
                                             .receiver(receiver)
                                             .content(existingUser.getName() + "님이 '" + existingGroup.getName() + "'에서 " + receiver.getName() + "님을 내보냈어요.")
                                             .reason(kickOutRequestDto.getReason())
-                                            .isBadged(true)
                                             .build()
                             );
 
@@ -482,7 +481,6 @@ public class GroupService {
                                     .receiver(joiner)
                                     .content(groupMaker.getName() + "님이 '" + existingGroup.getName() + "'을 취소했어요.")
                                     .reason("모임 생성자: " + groupMaker.getName() + "님")
-                                    .isBadged(true)
                                     .build()
                     );
 
@@ -590,7 +588,6 @@ public class GroupService {
                             .receiver(albumOwner)
                             .content(String.join(",", nameList) + " 님과의 카드를 만들었어요.")
                             .reason("모임 생성자: " + groupMakerName + "님")
-                            .isBadged(true)
                             .build()
             );
             albumOwner.notifyUser();

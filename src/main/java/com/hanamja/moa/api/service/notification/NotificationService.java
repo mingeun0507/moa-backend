@@ -34,6 +34,7 @@ public class NotificationService {
                 .collect(Collectors.toList());
 
         existingUser.unNotifyUser();
+        notificationRepository.updateNotificationState(existingUser.getId());
         userRepository.save(existingUser);
 
         return DataResponseDto.<List<NotificationResponseDto>>builder()
