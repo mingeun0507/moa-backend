@@ -1,6 +1,5 @@
 package com.hanamja.moa.api.controller.album;
 
-import com.hanamja.moa.api.controller.SortedBy;
 import com.hanamja.moa.api.dto.album.AlbumRespDto;
 import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;

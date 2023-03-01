@@ -1,6 +1,6 @@
 package com.hanamja.moa.api.entity.user_group;
 
-import com.hanamja.moa.api.controller.SortedBy;
+import com.hanamja.moa.api.controller.group.SortedBy;
 import com.hanamja.moa.api.entity.group.State;
 import com.hanamja.moa.api.entity.user.User;
 
