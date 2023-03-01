@@ -525,8 +525,7 @@ public class GroupService {
         groupRepository.updateCompleteGroup(imageLink, now, gid, State.DONE);
 
         // 앨범마다 group 유저 정보 체크해서 없으면 카드 추가, 있으면 badged -> true 로 변경
-        List<User> groupJoinUsers = userGroupRepository.findAllByGroup_Id(gid).stream()
-                .map(UserGroup::getJoiner).collect(Collectors.toList());
+        List<User> groupJoinUsers = userGroupRepository.findGroupJoiner(gid);
 
         List<GroupCompleteRespDto.Card> cardList = new ArrayList<>();
 
@@ -562,37 +561,40 @@ public class GroupService {
             for (User groupJoinUser : groupJoinUsers) {
                 userGroupRepository.updateFrontCardImg(groupJoinUser.getImageLink(), gid, groupJoinUser.getId());
 
-                if (!Objects.equals(albumOwner.getId(), groupJoinUser.getId()) && !metUsersIdList.contains(groupJoinUser.getId())) {
-                    log.info("albumOwner : {}, joiner : {}", albumOwner.getName(), groupJoinUser.getName());
-                    log.info("New card created: Add 100 point to {} ({})", albumOwnerPoint, albumOwner.getName());
-                    albumOwnerPointHistoryMessage.append(groupJoinUser.getName()).append(" 100점, ");
-                    albumOwnerPoint += 100;
+                if (!Objects.equals(albumOwner.getId(), groupJoinUser.getId())) {
+                    if (!metUsersIdList.contains(groupJoinUser.getId())) {
+                        log.info("albumOwner : {}, joiner : {}", albumOwner.getName(), groupJoinUser.getName());
+                        log.info("New card created: Add 100 point to {} ({})", albumOwnerPoint, albumOwner.getName());
+                        albumOwnerPointHistoryMessage.append(groupJoinUser.getName()).append(" 100점, ");
+                        albumOwnerPoint += 100;
 
-                    albumRepository.save(Album.builder()
-                            .owner(albumOwner).metUser(groupJoinUser).isBadged(true)
-                            .build());
-
-                    notificationRepository.save(
-                            Notification
-                                    .builder()
-                                    .sender(albumOwner)
-                                    .receiver(albumOwner)
-                                    .content(groupJoinUser.getName() + "님과의 카드를 만들었어요.")
-                                    .reason("모임 생성자: " + groupMakerName + "님")
-                                    .isBadged(true)
-                                    .build()
-                    );
-
-                    albumOwner.notifyUser();
-                    userRepository.save(albumOwner);
-
-                } else if (!Objects.equals(albumOwner.getId(), groupJoinUser.getId())) { // 이미 카드가 있으면
-                    log.info("Card already exist: Add 50 point to {} ({})", albumOwnerPoint, albumOwner.getName());
-                    albumOwnerPointHistoryMessage.append(groupJoinUser.getName()).append(" 50점, ");
-                    albumOwnerPoint += 50;
-                    albumRepository.updateBadgeState(true, groupJoinUser.getId(), albumOwner.getId());
+                        albumRepository.save(Album.builder()
+                                .owner(albumOwner).metUser(groupJoinUser).isBadged(true)
+                                .build());
+                    } else {
+                        log.info("Card already exist: Add 50 point to {} ({})", albumOwnerPoint, albumOwner.getName());
+                        albumOwnerPointHistoryMessage.append(groupJoinUser.getName()).append(" 50점, ");
+                        albumOwnerPoint += 50;
+                        albumRepository.updateBadgeState(true, groupJoinUser.getId(), albumOwner.getId());
+                    }
                 }
             }
+            List<String> nameList = groupJoinUsers.stream()
+                    .filter(user -> !user.getId().equals(albumOwner.getId()))
+                    .map(User::getName).collect(Collectors.toList());
+
+            notificationRepository.save(
+                    Notification
+                            .builder()
+                            .sender(group.getMaker())
+                            .receiver(albumOwner)
+                            .content(String.join(",", nameList) + " 님과의 카드를 만들었어요.")
+                            .reason("모임 생성자: " + groupMakerName + "님")
+                            .isBadged(true)
+                            .build()
+            );
+            albumOwner.notifyUser();
+            userRepository.save(albumOwner);
 
             if (!albumOwner.getId().equals(uid)) {
                 List<UserGroup> onePersonCard = userGroupRepository.findOnePersonCard(uid, albumOwner.getId(), State.DONE);
