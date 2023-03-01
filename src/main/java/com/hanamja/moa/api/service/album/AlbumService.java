@@ -1,6 +1,6 @@
 package com.hanamja.moa.api.service.album;
 
-import com.hanamja.moa.api.controller.SortedBy;
+import com.hanamja.moa.api.controller.album.SortedBy;
 import com.hanamja.moa.api.dto.album.AlbumRespDto;
 import com.hanamja.moa.api.dto.album.CardRespDto;
 import com.hanamja.moa.api.dto.util.DataResponseDto;
@@ -32,10 +32,7 @@ public class AlbumService {
     @Transactional(readOnly = true)
     public DataResponseDto<List<AlbumRespDto>> getMyAlbumInfo(Long uid, SortedBy sort){
         List<AlbumRespDto> response = new ArrayList<>();
-        List<User> users = sort.equals(SortedBy.RECENT) ?
-                userGroupRepository.findMyAlbumUserSortByNewest(uid, State.DONE)
-                :
-                userGroupRepository.findMyAlbumUserSortByAlphabet(uid, State.DONE);
+        List<User> users = albumRepository.findAllAlbumUserSorted(uid, sort);
 
         users.stream().forEach(user -> {
                     Album album = albumRepository.findByOwner_IdAndMetUser_Id(uid, user.getId())
@@ -66,7 +63,7 @@ public class AlbumService {
         User metUser = userRepository.findUserById(metUserId).orElseThrow(
                 () -> new NotFoundException("해당하는 사용자를 찾을 수 없습니다.")
         );
-        albumRepository.updateBadgeState(false, metUserId, uid);
+        albumRepository.clickOneCard(false, metUserId, uid);
 
         List<UserGroup> onePersonCard = userGroupRepository.findOnePersonCard(uid, metUserId, State.DONE);
         onePersonCard.stream()
