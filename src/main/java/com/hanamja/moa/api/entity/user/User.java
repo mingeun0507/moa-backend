@@ -94,7 +94,7 @@ public class User {
         this.role = studentId.startsWith(FRESHMAN_YEAR) ? Role.ROLE_FRESHMEN : Role.ROLE_SENIOR;
         this.department = department;
         this.isOnboarded = false;
-        this.isActive = true;
+        this.isActive = false;
         this.isNotified = false;
     }
 
