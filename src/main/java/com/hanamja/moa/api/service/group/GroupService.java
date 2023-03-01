@@ -546,6 +546,10 @@ public class GroupService {
                     albumOwnerPoint += 500L;
                     albumOwnerPointHistoryMessage.append("모임 점수: 500점\n");
                     break;
+                default:
+                    albumOwnerPoint += 0L;
+                    albumOwnerPointHistoryMessage.append("모임 점수: 0점\n");
+                    break;
             }
             albumOwnerPointHistoryMessage.append("카드 점수: ");
             log.info("Initial point: Add {} ({})", albumOwnerPoint, albumOwner.getName());
