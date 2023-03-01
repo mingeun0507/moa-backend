@@ -30,7 +30,7 @@ public class MakingGroupRequestDto {
 
     public static Group toEntity(MakingGroupRequestDto makingGroupRequestDto, User user) {
         LocalDateTime meetingAt = ZonedDateTime.of(makingGroupRequestDto.getMeetingAt(), ZoneId.of("Asia/Seoul"))
-                .toLocalDateTime();
+                .toLocalDateTime().plusHours(9L);
         return Group
                 .builder()
                 .name(makingGroupRequestDto.getName())
