@@ -181,6 +181,7 @@ public class InitDatabaseForLocal {
                     .owner(mingeun)
                     .metUser(seokmin)
                     .isBadged(true)
+                    .updatedAt(LocalDateTime.now())
                     .build();
 
             Album mingeunChangjinAlbum = Album
@@ -188,6 +189,7 @@ public class InitDatabaseForLocal {
                     .owner(mingeun)
                     .metUser(changjin)
                     .isBadged(false)
+                    .updatedAt(LocalDateTime.now())
                     .build();
 
             albumRepository.save(mingeunSeokminAlbum);
