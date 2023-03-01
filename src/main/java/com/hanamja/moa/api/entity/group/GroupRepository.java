@@ -28,6 +28,10 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
 
     List<Group> findAllByIdAndState(Long gid, State state);
 
+    @Query(value = "SELECT g FROM Group g " +
+            "WHERE g.state = :state AND COALESCE(g.meetingAt, :now+:now) > :now " +
+            "ORDER BY g.createdAt DESC")
+    List<Group> findExistingGroupsByRECENT(@Param(value = "state") State state, @Param(value = "now") LocalDateTime now);
     List<Group> findAllByStateAndMeetingAtAfterOrderByCreatedAtDesc(State state, LocalDateTime currentTime);
 
     List<Group> findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State state, LocalDateTime currentTime);
