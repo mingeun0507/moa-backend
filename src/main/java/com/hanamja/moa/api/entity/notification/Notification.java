@@ -40,11 +40,11 @@ public class Notification {
     private User receiver;
 
     @Builder
-    public Notification(String content, String reason, Boolean isBadged, User sender, User receiver) {
+    public Notification(String content, String reason, User sender, User receiver) {
         this.content = content;
         this.createdAt = LocalDateTime.now();
         this.reason = reason;
-        this.isBadged = isBadged;
+        this.isBadged = true;
         this.sender = sender;
         this.receiver = receiver;
     }
