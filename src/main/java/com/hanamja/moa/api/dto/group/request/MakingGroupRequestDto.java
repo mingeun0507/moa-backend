@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -29,8 +30,11 @@ public class MakingGroupRequestDto {
     private String hashtags;
 
     public static Group toEntity(MakingGroupRequestDto makingGroupRequestDto, User user) {
-        LocalDateTime meetingAt = ZonedDateTime.of(makingGroupRequestDto.getMeetingAt(), ZoneId.of("Asia/Seoul"))
-                .toLocalDateTime().plusHours(9L);
+        LocalDateTime meetingAt = makingGroupRequestDto.getMeetingAt();
+        if (Optional.ofNullable(makingGroupRequestDto.getMeetingAt()).isPresent()){
+            meetingAt = ZonedDateTime.of(makingGroupRequestDto.getMeetingAt(), ZoneId.of("Asia/Seoul"))
+                    .toLocalDateTime().plusHours(9L);
+        }
         return Group
                 .builder()
                 .name(makingGroupRequestDto.getName())
