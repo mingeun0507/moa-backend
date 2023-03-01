@@ -144,19 +144,24 @@ public class GroupController {
     @PostMapping(value = "/complete")
     public ResponseEntity<GroupCompleteRespDto> makeCard
     (
-              @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
-              @RequestParam(value = "gid") Long gid,
-              @RequestParam(value = "image") MultipartFile image
-    ) throws Exception
-    {
+            @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
+            @RequestParam(value = "gid") Long gid,
+            @RequestParam(value = "image") MultipartFile image
+    ) throws Exception {
         // 모임 완료 후 -> card 생성하는 로직
         GroupCompleteRespDto groupCompleteRespDto = groupService.completeGroup(userAccount.getUserId(), gid, image);
         return ResponseEntity.ok().body(groupCompleteRespDto);
     }
 
-    @Operation(summary = "모임 검색하기", description = "모임 검색하기")
+//    @Operation(summary = "모임 검색하기", description = "모임 검색하기")
+//    @GetMapping("/search")
+//    public ResponseEntity<DataResponseDto<List<GroupInfoResponseDto>>> searchGroupByKeyword(@RequestParam String keyword) {
+//        return ResponseEntity.ok(groupService.searchGroupByKeyword(keyword));
+//    }
+
+    @Operation(summary = "모임 검색하기 - 정렬", description = "모임 검색하기 - 정렬")
     @GetMapping("/search")
-    public ResponseEntity<DataResponseDto<List<GroupInfoResponseDto>>> searchGroupByKeyword(@RequestParam String keyword) {
-        return ResponseEntity.ok(groupService.searchGroupByKeyword(keyword));
+    public ResponseEntity<DataResponseDto<List<GroupInfoResponseDto>>> searchAndSortGroupByKeyword(@RequestParam String keyword, @RequestParam SortedBy sortedBy) {
+        return ResponseEntity.ok(groupService.searchAndSortGroupByKeyword(keyword, sortedBy));
     }
 }
