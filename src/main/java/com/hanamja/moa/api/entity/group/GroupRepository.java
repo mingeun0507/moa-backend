@@ -38,6 +38,10 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
     @Query(value = "SELECT distinct g FROM Group g JOIN FETCH GroupHashtag gh ON g.id = gh.group.id JOIN FETCH Hashtag h ON gh.hashtag.id = h.id WHERE (g.name LIKE %:keyword% OR h.name LIKE %:keyword%) AND g.state = 'RECRUITING' ORDER BY g.createdAt DESC")
     List<Group> searchGroupByKeyword(@Param(value = "keyword") String keyword);
 
+    @Query(value = "SELECT distinct g FROM Group g JOIN FETCH GroupHashtag gh ON g.id = gh.group.id JOIN FETCH Hashtag h ON gh.hashtag.id = h.id WHERE (g.name LIKE %:keyword% OR h.name LIKE %:keyword%) AND g.state = 'RECRUITING' AND (g.meetingAt > :now OR g.meetingAt is Null) ORDER BY g.meetingAt asc nulls last, g.createdAt DESC")
+    List<Group> searchGroupByMeetingAtAndKeyword(@Param(value = "now") LocalDateTime now, @Param(value = "keyword") String keyword);
+
+
     List<Group> findAllByStateAndNameContainsOrderByCreatedAtDesc(State state, String name);
 
     List<Group> findAllByMaker_Id(Long userId);
