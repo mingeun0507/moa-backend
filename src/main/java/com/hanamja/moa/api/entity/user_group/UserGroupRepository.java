@@ -30,7 +30,7 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, Long>, Use
             "AND uug.group.id in (SELECT distinct ug.group.id FROM UserGroup ug WHERE ug.joiner.id = :uid AND ug.group.state = :state) ORDER BY uug.joiner.name ASC")
     List<User> findMyAlbumUserSortByAlphabet(@Param(value = "uid") Long uid, @Param(value = "state") State state);
 
-    @Query(value = "SELECT uug.joiner FROM UserGroup uug WHERE uug.joiner.id <> :uid " +
+    @Query(value = "SELECT DISTINCT uug.joiner FROM UserGroup uug WHERE uug.joiner.id <> :uid " +
             "AND uug.group.id in (SELECT distinct ug.group.id FROM UserGroup ug WHERE ug.joiner.id = :uid AND ug.group.state = :state ) ORDER BY uug.group.modifiedAt DESC ")
     List<User> findMyAlbumUserSortByNewest(@Param(value = "uid") Long uid, @Param(value = "state") State state);
 
