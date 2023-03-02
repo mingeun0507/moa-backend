@@ -327,7 +327,7 @@ public class GroupService {
     public GroupInfoResponseDto join(Long groupId, UserAccount userAccount) {
 
         Group group = groupRepository.findById(groupId).orElseThrow(
-                () -> new NotFoundException("해당 그룹을 찾을 수 없습니다.")
+                () -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당 그룹을 찾을 수 없습니다.")
         );
 
         User user = userRepository.findUserById(userAccount.getUserId())
@@ -391,7 +391,7 @@ public class GroupService {
     public GroupInfoResponseDto quit(Long groupId, UserAccount userAccount) {
 
         UserGroup userGroup = userGroupRepository.findByGroupIdAndJoinerId(groupId, userAccount.getUserId())
-                .orElseThrow(() -> new NotFoundException("해당 그룹을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당 그룹을 찾을 수 없습니다."));
 
         Group group = userGroup.getGroup();
         group.subtractCurrentPeopleNum();

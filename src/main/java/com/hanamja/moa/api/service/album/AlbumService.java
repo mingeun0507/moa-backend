@@ -61,7 +61,7 @@ public class AlbumService {
     public DataResponseDto<CardRespDto> getCardInfo(Long uid, Long metUserId){
         List<CardRespDto.CardInfo> cardInfos = new ArrayList<>();
         User metUser = userRepository.findUserById(metUserId).orElseThrow(
-                () -> new NotFoundException("해당하는 사용자를 찾을 수 없습니다.")
+                () -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당하는 사용자를 찾을 수 없습니다.")
         );
         albumRepository.clickOneCard(false, metUserId, uid);
 

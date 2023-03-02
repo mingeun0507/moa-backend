@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
@@ -41,7 +42,7 @@ public class AuthController {
     {
 
         if (!authorization.equals("Bearer " + googleFormCustomAuthKey)){
-            throw new UnauthorizedException("토큰이 일치하지 않습니다.");
+            throw new UnauthorizedException(HttpStatus.FORBIDDEN, "토큰이 일치하지 않습니다.");
         }
 
         UserInfoResponseDto responseDto = authService.signUp(signUpRequestDto);

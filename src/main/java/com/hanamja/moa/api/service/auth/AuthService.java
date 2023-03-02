@@ -68,13 +68,13 @@ public class AuthService {
     @Transactional
     public UserInfoResponseDto onBoardUser(UserAccount userAccount, OnBoardingRequestDto onBoardingRequestDto) {
         User foundUser = userRepository.findUserById(userAccount.getUserId()).orElseThrow(
-                () -> new NotFoundException("해당하는 사용자를 찾을 수 없습니다.")
+                () -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당하는 사용자를 찾을 수 없습니다.")
         );
 
         Department department = departmentRepository
                 .findByName(onBoardingRequestDto.getDepartment())
                 .orElseThrow(
-                        () -> new NotFoundException("해당하는 학부를 찾을 수 없습니다.")
+                        () -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당하는 학부를 찾을 수 없습니다.")
                 );
 
         foundUser.updateOnBoardingInfo(onBoardingRequestDto.getGender(), department, onBoardingRequestDto.getImageLink());

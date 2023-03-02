@@ -9,6 +9,7 @@ import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.exception.custom.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,7 +45,7 @@ public class NotificationService {
 
     private User validateUser(UserAccount userAccount) {
         return userRepository.findById(userAccount.getUserId())
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new NotFoundException(HttpStatus.BAD_REQUEST, "존재하지 않는 유저입니다."));
     }
 
     public String checkNotifications(UserAccount userAccount) {
