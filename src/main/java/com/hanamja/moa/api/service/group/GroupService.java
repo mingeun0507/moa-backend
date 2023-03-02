@@ -212,8 +212,10 @@ public class GroupService {
 
     @Transactional
     protected List<Hashtag> saveHashtags(String hashtagString) {
-        List<String> hashtagStringList = !hashtagString.isEmpty() ? new ArrayList<>(List.of(hashtagString.split("#"))) : new ArrayList<>();
-        hashtagStringList.remove(0);
+        List<String> hashtagStringList = hashtagString != null ? new ArrayList<>(List.of(hashtagString.split("#"))) : new ArrayList<>();
+        if (hashtagStringList.size() > 0) {
+            hashtagStringList.remove(0);
+        }
 
         return hashtagStringList.stream().map(
                 x -> {
