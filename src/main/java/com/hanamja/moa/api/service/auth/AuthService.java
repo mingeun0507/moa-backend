@@ -11,12 +11,12 @@ import com.hanamja.moa.api.entity.department.Department;
 import com.hanamja.moa.api.entity.department.DepartmentRepository;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
-import com.hanamja.moa.api.entity.user.UserAccount.jwt.JwtTokenUtil;
 import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.api.entity.user_token.UserToken;
 import com.hanamja.moa.api.entity.user_token.UserTokenRepository;
 import com.hanamja.moa.exception.custom.NotFoundException;
 import com.hanamja.moa.exception.custom.UserInputException;
+import com.hanamja.moa.filter.jwt.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -68,13 +68,13 @@ public class AuthService {
     @Transactional
     public UserInfoResponseDto onBoardUser(UserAccount userAccount, OnBoardingRequestDto onBoardingRequestDto) {
         User foundUser = userRepository.findUserById(userAccount.getUserId()).orElseThrow(
-                () -> new NotFoundException("해당하는 사용자를 찾을 수 없습니다.")
+                () -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당하는 사용자를 찾을 수 없습니다.")
         );
 
         Department department = departmentRepository
                 .findByName(onBoardingRequestDto.getDepartment())
                 .orElseThrow(
-                        () -> new NotFoundException("해당하는 학부를 찾을 수 없습니다.")
+                        () -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당하는 학부를 찾을 수 없습니다.")
                 );
 
         foundUser.updateOnBoardingInfo(onBoardingRequestDto.getGender(), department, onBoardingRequestDto.getImageLink());

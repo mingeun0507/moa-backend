@@ -105,7 +105,7 @@ public class PointHistoryService {
     @Transactional(readOnly = true)
     public DataResponseDto<UserPointRankResponseDto.RankTab> getRank(Long userId){
         User user = userRepository.findUserById(userId)
-                .orElseThrow(() -> new NotFoundException("해당 유저가 없습니다. id=" + userId));
+                .orElseThrow(() -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당 유저가 없습니다. id=" + userId));
         int rank = userRepository.getUserRank(userId, user.getRole());
         return DataResponseDto.<UserPointRankResponseDto.RankTab>builder()
                 .data(UserPointRankResponseDto.RankTab.of(user, Long.valueOf(rank)))

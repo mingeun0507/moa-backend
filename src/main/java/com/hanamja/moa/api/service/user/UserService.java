@@ -9,6 +9,7 @@ import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.exception.custom.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,13 +23,13 @@ public class UserService {
     private final DepartmentRepository departmentRepository;
 
     public UserInfoResponseDto getUserInfo(Long userId) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("해당 유저가 없습니다. id=" + userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당 유저가 없습니다. id=" + userId));
         int rank = userRepository.getUserRank(userId, user.getRole());
         return UserInfoResponseDto.from(user, rank);
     }
 
     public UserInfoResponseDto updateProfileImage(Long userId, String profileImageUrl) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException("해당 유저가 없습니다. id=" + userId));
+        User user = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당 유저가 없습니다. id=" + userId));
 
         user.updateProfileImage(profileImageUrl);
 
@@ -37,10 +38,10 @@ public class UserService {
 
     @Transactional
     public UserInfoResponseDto modifyUserInfo(UserAccount userAccount, ModifyingUserInfoRequestDto modifyingUserInfoRequestDto) {
-        User user = userRepository.findById(userAccount.getUserId()).orElseThrow(() -> new NotFoundException("해당 유저가 없습니다. id=" + userAccount.getUserId()));
+        User user = userRepository.findById(userAccount.getUserId()).orElseThrow(() -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당 유저가 없습니다. id=" + userAccount.getUserId()));
 
         user.modifyUserInfo(modifyingUserInfoRequestDto.getGender(), departmentRepository.findByName(modifyingUserInfoRequestDto.getDepartment()).orElseThrow(
-                () -> new NotFoundException("해당 학과가 없습니다. name=" + modifyingUserInfoRequestDto.getDepartment())
+                () -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당 학과가 없습니다. name=" + modifyingUserInfoRequestDto.getDepartment())
         ), modifyingUserInfoRequestDto.getIntro(), modifyingUserInfoRequestDto.getImageLink());
         user.updateProfileImage(modifyingUserInfoRequestDto.getImageLink());
         userRepository.save(user);
