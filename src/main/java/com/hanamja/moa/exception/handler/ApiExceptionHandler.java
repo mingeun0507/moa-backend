@@ -15,7 +15,7 @@ public class ApiExceptionHandler {
 
     @ExceptionHandler(value = {CustomException.class})
     public ResponseEntity<ApiException> handlerCustomException(CustomException e) {
-        log.error("Unexpected Exception occurred: {}", e.getMessage(), e);
+        log.error("Status: {}, Message: {}", e.getHttpStatus(), e.getMessage());
 
         return ResponseEntity
                 .status(e.getHttpStatus())
