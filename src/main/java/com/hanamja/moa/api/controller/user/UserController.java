@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -32,7 +33,7 @@ public class UserController {
 
     @Operation(summary = "마이페이지에서 유저 정보 변경")
     @PutMapping(value = "/info")
-    public ResponseEntity<UserInfoResponseDto> modifyUserInfo(@AuthenticationPrincipal UserAccount userAccount, @RequestBody ModifyingUserInfoRequestDto modifyingUserInfoRequestDto) {
+    public ResponseEntity<UserInfoResponseDto> modifyUserInfo(@AuthenticationPrincipal UserAccount userAccount, @Validated @RequestBody ModifyingUserInfoRequestDto modifyingUserInfoRequestDto) {
         return ResponseEntity.ok().body(userService.modifyUserInfo(userAccount, modifyingUserInfoRequestDto));
     }
 }
