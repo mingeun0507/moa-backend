@@ -1,4 +1,4 @@
-package com.hanamja.moa.api.entity.user.UserAccount.jwt;
+package com.hanamja.moa.filter.jwt;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

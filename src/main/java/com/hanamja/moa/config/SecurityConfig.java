@@ -1,8 +1,8 @@
 package com.hanamja.moa.config;
 
-import com.hanamja.moa.api.entity.user.UserAccount.jwt.JwtAuthenticationFilter;
-import com.hanamja.moa.api.entity.user.UserAccount.jwt.JwtExceptionFilter;
-import com.hanamja.moa.api.entity.user.UserAccount.jwt.JwtTokenUtil;
+import com.hanamja.moa.filter.jwt.JwtAuthenticationFilter;
+import com.hanamja.moa.filter.jwt.JwtExceptionFilter;
+import com.hanamja.moa.filter.jwt.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;

@@ -1,6 +1,6 @@
 package com.hanamja.moa.config;
 
-import com.hanamja.moa.api.entity.user.UserAccount.jwt.JwtAuthenticationProvider;
+import com.hanamja.moa.filter.jwt.JwtAuthenticationProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
