@@ -586,7 +586,7 @@ public class GroupService {
                             .builder()
                             .sender(group.getMaker())
                             .receiver(albumOwner)
-                            .content(String.join(",", nameList) + " 님과의 카드를 만들었어요.")
+                            .content(String.join(", ", nameList) + " 님과의 카드를 만들었어요.")
                             .reason("모임 생성자: " + groupMakerName + "님")
                             .build()
             );
