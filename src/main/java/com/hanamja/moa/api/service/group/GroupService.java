@@ -248,14 +248,9 @@ public class GroupService {
     public DataResponseDto<List<GroupInfoResponseDto>> getExistingGroups(SortedBy sortedBy) {
         if (sortedBy == SortedBy.RECENT) {
             List<GroupInfoResponseDto> resultDtoList = groupRepository
-//                    .findAllByStateAndMeetingAtAfterOrderByCreatedAtDesc(State.RECRUITING, LocalDateTime.now())
                     .findExistingGroupsByRECENT(State.RECRUITING, LocalDateTime.now())
                     .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
                     .collect(Collectors.toList());
-//            resultDtoList.addAll(groupRepository
-//                    .findAllByStateAndMeetingAtOrderByCreatedAtDesc(State.RECRUITING, null)
-//                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
-//                    .collect(Collectors.toList()));
             return DataResponseDto.<List<GroupInfoResponseDto>>builder()
                     .data(resultDtoList).build();
         } else if (sortedBy == SortedBy.SOON) {
