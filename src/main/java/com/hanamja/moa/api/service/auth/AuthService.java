@@ -51,18 +51,18 @@ public class AuthService {
                     .build();
         }
 
-        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
-        String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
+        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getRole(), user.getIsActive());
+        String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole(), user.getIsActive());
 
         UserToken userToken = UserToken.builder().user(user).refreshToken(refreshToken).build();
 
-        if (userTokenRepository.existsByUser_Id(user.getId())){
+        if (userTokenRepository.existsByUser_Id(user.getId())) {
             userTokenRepository.updateRefreshToken(user.getId(), refreshToken);
         } else {
             userTokenRepository.save(userToken);
         }
 
-        return LoginResponseDto.of(accessToken, refreshToken, user.isOnboarded(), user.isActive());
+        return LoginResponseDto.of(accessToken, refreshToken, user.getIsOnboarded(), user.getIsActive());
     }
 
     @Transactional
@@ -91,8 +91,8 @@ public class AuthService {
 
         User user = userToken.getUser();
 
-        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
-        String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
+        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getRole(), user.getIsActive());
+        String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole(), user.getIsActive());
 
         userTokenRepository.updateRefreshToken(user.getId(), refreshToken);
 
