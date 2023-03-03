@@ -95,9 +95,9 @@ public class PointHistoryService {
         List<UserPointRankResponseDto> responseDtos = new ArrayList<>();
 
         responseDtos.add(UserPointRankResponseDto.of("FRESHMAN",
-                userRepository.findTop20ByRoleOrderByPointDesc(Role.ROLE_FRESHMEN)));
+                userRepository.findTop20ByRoleAndIsOnboardedAndIsActiveOrderByPointDesc(Role.ROLE_FRESHMEN, true, true)));
         responseDtos.add(UserPointRankResponseDto.of("SENIORS",
-                userRepository.findTop20ByRoleOrderByPointDesc(Role.ROLE_SENIOR)));
+                userRepository.findTop20ByRoleAndIsOnboardedAndIsActiveOrderByPointDesc(Role.ROLE_SENIOR, true, true)));
 
         return DataResponseDto.<List<UserPointRankResponseDto>>builder().data(responseDtos).build();
     }
