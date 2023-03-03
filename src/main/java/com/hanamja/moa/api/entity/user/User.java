@@ -70,10 +70,10 @@ public class User {
 //    private List<Album> metAlbumList;
 
     @Column(name = "is_onboarded", nullable = false)
-    private boolean isOnboarded;
+    private Boolean isOnboarded;
 
     @Column(name = "is_active", nullable = false)
-    private boolean isActive;
+    private Boolean isActive;
 
     @Column(name = "is_notified", nullable = false)
     private Boolean isNotified;
