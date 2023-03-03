@@ -574,7 +574,6 @@ public class GroupService {
         if (Optional.ofNullable(group.getMeetingAt()).isEmpty()) {
             group.updateNullMeetingAt(now);
         }
-        groupRepository.updateCompleteGroup(imageLink, now, gid, State.DONE);
 
         // 앨범마다 group 유저 정보 체크해서 없으면 카드 추가, 있으면 badged -> true 로 변경
         List<User> groupJoinUsers = userGroupRepository.findGroupJoiner(gid);
@@ -675,6 +674,8 @@ public class GroupService {
             userRepository.addUserPoint(albumOwner.getId(), albumOwnerPoint);
 
         });
+
+        groupRepository.updateCompleteGroup(imageLink, now, gid, State.DONE);
 
         return GroupCompleteRespDto.builder()
                 .cardList(cardList)
