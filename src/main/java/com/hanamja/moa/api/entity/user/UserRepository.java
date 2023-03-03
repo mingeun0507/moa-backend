@@ -18,7 +18,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findTop20ByRoleAndIsOnboardedAndIsActiveOrderByPointDesc(Role role, Boolean isOnboarded, Boolean isActive);
 
     @Query(value = "SELECT COUNT(u) FROM User u " +
-            "WHERE u.point >= (SELECT uu.point FROM User uu WHERE uu.id = :uid AND uu.role = :role) AND u.role = :role")
+            "WHERE u.point >= (SELECT uu.point FROM User uu WHERE uu.id = :uid AND uu.role = :role AND u.isActive = true AND u.isOnboarded = true) AND u.role = :role")
     int getUserRank(@Param(value = "uid") Long uid, @Param(value = "role")Role role);
 
     @Modifying(clearAutomatically = true)
