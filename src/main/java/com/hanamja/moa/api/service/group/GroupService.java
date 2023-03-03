@@ -338,8 +338,6 @@ public class GroupService {
                                                     .message("해당 유저를 찾을 수 없습니다.")
                                                     .build());
 
-        System.out.println("??????" + userGroupRepository.existsByGroupIdAndJoinerId(groupId, userAccount.getUserId()));
-
         if (userGroupRepository.existsByGroupIdAndJoinerId(groupId, userAccount.getUserId())) {
             throw UserInputException.builder().httpStatus(HttpStatus.BAD_REQUEST).message("이미 참여한 그룹입니다.").build();
         }
@@ -501,7 +499,41 @@ public class GroupService {
     @Transactional
     public void groupRecruitDone(Long uid, Long gid){
         validateGroupMaker(uid, gid);
+        Group existingGroup = groupRepository.findById(gid).orElseThrow(
+                () ->
+                        NotFoundException.builder()
+                                .httpStatus(HttpStatus.NOT_FOUND)
+                                .message("groupId로 모임을 찾을 수 없습니다.")
+                                .build()
+        );
+
+        String groupMakerName = existingGroup.getMaker().getName();
+
+        if (existingGroup.getState() != State.RECRUITING) {
+            throw NotFoundException.builder()
+                    .httpStatus(HttpStatus.CONFLICT)
+                    .message("모집중인 모임이 아닙니다. 모임의 상태를 확인 후 다시 시도해주세요.")
+                    .build();
+        }
+
         groupRepository.updateGroupState(State.RECRUITED, gid);
+        List<User> joinerList = userGroupRepository.findAllByGroup_Id(gid).stream()
+                .map(UserGroup::getJoiner).collect(Collectors.toList());
+
+        joinerList.forEach(joiner -> {
+            notificationRepository
+                    .save(
+                            Notification
+                                    .builder()
+                                    .sender(existingGroup.getMaker())
+                                    .receiver(joiner)
+                                    .content(existingGroup.getName() + " 모임의 모집이 마감되었어요.")
+                                    .reason("모임 생성자: " + groupMakerName + "님")
+                                    .build()
+                    );
+            joiner.notifyUser();
+            userRepository.save(joiner);
+        });
     }
 
 
@@ -519,7 +551,7 @@ public class GroupService {
         String groupMakerName = group.getMaker().getName();
 
         String imageLink = amazonS3Uploader.saveFileAndGetUrl(image);
-        if (!Optional.ofNullable(group.getMeetingAt()).isPresent()){
+        if (Optional.ofNullable(group.getMeetingAt()).isEmpty()) {
             group.updateNullMeetingAt(now);
         }
         groupRepository.updateCompleteGroup(imageLink, now, gid, State.DONE);
@@ -588,7 +620,7 @@ public class GroupService {
                             .builder()
                             .sender(group.getMaker())
                             .receiver(albumOwner)
-                            .content(String.join(", ", nameList) + " 님과의 카드를 만들었어요.")
+                            .content(String.join(", ", nameList) + "님과의 카드를 만들었어요.")
                             .reason("모임 생성자: " + groupMakerName + "님")
                             .build()
             );
