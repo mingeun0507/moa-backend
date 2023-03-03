@@ -31,4 +31,11 @@ public class GroupDetailInfoResponseDto {
                 .build();
     }
 
+    public static GroupDetailInfoResponseDto from(Group group, List<String> hashtags, List<SimpleUserInfoResponseDto> userInfoDtoList) {
+        return GroupDetailInfoResponseDto
+                .builder()
+                .groupInfoResponseDto(GroupInfoResponseDto.from(group, hashtags))
+                .userInfoDtoList(userInfoDtoList)
+                .build();
+    }
 }

@@ -325,6 +325,24 @@ public class GroupService {
 
         return GroupDetailInfoResponseDto.from(existingGroup, getHashtagStringList(existingGroup), simpleUserInfoDtoList, point);
     }
+
+    public GroupDetailInfoResponseDto getPublicExistingGroupDetail(Long groupId) {
+        Group existingGroup = groupRepository.findById(groupId).orElseThrow(
+                () -> NotFoundException
+                        .builder()
+                        .httpStatus(HttpStatus.BAD_REQUEST)
+                        .message("groupId로 group을 찾을 수 없습니다.")
+                        .build()
+        );
+
+        // 참여자들의 간단한 프로필 추가
+        List<SimpleUserInfoResponseDto> simpleUserInfoDtoList =
+                userGroupRepository.findAllByGroup_Id(groupId).stream()
+                        .map(x -> SimpleUserInfoResponseDto.from(x.getJoiner()))
+                        .collect(Collectors.toList());
+
+        return GroupDetailInfoResponseDto.from(existingGroup, getHashtagStringList(existingGroup), simpleUserInfoDtoList);
+    }
         
     public GroupInfoResponseDto join(Long groupId, UserAccount userAccount) {
 

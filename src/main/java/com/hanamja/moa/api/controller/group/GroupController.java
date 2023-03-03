@@ -72,6 +72,14 @@ public class GroupController {
         return ResponseEntity.ok(groupService.getExistingGroupDetail(userAccount, groupId));
     }
 
+    @Operation(summary = "공유하기 기능 - 모임 정보 보기", description = "공유하기 기능 - 모임 정보 보기")
+    @GetMapping("/public/{groupId}")
+    public ResponseEntity<GroupDetailInfoResponseDto> getPublicExistingGroupDetail(
+            @NotNull @PathVariable Long groupId) {
+
+        return ResponseEntity.ok(groupService.getPublicExistingGroupDetail(groupId));
+    }
+
     @Operation(summary = "모임 참가하기", description = "모임 참가하기")
     @PostMapping("/{groupId}")
     public ResponseEntity<GroupInfoResponseDto> join(
