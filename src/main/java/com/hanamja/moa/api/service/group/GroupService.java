@@ -646,18 +646,6 @@ public class GroupService {
             albumOwner.notifyUser();
             userRepository.save(albumOwner);
 
-            if (!albumOwner.getId().equals(uid)) {
-                List<UserGroup> onePersonCard = userGroupRepository.findOnePersonCard(uid, albumOwner.getId(), State.DONE);
-                cardList.add(GroupCompleteRespDto.Card.builder()
-                        .userId(albumOwner.getId())
-                        .username(albumOwner.getName())
-                        .meetingAt(group.getMeetingAt())
-                        .meetingCnt(Long.valueOf(onePersonCard.size()))
-                        .frontImage(albumOwner.getImageLink())
-                        .backImage(imageLink)
-                        .build());
-            }
-
             albumOwnerPointHistoryMessage.replace(albumOwnerPointHistoryMessage.length() - 2, albumOwnerPointHistoryMessage.length(), "\n");
             albumOwnerPointHistoryMessage.append("총 점수: ").append(albumOwnerPoint).append("점");
 
@@ -677,6 +665,19 @@ public class GroupService {
 
         groupRepository.updateCompleteGroup(imageLink, now, gid, State.DONE);
 
+        for (User albumOwner : groupJoinUsers) {
+            if (!albumOwner.getId().equals(uid)) {
+                List<UserGroup> onePersonCard = userGroupRepository.findOnePersonCard(uid, albumOwner.getId(), State.DONE);
+                cardList.add(GroupCompleteRespDto.Card.builder()
+                        .userId(albumOwner.getId())
+                        .username(albumOwner.getName())
+                        .meetingAt(group.getMeetingAt())
+                        .meetingCnt(Long.valueOf(onePersonCard.size()))
+                        .frontImage(albumOwner.getImageLink())
+                        .backImage(imageLink)
+                        .build());
+            }
+        }
         return GroupCompleteRespDto.builder()
                 .cardList(cardList)
                 .build();
