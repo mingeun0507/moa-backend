@@ -412,9 +412,16 @@ public class GroupService {
                 .orElseThrow(() -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당 그룹을 찾을 수 없습니다."));
 
         Group group = userGroup.getGroup();
-        group.subtractCurrentPeopleNum();
-        userGroupRepository.delete(userGroup);
-        groupRepository.save(group);
+        if(group.getState().equals(State.RECRUITING)){
+            group.subtractCurrentPeopleNum();
+            userGroupRepository.delete(userGroup);
+            groupRepository.save(group);
+        } else {
+            throw UserInputException.builder()
+                    .httpStatus(HttpStatus.BAD_REQUEST)
+                    .message("모임이 이미 모집 완료되었습니다.")
+                    .build();
+        }
 
         return GroupInfoResponseDto.from(group, getHashtagStringList(group));
     }
