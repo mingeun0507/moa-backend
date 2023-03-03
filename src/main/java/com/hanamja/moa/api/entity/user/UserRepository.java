@@ -15,7 +15,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Boolean existsByStudentId(String studentId);
 
-    List<User> findTop20ByRoleOrderByPointDesc(Role role);
+    List<User> findTop20ByRoleAndIsOnboardedAndIsActiveOrderByPointDesc(Role role, Boolean isOnboarded, Boolean isActive);
 
     @Query(value = "SELECT COUNT(u) FROM User u " +
             "WHERE u.point >= (SELECT uu.point FROM User uu WHERE uu.id = :uid AND uu.role = :role) AND u.role = :role")
