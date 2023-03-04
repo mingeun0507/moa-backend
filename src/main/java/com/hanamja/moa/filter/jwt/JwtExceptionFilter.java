@@ -2,6 +2,7 @@ package com.hanamja.moa.filter.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanamja.moa.exception.custom.CustomException;
+import io.sentry.Sentry;
 import lombok.RequiredArgsConstructor;
 import org.apache.http.entity.ContentType;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -22,6 +23,7 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
         try {
             doFilter(request, response, filterChain);
         } catch (CustomException e) {
+            Sentry.captureException(e);
             final Map<String, Object> body = new HashMap<>();
             final ObjectMapper mapper = new ObjectMapper();
             response.setStatus(e.getHttpStatus().value());
