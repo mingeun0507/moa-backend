@@ -347,9 +347,13 @@ public class GroupService {
 
         User user = userRepository.findUserById(userAccount.getUserId())
                 .orElseThrow(() -> NotFoundException.builder()
-                                                    .httpStatus(HttpStatus.NOT_FOUND)
-                                                    .message("해당 유저를 찾을 수 없습니다.")
-                                                    .build());
+                        .httpStatus(HttpStatus.NOT_FOUND)
+                        .message("해당 유저를 찾을 수 없습니다.")
+                        .build());
+
+        User groupMaker = group.getMaker();
+        String groupMakerName = groupMaker.getName();
+        String groupName = group.getName();
 
         if (userGroupRepository.existsByGroupIdAndJoinerId(groupId, userAccount.getUserId())) {
             throw UserInputException.builder().httpStatus(HttpStatus.BAD_REQUEST).message("이미 참여한 그룹입니다.").build();
@@ -367,14 +371,34 @@ public class GroupService {
             throw UserInputException.builder().httpStatus(HttpStatus.BAD_REQUEST).message("모집인원이 초과된 그룹입니다.").build();
         }
         UserGroup userGroup = UserGroup
-                                .builder()
-                                    .progress("")
-                                    .joiner(user)
-                                    .group(group)
-                                .build();
+                .builder()
+                .progress("")
+                .joiner(user)
+                .group(group)
+                .build();
         userGroupRepository.save(userGroup);
 
         Long currNum = Long.valueOf(userGroupRepository.findAllByGroup_Id(groupId).size());
+
+        // 모임 정원이 꽉 찼을 때 알림 생성
+        if (currNum.equals(group.getMaxPeopleNum())) {
+            userGroupRepository.findAllByGroup_Id(group.getId()).stream()
+                    .map(UserGroup::getJoiner)
+                    .forEach(joiner -> {
+                        notificationRepository.save(
+                                Notification
+                                        .builder()
+                                        .sender(groupMaker)
+                                        .receiver(joiner)
+                                        .content(groupName + " 모임의 정원이 꽉 찼어요. 우리 한번 모여볼까요?")
+                                        .reason("모임 생성자: " + groupMakerName + "님")
+                                        .build()
+                        );
+
+                        joiner.notifyUser();
+                        userRepository.save(joiner);
+                    });
+        }
         group.updateCurrentPeopleNum(currNum);
         groupRepository.save(group);
 
@@ -473,7 +497,7 @@ public class GroupService {
                                             .build()
                             );
 
-                            receiver.notifyUser();
+                    receiver.notifyUser();
                     userRepository.save(receiver);
                         }
                 );
@@ -547,7 +571,7 @@ public class GroupService {
                                     .builder()
                                     .sender(existingGroup.getMaker())
                                     .receiver(joiner)
-                                    .content(existingGroup.getName() + " 모임의 모집이 마감되었어요.")
+                                    .content(existingGroup.getName() + " 모임의 모집이 마감되었어요. 모임원들과 연락해보세요!")
                                     .reason("모임 생성자: " + groupMakerName + "님")
                                     .build()
                     );
