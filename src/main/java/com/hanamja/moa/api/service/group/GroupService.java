@@ -726,9 +726,8 @@ public class GroupService {
                     .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
                     .collect(Collectors.toList());
         } else if (sortedBy == SortedBy.SOON) {
-            LocalDateTime now = ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("Asia/Seoul")).toLocalDateTime();
             resultDtoList = groupRepository
-                    .searchGroupByMeetingAtAndKeyword(now, keyword)
+                    .searchGroupByMeetingAtAndKeyword(keyword)
                     .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
                     .collect(Collectors.toList());
         } else {
