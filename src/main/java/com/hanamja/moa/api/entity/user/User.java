@@ -130,4 +130,8 @@ public class User {
     public void unNotifyUser() {
         this.isNotified = false;
     }
+
+    public void addPoint(Long point) {
+        this.point += point;
+    }
 }
