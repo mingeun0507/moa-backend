@@ -16,6 +16,13 @@
         </layout>
     </appender>
 
+    <!-- Configure the Sentry appender, overriding the logging threshold to the WARN level -->
+    <appender name="Sentry" class="io.sentry.logback.SentryAppender">
+        <options>
+            <dsn>https://93e7db91277f49ed9808aaf52acd05f2@o4504775285669888.ingest.sentry.io/4504775287308288</dsn>
+        </options>
+    </appender>
+
     <!-- 파일(FILE) -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <!--     log 기록할 파일 위치 설정 -->
@@ -37,6 +44,7 @@
     <root level="info">
         <!--     참조할 appender 설정 - STDOUT -->
         <appender-ref ref="STDOUT"/>
+        <appender-ref ref="Sentry"/>
     </root>
 
     <!-- log 레벨 설정 (org.springframework.web=debug)-->
