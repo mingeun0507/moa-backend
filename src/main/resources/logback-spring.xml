@@ -22,7 +22,7 @@
             <level>INFO</level>
         </filter>
         <options>
-            <dsn>https://93e7db91277f49ed9808aaf52acd05f2@o4504775285669888.ingest.sentry.io/4504775287308288</dsn>
+            <dsn>https://f89c205e3fa641b184e424c5d3fafc9c@o4504775285669888.ingest.sentry.io/4504789344583680</dsn>
         </options>
     </appender>
 
