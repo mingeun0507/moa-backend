@@ -30,6 +30,7 @@ repositories {
 
 dependencies {
 	implementation 'io.sentry:sentry-spring-boot-starter:6.15.0'
+	implementation 'io.sentry:sentry-logback:6.15.0'
 
 	implementation 'io.awspring.cloud:spring-cloud-starter-aws:2.3.1'
 
