@@ -86,7 +86,7 @@ public class Group {
 
     // 모임 정보 수정에 대한 update 메소드
     public void modifyGroupInfo(String name, String description, LocalDateTime meetingAt, Long maxPeopleNum) {
-        if (Optional.ofNullable(meetingAt).isPresent()){
+        if (Optional.ofNullable(meetingAt).isPresent() && !this.meetingAt.equals(meetingAt)){
             meetingAt = ZonedDateTime.of(meetingAt, ZoneId.of("Asia/Seoul"))
                     .toLocalDateTime().plusHours(9L);
         }
