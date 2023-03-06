@@ -86,9 +86,16 @@ public class Group {
 
     // 모임 정보 수정에 대한 update 메소드
     public void modifyGroupInfo(String name, String description, LocalDateTime meetingAt, Long maxPeopleNum) {
-        if (Optional.ofNullable(meetingAt).isPresent() && !Optional.ofNullable(this.meetingAt).equals(meetingAt)){
-            meetingAt = ZonedDateTime.of(meetingAt, ZoneId.of("Asia/Seoul"))
-                    .toLocalDateTime().plusHours(9L);
+        if (Optional.ofNullable(meetingAt).isPresent()){
+            if (Optional.ofNullable(this.meetingAt).isPresent() && !this.meetingAt.equals(meetingAt)){
+                // 수정사항없이 보냈을 때 +9 안되도록 조건문 추가
+                meetingAt = ZonedDateTime.of(meetingAt, ZoneId.of("Asia/Seoul"))
+                        .toLocalDateTime().plusHours(9L);
+            } else if(Optional.ofNullable(this.meetingAt).isEmpty()){
+                // 만나는 날짜 미정일 경우 NPE 해결
+                meetingAt = ZonedDateTime.of(meetingAt, ZoneId.of("Asia/Seoul"))
+                        .toLocalDateTime().plusHours(9L);
+            }
         }
         this.name = name;
         this.description = description;
