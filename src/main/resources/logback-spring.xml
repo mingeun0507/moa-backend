@@ -48,7 +48,7 @@
     </root>
 
     <!-- log 레벨 설정 (org.springframework.web=debug)-->
-    <logger name="c.h.moa.filter.logging.LoggingFilter" level="debug">
+    <logger name="com.hanamja.moa.filter.logging.LoggingFilter" level="debug">
         <appender-ref ref="FILE"/>
     </logger>
 
