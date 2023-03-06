@@ -18,6 +18,9 @@
 
     <!-- Configure the Sentry appender, overriding the logging threshold to the WARN level -->
     <appender name="Sentry" class="io.sentry.logback.SentryAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
         <options>
             <dsn>https://93e7db91277f49ed9808aaf52acd05f2@o4504775285669888.ingest.sentry.io/4504775287308288</dsn>
         </options>
