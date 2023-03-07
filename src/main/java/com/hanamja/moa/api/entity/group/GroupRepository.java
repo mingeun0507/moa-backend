@@ -35,6 +35,7 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
     List<Group> findAllByStateAndMeetingAtAfterOrderByCreatedAtDesc(State state, LocalDateTime currentTime);
 
     List<Group> findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State state, LocalDateTime currentTime);
+    List<Group> findAllByStateAndMeetingAtBeforeOrderByCreatedAtDesc(State state, LocalDateTime currentTime);
 
     List<Group> findAllByStateAndMeetingAtOrderByCreatedAtDesc(State state, LocalDateTime currentTime);
 
