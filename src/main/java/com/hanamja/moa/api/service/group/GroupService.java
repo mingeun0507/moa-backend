@@ -264,6 +264,13 @@ public class GroupService {
                     .collect(Collectors.toList()));
             return DataResponseDto.<List<GroupInfoResponseDto>>builder()
                     .data(resultDtoList).build();
+        } else if (sortedBy == SortedBy.PAST) {
+            List<GroupInfoResponseDto> resultDtoList = groupRepository
+                    .findAllByStateAndMeetingAtBeforeOrderByCreatedAtDesc(State.DONE, LocalDateTime.now())
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList());
+            return DataResponseDto.<List<GroupInfoResponseDto>>builder()
+                    .data(resultDtoList).build();
         } else {
             throw InvalidParameterException
                     .builder()
