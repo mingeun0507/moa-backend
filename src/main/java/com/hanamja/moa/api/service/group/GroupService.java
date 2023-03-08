@@ -61,9 +61,6 @@ public class GroupService {
 
         User user = validateUser(userAccount.getUserId());
 
-        // 재학생인지 검증
-        validateSenior(user);
-
         // Hashtag #으로 파싱 후 분리, 저장 (다른 메소드로 분리 구현)
         List<Hashtag> hashtagList = saveHashtags(makingGroupRequestDto.getHashtags());
 
