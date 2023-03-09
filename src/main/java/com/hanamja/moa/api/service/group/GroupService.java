@@ -92,7 +92,7 @@ public class GroupService {
         User user = validateUser(userAccount.getUserId());
 
         // 재학생인지 검증
-        validateSenior(user);
+//        validateSenior(user);
 
         // groupId로 group 찾아오기
         Group existingGroup = groupRepository.findById(modifyingGroupRequestDto.getId()).orElseThrow(
