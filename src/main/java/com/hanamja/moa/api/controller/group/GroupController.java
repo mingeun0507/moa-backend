@@ -1,5 +1,7 @@
 package com.hanamja.moa.api.controller.group;
 
+import com.hanamja.moa.api.dto.comment.request.WritingCommentRequestDto;
+import com.hanamja.moa.api.dto.comment.response.CommentInfoResponseDto;
 import com.hanamja.moa.api.dto.group.request.KickOutRequestDto;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
@@ -170,5 +172,11 @@ public class GroupController {
     @GetMapping("/search")
     public ResponseEntity<DataResponseDto<List<GroupInfoResponseDto>>> searchAndSortGroupByKeyword(@RequestParam String keyword, @RequestParam SortedBy sortedBy) {
         return ResponseEntity.ok(groupService.searchAndSortGroupByKeyword(keyword, sortedBy));
+    }
+
+    @PostMapping("/{groupId}/comment")
+    public ResponseEntity<DataResponseDto<CommentInfoResponseDto>> writeComment(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @NotNull @PathVariable Long groupId, @Validated @RequestBody WritingCommentRequestDto writingCommentRequestDto) {
+
+        return ResponseEntity.ok(groupService.writeComment(userAccount, groupId, writingCommentRequestDto));
     }
 }
