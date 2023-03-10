@@ -1,6 +1,8 @@
 package com.hanamja.moa.api.service.group;
 
 import com.hanamja.moa.api.controller.group.SortedBy;
+import com.hanamja.moa.api.dto.comment.request.WritingCommentRequestDto;
+import com.hanamja.moa.api.dto.comment.response.CommentInfoResponseDto;
 import com.hanamja.moa.api.dto.group.request.KickOutRequestDto;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
@@ -8,6 +10,8 @@ import com.hanamja.moa.api.dto.group.response.*;
 import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.album.Album;
 import com.hanamja.moa.api.entity.album.AlbumRepository;
+import com.hanamja.moa.api.entity.comment.Comment;
+import com.hanamja.moa.api.entity.comment.CommentRepository;
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.group.GroupRepository;
 import com.hanamja.moa.api.entity.group.State;
@@ -54,6 +58,7 @@ public class GroupService {
     private final HashtagRepository hashtagRepository;
     private final NotificationRepository notificationRepository;
     private final PointHistoryRepository pointHistoryRepository;
+    private final CommentRepository commentRepository;
     private final AmazonS3Uploader amazonS3Uploader;
 
     @Transactional
@@ -176,6 +181,16 @@ public class GroupService {
                         .builder()
                         .httpStatus(HttpStatus.BAD_REQUEST)
                         .message("유효하지 않은 사용자입니다.")
+                        .build()
+        );
+    }
+
+    private Group validateGroup(Long groupId) {
+        return groupRepository.findById(groupId).orElseThrow(
+                () -> NotFoundException
+                        .builder()
+                        .httpStatus(HttpStatus.BAD_REQUEST)
+                        .message("유효하지 않은 모임입니다.")
                         .build()
         );
     }
@@ -744,5 +759,24 @@ public class GroupService {
 
         return DataResponseDto.<List<GroupInfoResponseDto>>builder()
                 .data(resultDtoList).build();
+    }
+
+
+    @Transactional
+    public DataResponseDto<CommentInfoResponseDto> writeComment(UserAccount userAccount, Long groupId, WritingCommentRequestDto writingCommentRequestDto) {
+        User existingUser = validateUser(userAccount.getUserId());
+        Group existingGroup = validateGroup(groupId);
+
+        Comment comment = Comment.builder()
+                .group(existingGroup)
+                .user(existingUser)
+                .content(writingCommentRequestDto.getContent())
+                .build();
+
+        commentRepository.save(comment);
+
+        return DataResponseDto.<CommentInfoResponseDto>builder()
+                .data(CommentInfoResponseDto.from(comment))
+                .build();
     }
 }
