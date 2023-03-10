@@ -174,6 +174,7 @@ public class GroupController {
         return ResponseEntity.ok(groupService.searchAndSortGroupByKeyword(keyword, sortedBy));
     }
 
+    @Operation(summary = "모임 댓글 작성하기", description = "모임 댓글 작성하기")
     @PostMapping("/{groupId}/comment")
     public ResponseEntity<DataResponseDto<CommentInfoResponseDto>> writeComment(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @NotNull @PathVariable Long groupId, @Validated @RequestBody WritingCommentRequestDto writingCommentRequestDto) {
 
