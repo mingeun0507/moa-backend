@@ -11,9 +11,6 @@ import javax.validation.constraints.NotNull;
 public class WritingCommentRequestDto {
 
     @NotNull
-    private Long groupId;
-
-    @NotNull
     private String content;
 
     /* 작성, 수정은 이거로 통합해서 쓰면 될듯? */
