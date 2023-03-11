@@ -180,4 +180,11 @@ public class GroupController {
 
         return ResponseEntity.ok(groupService.writeComment(userAccount, groupId, writingCommentRequestDto));
     }
+
+    @Operation(summary = "모임 댓글 수정하기", description = "모임 댓글 수정하기")
+    @PutMapping("/comment/{commentId}")
+    public ResponseEntity<DataResponseDto<CommentInfoResponseDto>> updateComment(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @NotNull @PathVariable Long commentId, @Validated @RequestBody WritingCommentRequestDto writingCommentRequestDto) {
+
+        return ResponseEntity.ok(groupService.updateComment(userAccount, commentId, writingCommentRequestDto));
+    }
 }
