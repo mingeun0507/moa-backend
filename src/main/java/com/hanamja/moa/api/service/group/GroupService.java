@@ -811,4 +811,22 @@ public class GroupService {
                 .build();
     }
 
+    public DataResponseDto<CommentInfoResponseDto> deleteComment(UserAccount userAccount, Long commentId) {
+        User existingUser = validateUser(userAccount.getUserId());
+        Comment existingComment = validateComment(commentId);
+
+        if (!existingComment.getUser().getId().equals(existingUser.getId())) {
+            throw InvalidParameterException
+                    .builder()
+                    .httpStatus(HttpStatus.FORBIDDEN)
+                    .message("댓글 작성자가 아닙니다.")
+                    .build();
+        }
+
+        commentRepository.delete(existingComment);
+
+        return DataResponseDto.<CommentInfoResponseDto>builder()
+                .data(CommentInfoResponseDto.from(existingComment))
+                .build();
+    }
 }
