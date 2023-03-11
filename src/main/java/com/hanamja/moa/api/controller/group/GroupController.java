@@ -187,4 +187,11 @@ public class GroupController {
 
         return ResponseEntity.ok(groupService.updateComment(userAccount, commentId, writingCommentRequestDto));
     }
+
+    @Operation(summary = "모임 댓글 삭제하기", description = "모임 댓글 삭제하기")
+    @DeleteMapping("/comment/{commentId}")
+    public ResponseEntity<DataResponseDto<CommentInfoResponseDto>> deleteComment(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @NotNull @PathVariable Long commentId) {
+
+        return ResponseEntity.ok(groupService.deleteComment(userAccount, commentId));
+    }
 }
