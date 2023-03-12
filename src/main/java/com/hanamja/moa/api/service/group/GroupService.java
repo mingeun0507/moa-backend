@@ -347,7 +347,7 @@ public class GroupService {
             }
         }
 
-        return GroupDetailInfoResponseDto.from(existingGroup, getHashtagStringList(existingGroup), simpleUserInfoDtoList, point);
+        return GroupDetailInfoResponseDto.from(existingGroup, getHashtagStringList(existingGroup), simpleUserInfoDtoList, point, getRecentCommentDtoFromGroup(existingGroup));
     }
 
     public GroupDetailInfoResponseDto getPublicExistingGroupDetail(Long groupId) {
@@ -365,7 +365,7 @@ public class GroupService {
                         .map(x -> SimpleUserInfoResponseDto.from(x.getJoiner()))
                         .collect(Collectors.toList());
 
-        return GroupDetailInfoResponseDto.from(existingGroup, getHashtagStringList(existingGroup), simpleUserInfoDtoList);
+        return GroupDetailInfoResponseDto.from(existingGroup, getHashtagStringList(existingGroup), simpleUserInfoDtoList, getRecentCommentDtoFromGroup(existingGroup));
     }
         
     public GroupInfoResponseDto join(Long groupId, UserAccount userAccount) {
@@ -828,5 +828,13 @@ public class GroupService {
         return DataResponseDto.<CommentInfoResponseDto>builder()
                 .data(CommentInfoResponseDto.from(existingComment))
                 .build();
+    }
+
+    private CommentInfoResponseDto getRecentCommentDtoFromGroup(Group group) {
+        Optional<Comment> recentComment = commentRepository.findTopByGroupOrderByCreatedAtDesc(group);
+        if (recentComment.isEmpty()) {
+            return null;
+        }
+        return CommentInfoResponseDto.from(recentComment.get());
     }
 }
