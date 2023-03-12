@@ -39,6 +39,7 @@ out/
 ### Security Files ###
 application-dev.yml
 application-prod.yml
+application-test.yml
 application-secret.yml
 
 ### Log Files ###
