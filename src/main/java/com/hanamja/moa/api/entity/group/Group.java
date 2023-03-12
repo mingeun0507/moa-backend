@@ -142,6 +142,6 @@ public class Group {
     }
 
     public int getCommentCount() {
-        return this.commentList.size();
+        return commentList == null ? 0 : this.commentList.size();
     }
 }
