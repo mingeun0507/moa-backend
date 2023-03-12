@@ -15,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import net.bytebuddy.implementation.bind.annotation.Default;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -25,6 +26,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -201,9 +203,11 @@ public class GroupController {
 
     @Operation(summary = "모임 댓글 리스트 조회하기", description = "모임 댓글 리스트 조회하기")
     @GetMapping("/{groupId}/comment")
-    public ResponseEntity<DataResponseDto<Page<CommentInfoResponseDto>>> getPagedCommentList(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @NotNull @PathVariable Long groupId,
-                                                                                             @PageableDefault(size = 100, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    public ResponseEntity<DataResponseDto<Page<CommentInfoResponseDto>>> getPagedCommentList(@NotNull @PathVariable Long groupId,
+                                                                                             @RequestParam @NotNull Long cursor,
+                                                                                             @RequestParam @NotNull int offset,
+                                                                                             @PageableDefault(size = 20, sort = "comment_id", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        return ResponseEntity.ok(groupService.getCommentList(userAccount, groupId, pageable));
+        return ResponseEntity.ok(groupService.getCommentList(groupId, cursor, offset, pageable));
     }
 }

@@ -835,17 +835,17 @@ public class GroupService {
     }
 
     private CommentInfoResponseDto getRecentCommentDtoFromGroup(Group group) {
-        Optional<Comment> recentComment = commentRepository.findTopByGroupOrderByCreatedAtDesc(group);
+        Optional<Comment> recentComment = commentRepository.findTopByGroupOrderByIdDesc(group);
         if (recentComment.isEmpty()) {
             return null;
         }
         return CommentInfoResponseDto.from(recentComment.get());
     }
 
-    public DataResponseDto<Page<CommentInfoResponseDto>> getCommentList(UserAccount userAccount, Long groupId, Pageable pageable) {
+    public DataResponseDto<Page<CommentInfoResponseDto>> getCommentList(Long groupId, Long cursor, int offset, Pageable pageable) {
         Group existingGroup = validateGroup(groupId);
 
-        Page<Comment> commentPage = commentRepository.findByGroup(existingGroup, pageable);
+        Page<Comment> commentPage = commentRepository.findAllByGroupAndIdGreaterThanEqual(existingGroup, cursor, offset, pageable);;
 
         return DataResponseDto.<Page<CommentInfoResponseDto>>builder()
                 .data(commentPage.map(CommentInfoResponseDto::from))
