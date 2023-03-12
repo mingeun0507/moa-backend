@@ -27,45 +27,46 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      - name: Copy Prod
+      - name: Copy Test
         env:
-          OCCUPY_PROD: ${{ secrets.OCCUPY_PROD }}
-          OCCUPY_PROD_DIR: src/main/resources
-          # OCCUPY_PROD_TEST_DIR: src/test/resources
-          OCCUPY_PROD_DIR_FILE_NAME: application-prod.yml
-        run: echo $OCCUPY_PROD | base64 --decode > $OCCUPY_PROD_DIR/$OCCUPY_PROD_DIR_FILE_NAME
-          # echo $OCCUPY_PROD | base64 --decode > $OCCUPY_PROD_TEST_DIR/$OCCUPY_PROD_DIR_FILE_NAME
+          OCCUPY_TEST: ${{ secrets.OCCUPY_TEST }}
+          OCCUPY_TEST_DIR: src/main/resources
+          OCCUPY_TEST_DIR_FILE_NAME: application-test.yml
+        run: echo $OCCUPY_TEST | base64 --decode > $OCCUPY_TEST_DIR/$OCCUPY_TEST_DIR_FILE_NAME
 
       - name: Copy Secret
         env:
           OCCUPY_SECRET: ${{ secrets.OCCUPY_SECRET }}
           OCCUPY_SECRET_DIR: src/main/resources
-          # OCCUPY_SECRET_TEST_DIR: src/test/resources
           OCCUPY_SECRET_DIR_FILE_NAME: application-secret.yml
         run: echo $OCCUPY_SECRET | base64 --decode > $OCCUPY_SECRET_DIR/$OCCUPY_SECRET_DIR_FILE_NAME
-        # echo $OCCUPY_SECRET | base64 --decode > $OCCUPY_SECRET_TEST_DIR/$OCCUPY_SECRET_DIR_FILE_NAME
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
-        with:
-          arguments: build
+        run: ./gradlew build
+          shell: bash
 
       - name: Compile querydsl with Gradle
         run: ./gradlew compilequerydsl
 
-      - name: Get current time
-        uses: 1466587594/get-current-time@v2
-        id: current-time
-        with:
-          format: YYYYMMDDTHHmm
-          utcOffset: "+09:00"
+      - name: Make zip file
+        run: zip -qq -r ./$GITHUB_SHA.zip .
+        shell: bash
 
-      - name: Generate deployment package
-        run: |
-          mkdir -p deploy
-          cp build/libs/moa-0.0.1-SNAPSHOT.jar deploy/moa-springboot-server-ebextensions-1.jar
-          cp Procfile deploy/Procfile
-          cd deploy && zip -r moa-springboot-server-label-${{steps.current-time.outputs.formattedTime}}-${{github.sha}} .
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.ACCESS_KEY_SECRET }}
+          aws-region: ap-northeast-2
+
+      - name: Upload to S3
+        run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://moa-backend-bucket/test-server/$GITHUB_SHA.zip
+
+      - name: Code Deploy
+        run: aws deploy create-deployment --application-name moa_backend_test
+          --deployment-config-name CodeDeployDefault.OneAtATime
+          --deployment-group-name test_server
+          --s3-location bucket=moa-backend-bucket/test-server,bundleType=zip,key=$GITHUB_SHA.zip
