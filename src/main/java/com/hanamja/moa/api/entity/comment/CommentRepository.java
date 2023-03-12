@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface CommentRepository extends JpaRepository<Comment, Long>, CommentRepositoryCustom {
     Optional<Comment> findTopByGroupOrderByIdDesc(Group group);
 
-    Page<Comment> findAllByGroupAndIdGreaterThanEqual(Group group, Long cursor, int offset, Pageable pageable);
+    Page<Comment> findAllByGroupAndIdGreaterThanEqual(Group group, Long cursor, Pageable pageable);
 }

@@ -842,10 +842,10 @@ public class GroupService {
         return CommentInfoResponseDto.from(recentComment.get());
     }
 
-    public DataResponseDto<Page<CommentInfoResponseDto>> getCommentList(Long groupId, Long cursor, int offset, Pageable pageable) {
+    public DataResponseDto<Page<CommentInfoResponseDto>> getCommentList(Long groupId, Long cursor, Pageable pageable) {
         Group existingGroup = validateGroup(groupId);
 
-        Page<Comment> commentPage = commentRepository.findAllByGroupAndIdGreaterThanEqual(existingGroup, cursor, offset, pageable);;
+        Page<Comment> commentPage = commentRepository.findAllByGroupAndIdGreaterThanEqual(existingGroup, cursor, pageable);;
 
         return DataResponseDto.<Page<CommentInfoResponseDto>>builder()
                 .data(commentPage.map(CommentInfoResponseDto::from))

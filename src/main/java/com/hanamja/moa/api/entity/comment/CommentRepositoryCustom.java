@@ -6,5 +6,5 @@ import org.springframework.data.domain.Pageable;
 
 public interface CommentRepositoryCustom {
 
-    Page<Comment> findAllByGroupAndIdGreaterThanEqual(Group group, Long cursor, int offset, Pageable pageable);
+    Page<Comment> findAllByGroupAndIdGreaterThanEqual(Group group, Long cursor, Pageable pageable);
 }
