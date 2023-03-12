@@ -1,6 +1,8 @@
 package com.hanamja.moa.api.service.group;
 
 import com.hanamja.moa.api.controller.group.SortedBy;
+import com.hanamja.moa.api.dto.comment.request.WritingCommentRequestDto;
+import com.hanamja.moa.api.dto.comment.response.CommentInfoResponseDto;
 import com.hanamja.moa.api.dto.group.request.KickOutRequestDto;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
@@ -8,6 +10,8 @@ import com.hanamja.moa.api.dto.group.response.*;
 import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.album.Album;
 import com.hanamja.moa.api.entity.album.AlbumRepository;
+import com.hanamja.moa.api.entity.comment.Comment;
+import com.hanamja.moa.api.entity.comment.CommentRepository;
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.group.GroupRepository;
 import com.hanamja.moa.api.entity.group.State;
@@ -54,6 +58,7 @@ public class GroupService {
     private final HashtagRepository hashtagRepository;
     private final NotificationRepository notificationRepository;
     private final PointHistoryRepository pointHistoryRepository;
+    private final CommentRepository commentRepository;
     private final AmazonS3Uploader amazonS3Uploader;
 
     @Transactional
@@ -143,7 +148,7 @@ public class GroupService {
         User user = validateUser(userAccount.getUserId());
 
         // 재학생인지 검증
-        validateSenior(user);
+//        validateSenior(user);
 
         // groupId로 group 찾아오기
         Group existingGroup = groupRepository.findById(groupId).orElseThrow(
@@ -180,6 +185,16 @@ public class GroupService {
         );
     }
 
+    private Group validateGroup(Long groupId) {
+        return groupRepository.findById(groupId).orElseThrow(
+                () -> NotFoundException
+                        .builder()
+                        .httpStatus(HttpStatus.BAD_REQUEST)
+                        .message("유효하지 않은 모임입니다.")
+                        .build()
+        );
+    }
+
     private void validateSenior(User user) {
         if (user.isFreshman()) {
             log.info("신입생의 모임 생성 시도 발생 - 학번: {}, 이름: {}", user.getStudentId(), user.getName());
@@ -199,6 +214,16 @@ public class GroupService {
                     .message("해당 모임에 접근할 권한이 없습니다.")
                     .build();
         }
+    }
+
+    private Comment validateComment(Long commentId) {
+        return commentRepository.findById(commentId).orElseThrow(
+                () -> NotFoundException
+                        .builder()
+                        .httpStatus(HttpStatus.NOT_FOUND)
+                        .message("존재하지 않는 댓글입니다.")
+                        .build()
+        );
     }
 
     private List<String> getHashtagStringList(Group existingGroup) {
@@ -744,5 +769,64 @@ public class GroupService {
 
         return DataResponseDto.<List<GroupInfoResponseDto>>builder()
                 .data(resultDtoList).build();
+    }
+
+
+    @Transactional
+    public DataResponseDto<CommentInfoResponseDto> writeComment(UserAccount userAccount, Long groupId, WritingCommentRequestDto writingCommentRequestDto) {
+        User existingUser = validateUser(userAccount.getUserId());
+        Group existingGroup = validateGroup(groupId);
+
+        Comment comment = Comment.builder()
+                .group(existingGroup)
+                .user(existingUser)
+                .content(writingCommentRequestDto.getContent())
+                .build();
+
+        commentRepository.save(comment);
+
+        return DataResponseDto.<CommentInfoResponseDto>builder()
+                .data(CommentInfoResponseDto.from(comment))
+                .build();
+    }
+
+    public DataResponseDto<CommentInfoResponseDto> updateComment(UserAccount userAccount, Long commentId, WritingCommentRequestDto writingCommentRequestDto) {
+        User existingUser = validateUser(userAccount.getUserId());
+        Comment existingComment = validateComment(commentId);
+
+        if (!existingComment.getUser().getId().equals(existingUser.getId())) {
+            throw InvalidParameterException
+                    .builder()
+                    .httpStatus(HttpStatus.FORBIDDEN)
+                    .message("댓글 작성자가 아닙니다.")
+                    .build();
+        }
+
+        existingComment.modifyContent(writingCommentRequestDto.getContent());
+
+        commentRepository.save(existingComment);
+
+        return DataResponseDto.<CommentInfoResponseDto>builder()
+                .data(CommentInfoResponseDto.from(existingComment))
+                .build();
+    }
+
+    public DataResponseDto<CommentInfoResponseDto> deleteComment(UserAccount userAccount, Long commentId) {
+        User existingUser = validateUser(userAccount.getUserId());
+        Comment existingComment = validateComment(commentId);
+
+        if (!existingComment.getUser().getId().equals(existingUser.getId())) {
+            throw InvalidParameterException
+                    .builder()
+                    .httpStatus(HttpStatus.FORBIDDEN)
+                    .message("댓글 작성자가 아닙니다.")
+                    .build();
+        }
+
+        commentRepository.delete(existingComment);
+
+        return DataResponseDto.<CommentInfoResponseDto>builder()
+                .data(CommentInfoResponseDto.from(existingComment))
+                .build();
     }
 }

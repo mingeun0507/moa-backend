@@ -1,5 +1,7 @@
 package com.hanamja.moa.api.controller.group;
 
+import com.hanamja.moa.api.dto.comment.request.WritingCommentRequestDto;
+import com.hanamja.moa.api.dto.comment.response.CommentInfoResponseDto;
 import com.hanamja.moa.api.dto.group.request.KickOutRequestDto;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
@@ -170,5 +172,26 @@ public class GroupController {
     @GetMapping("/search")
     public ResponseEntity<DataResponseDto<List<GroupInfoResponseDto>>> searchAndSortGroupByKeyword(@RequestParam String keyword, @RequestParam SortedBy sortedBy) {
         return ResponseEntity.ok(groupService.searchAndSortGroupByKeyword(keyword, sortedBy));
+    }
+
+    @Operation(summary = "모임 댓글 작성하기", description = "모임 댓글 작성하기")
+    @PostMapping("/{groupId}/comment")
+    public ResponseEntity<DataResponseDto<CommentInfoResponseDto>> writeComment(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @NotNull @PathVariable Long groupId, @Validated @RequestBody WritingCommentRequestDto writingCommentRequestDto) {
+
+        return ResponseEntity.ok(groupService.writeComment(userAccount, groupId, writingCommentRequestDto));
+    }
+
+    @Operation(summary = "모임 댓글 수정하기", description = "모임 댓글 수정하기")
+    @PutMapping("/comment/{commentId}")
+    public ResponseEntity<DataResponseDto<CommentInfoResponseDto>> updateComment(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @NotNull @PathVariable Long commentId, @Validated @RequestBody WritingCommentRequestDto writingCommentRequestDto) {
+
+        return ResponseEntity.ok(groupService.updateComment(userAccount, commentId, writingCommentRequestDto));
+    }
+
+    @Operation(summary = "모임 댓글 삭제하기", description = "모임 댓글 삭제하기")
+    @DeleteMapping("/comment/{commentId}")
+    public ResponseEntity<DataResponseDto<CommentInfoResponseDto>> deleteComment(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @NotNull @PathVariable Long commentId) {
+
+        return ResponseEntity.ok(groupService.deleteComment(userAccount, commentId));
     }
 }

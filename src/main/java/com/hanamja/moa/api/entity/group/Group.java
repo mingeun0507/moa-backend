@@ -1,5 +1,6 @@
 package com.hanamja.moa.api.entity.group;
 
+import com.hanamja.moa.api.entity.comment.Comment;
 import com.hanamja.moa.api.entity.group_hashtag.GroupHashtag;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
@@ -64,6 +65,9 @@ public class Group {
 
     @OneToMany(mappedBy = "group")
     private List<GroupHashtag> groupHashtagList;
+
+    @OneToMany(mappedBy = "group")
+    private List<Comment> commentList;
 
     @Builder
     public Group(String name, String description, Long maxPeopleNum, Long currentPeopleNum, LocalDateTime meetingAt, String imageLink, User maker) {
@@ -133,7 +137,11 @@ public class Group {
         // 모임 상태 변경 시 사용할 메소드
     }
 
-    public void setCurrentPeopleNum(Long size){
+    public void setCurrentPeopleNum(Long size) {
         this.currentPeopleNum = size;
+    }
+
+    public int getCommentCount() {
+        return this.commentList.size();
     }
 }
