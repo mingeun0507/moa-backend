@@ -66,7 +66,7 @@ jobs:
         run: aws s3 cp --region ap-northeast-2 ./$GITHUB_SHA.zip s3://moa-backend-bucket/test-server/$GITHUB_SHA.zip
 
       - name: Code Deploy
-        run: aws deploy create-deployment --application-name moa_backend_test
+        run: aws deploy create-deployment --application-name moa-backend-test
           --deployment-config-name CodeDeployDefault.OneAtATime
-          --deployment-group-name test_server
+          --deployment-group-name test-server
           --s3-location bucket=moa-backend-bucket/test-server,bundleType=zip,key=$GITHUB_SHA.zip
