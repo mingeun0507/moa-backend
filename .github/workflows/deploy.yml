@@ -52,7 +52,7 @@ jobs:
         run: ./gradlew compilequerydsl
 
       - name: Make zip file
-        run: zip -qq -r ./$GITHUB_SHA.zip .
+        run: zip -qq -r ./moa-backend-test.zip .
         shell: bash
 
       - name: Configure AWS credentials
