@@ -5,16 +5,18 @@ import com.hanamja.moa.api.dto.auth.request.OnBoardingRequestDto;
 import com.hanamja.moa.api.dto.auth.request.RegenerateAccessTokenRequestDto;
 import com.hanamja.moa.api.dto.auth.response.LoginResponseDto;
 import com.hanamja.moa.api.dto.auth.response.RegenerateAccessTokenResponseDto;
+import com.hanamja.moa.api.dto.user.request.SignUpRequestDto;
 import com.hanamja.moa.api.dto.user.response.UserInfoResponseDto;
 import com.hanamja.moa.api.entity.department.Department;
 import com.hanamja.moa.api.entity.department.DepartmentRepository;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
-import com.hanamja.moa.api.entity.user.UserAccount.jwt.JwtTokenUtil;
 import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.api.entity.user_token.UserToken;
 import com.hanamja.moa.api.entity.user_token.UserTokenRepository;
 import com.hanamja.moa.exception.custom.NotFoundException;
+import com.hanamja.moa.exception.custom.UserInputException;
+import com.hanamja.moa.filter.jwt.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,6 +37,7 @@ public class AuthService {
 
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public LoginResponseDto login(LoginRequestDto loginRequestDto) {
         User user = userRepository.findByStudentId(loginRequestDto.getStudentId()).orElseThrow(
                 () -> NotFoundException.builder().message("유저를 찾을 수 없습니다.")
@@ -48,33 +51,38 @@ public class AuthService {
                     .build();
         }
 
-        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
-        String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
+        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getRole(), user.getIsActive());
+        String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole(), user.getIsActive());
 
         UserToken userToken = UserToken.builder().user(user).refreshToken(refreshToken).build();
-        UserToken savedUserToken = userTokenRepository.save(userToken);
 
-        return LoginResponseDto.of(accessToken, savedUserToken.getRefreshToken(), user.isOnboarded(), user.isActive());
+        if (userTokenRepository.existsByUser_Id(user.getId())) {
+            userTokenRepository.updateRefreshToken(user.getId(), refreshToken);
+        } else {
+            userTokenRepository.save(userToken);
+        }
+
+        return LoginResponseDto.of(accessToken, refreshToken, user.getIsOnboarded(), user.getIsActive());
     }
 
     @Transactional
     public UserInfoResponseDto onBoardUser(UserAccount userAccount, OnBoardingRequestDto onBoardingRequestDto) {
         User foundUser = userRepository.findUserById(userAccount.getUserId()).orElseThrow(
-                () -> new NotFoundException("해당하는 사용자를 찾을 수 없습니다.")
+                () -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당하는 사용자를 찾을 수 없습니다.")
         );
 
         Department department = departmentRepository
                 .findByName(onBoardingRequestDto.getDepartment())
                 .orElseThrow(
-                        () -> new NotFoundException("해당하는 학부를 찾을 수 없습니다.")
+                        () -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당하는 학부를 찾을 수 없습니다.")
                 );
 
-        foundUser.updateOnboardingInfo(onBoardingRequestDto.getGender(), department, onBoardingRequestDto.getImageLink());
-        userRepository.save(foundUser);
+        foundUser.updateOnBoardingInfo(onBoardingRequestDto.getGender(), department, onBoardingRequestDto.getImageLink());
 
-        return UserInfoResponseDto.from(foundUser);
+        return UserInfoResponseDto.from(userRepository.save(foundUser));
     }
 
+    @Transactional
     public RegenerateAccessTokenResponseDto regenerateAccessToken(RegenerateAccessTokenRequestDto requestDto) {
 
         UserToken userToken = userTokenRepository.findByRefreshToken(requestDto.getRefreshToken()).orElseThrow(
@@ -83,9 +91,26 @@ public class AuthService {
 
         User user = userToken.getUser();
 
-        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
-        String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole(), user.isActive());
+        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getRole(), user.getIsActive());
+        String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole(), user.getIsActive());
+
+        userTokenRepository.updateRefreshToken(user.getId(), refreshToken);
 
         return RegenerateAccessTokenResponseDto.of(accessToken, refreshToken);
+    }
+
+    public UserInfoResponseDto signUp(SignUpRequestDto signUpRequestDto) {
+
+        User user = User.builder()
+                .studentId(signUpRequestDto.getStudentId())
+                .password(passwordEncoder.encode(signUpRequestDto.getPassword()))
+                .name(signUpRequestDto.getName())
+                .build();
+        if (userRepository.existsByStudentId(signUpRequestDto.getStudentId())) {
+            throw UserInputException.builder().message("이미 존재하는 학번입니다.").httpStatus(HttpStatus.BAD_REQUEST).build();
+        }
+        User savedUser = userRepository.save(user);
+
+        return UserInfoResponseDto.from(savedUser);
     }
 }

@@ -1,4 +1,4 @@
-package com.hanamja.moa.api.entity.user.UserAccount.jwt;
+package com.hanamja.moa.filter.jwt;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +40,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        String[] excludePath = {"/api/auth/login"}; // TODO: JWT 안쓰는 API 추가 필요
+        String[] excludePath = {"/api/auth/login", "/api/auth/sign-up",
+                "/api/auth/regenerate-access-token", "/api/group/public/"}; // TODO: JWT 안쓰는 API 추가 필요
         String path = request.getRequestURI();
         return Arrays.stream(excludePath).anyMatch(path::startsWith);
     }

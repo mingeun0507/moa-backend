@@ -1,4 +1,4 @@
-package com.hanamja.moa.api.entity.user.UserAccount.jwt;
+package com.hanamja.moa.filter.jwt;
 
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccountService;
 import com.hanamja.moa.exception.custom.UnauthorizedTokenException;

@@ -26,6 +26,9 @@ public class UserGroup {
     @Column(name = "progress", nullable = false)
     private String progress;
 
+    @Column(name = "meeting_img")
+    private String meetingImg;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User joiner;
@@ -40,5 +43,9 @@ public class UserGroup {
         this.progress = progress;
         this.joiner = joiner;
         this.group = group;
+    }
+
+    public void updateMeetingImg(String meetingImg){
+        this.meetingImg = meetingImg;
     }
 }

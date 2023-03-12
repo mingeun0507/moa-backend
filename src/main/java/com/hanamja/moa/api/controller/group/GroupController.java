@@ -1,19 +1,16 @@
 package com.hanamja.moa.api.controller.group;
 
+import com.hanamja.moa.api.dto.comment.request.WritingCommentRequestDto;
+import com.hanamja.moa.api.dto.comment.response.CommentInfoResponseDto;
 import com.hanamja.moa.api.dto.group.request.KickOutRequestDto;
 import com.hanamja.moa.api.dto.group.request.MakingGroupRequestDto;
 import com.hanamja.moa.api.dto.group.request.ModifyingGroupRequestDto;
-import com.hanamja.moa.api.dto.group.request.RemovingGroupRequestDto;
-import com.hanamja.moa.api.dto.group.response.GroupCompleteRespDto;
-import com.hanamja.moa.api.dto.group.response.GroupDetailInfoResponseDto;
-import com.hanamja.moa.api.dto.group.response.GroupInfoListResponseDto;
-import com.hanamja.moa.api.dto.group.response.GroupInfoResponseDto;
+import com.hanamja.moa.api.dto.group.response.*;
 import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.service.group.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -73,9 +69,17 @@ public class GroupController {
     @GetMapping("/{groupId}")
     public ResponseEntity<GroupDetailInfoResponseDto> getExistingGroupDetail(
             @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
-            @NotNull @PathVariable Long id) {
+            @NotNull @PathVariable Long groupId) {
 
-        return ResponseEntity.ok(groupService.getExistingGroupDetail(userAccount, id));
+        return ResponseEntity.ok(groupService.getExistingGroupDetail(userAccount, groupId));
+    }
+
+    @Operation(summary = "공유하기 기능 - 모임 정보 보기", description = "공유하기 기능 - 모임 정보 보기")
+    @GetMapping("/public/{groupId}")
+    public ResponseEntity<GroupDetailInfoResponseDto> getPublicExistingGroupDetail(
+            @NotNull @PathVariable Long groupId) {
+
+        return ResponseEntity.ok(groupService.getPublicExistingGroupDetail(groupId));
     }
 
     @Operation(summary = "모임 참가하기", description = "모임 참가하기")
@@ -92,12 +96,12 @@ public class GroupController {
 
     @Operation(summary = "내 모임 조회하기", description = "내 모임 조회하기")
     @GetMapping("/my")
-    public ResponseEntity<GroupInfoListResponseDto> getMyGroupList(
+    public ResponseEntity<DataResponseDto<List<GroupStateInfoResponseDto>>> getMyGroupList(
             @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount) {
 
-        GroupInfoListResponseDto response = groupService.getMyGroupList(userAccount.getUserId());
+        DataResponseDto<List<GroupStateInfoResponseDto>> myGroupList = groupService.getMyGroupList(userAccount.getUserId());
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok().body(myGroupList);
     }
 
     @Operation(summary = "모임 탈퇴하기", description = "모임 탈퇴하기")
@@ -122,16 +126,14 @@ public class GroupController {
     @DeleteMapping(value = "/out")
     public ResponseEntity<?> outMemberFromGroup(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
                                                 @Validated @ModelAttribute KickOutRequestDto kickOutRequestDto){
-        groupService.kickoutMemberFromGroup(userAccount.getUserId(), kickOutRequestDto);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(groupService.kickOutMemberFromGroup(userAccount.getUserId(), kickOutRequestDto));
     }
 
     @Operation(summary = "모임 취소하기", description = "모임 취소하기")
     @DeleteMapping(value = "/cancel/{groupId}")
     public ResponseEntity<?> cancelGroup(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
                                          @NotNull @PathVariable Long groupId){
-        groupService.cancelGroup(userAccount.getUserId(), groupId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(groupService.cancelGroup(userAccount.getUserId(), groupId));
     }
 
     @Operation(summary = "모임 모집 마감하기", description = "모임 모집 마감하기")
@@ -149,11 +151,47 @@ public class GroupController {
      */
     @Operation(summary = "카드 만들기", description = "카드 만들기")
     @PostMapping(value = "/complete")
-    public ResponseEntity<?> makeCard(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
-                                      @RequestPart(value = "gid") Long gid,
-                                      @RequestPart(value = "image") MultipartFile image) throws IOException {
+    public ResponseEntity<GroupCompleteRespDto> makeCard
+    (
+            @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
+            @RequestParam(value = "gid") Long gid,
+            @RequestParam(value = "image") MultipartFile image
+    ) throws Exception {
         // 모임 완료 후 -> card 생성하는 로직
         GroupCompleteRespDto groupCompleteRespDto = groupService.completeGroup(userAccount.getUserId(), gid, image);
         return ResponseEntity.ok().body(groupCompleteRespDto);
+    }
+
+//    @Operation(summary = "모임 검색하기", description = "모임 검색하기")
+//    @GetMapping("/search")
+//    public ResponseEntity<DataResponseDto<List<GroupInfoResponseDto>>> searchGroupByKeyword(@RequestParam String keyword) {
+//        return ResponseEntity.ok(groupService.searchGroupByKeyword(keyword));
+//    }
+
+    @Operation(summary = "모임 검색하기 - 정렬", description = "모임 검색하기 - 정렬")
+    @GetMapping("/search")
+    public ResponseEntity<DataResponseDto<List<GroupInfoResponseDto>>> searchAndSortGroupByKeyword(@RequestParam String keyword, @RequestParam SortedBy sortedBy) {
+        return ResponseEntity.ok(groupService.searchAndSortGroupByKeyword(keyword, sortedBy));
+    }
+
+    @Operation(summary = "모임 댓글 작성하기", description = "모임 댓글 작성하기")
+    @PostMapping("/{groupId}/comment")
+    public ResponseEntity<DataResponseDto<CommentInfoResponseDto>> writeComment(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @NotNull @PathVariable Long groupId, @Validated @RequestBody WritingCommentRequestDto writingCommentRequestDto) {
+
+        return ResponseEntity.ok(groupService.writeComment(userAccount, groupId, writingCommentRequestDto));
+    }
+
+    @Operation(summary = "모임 댓글 수정하기", description = "모임 댓글 수정하기")
+    @PutMapping("/comment/{commentId}")
+    public ResponseEntity<DataResponseDto<CommentInfoResponseDto>> updateComment(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @NotNull @PathVariable Long commentId, @Validated @RequestBody WritingCommentRequestDto writingCommentRequestDto) {
+
+        return ResponseEntity.ok(groupService.updateComment(userAccount, commentId, writingCommentRequestDto));
+    }
+
+    @Operation(summary = "모임 댓글 삭제하기", description = "모임 댓글 삭제하기")
+    @DeleteMapping("/comment/{commentId}")
+    public ResponseEntity<DataResponseDto<CommentInfoResponseDto>> deleteComment(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount, @NotNull @PathVariable Long commentId) {
+
+        return ResponseEntity.ok(groupService.deleteComment(userAccount, commentId));
     }
 }

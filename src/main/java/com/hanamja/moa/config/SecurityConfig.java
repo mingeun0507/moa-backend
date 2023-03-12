@@ -1,8 +1,9 @@
 package com.hanamja.moa.config;
 
-import com.hanamja.moa.api.entity.user.UserAccount.jwt.JwtAuthenticationFilter;
-import com.hanamja.moa.api.entity.user.UserAccount.jwt.JwtExceptionFilter;
-import com.hanamja.moa.api.entity.user.UserAccount.jwt.JwtTokenUtil;
+import com.hanamja.moa.filter.jwt.JwtAuthenticationFilter;
+import com.hanamja.moa.filter.jwt.JwtExceptionFilter;
+import com.hanamja.moa.filter.jwt.JwtTokenUtil;
+import com.hanamja.moa.filter.logging.LoggingFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.boot.autoconfigure.security.ConditionalOnDefaultWebSecurity;
@@ -42,7 +43,7 @@ public class SecurityConfig {
         return (web) -> web.ignoring()
                 .antMatchers(
                         "/h2-console/**",
-                        "/health/check",
+                        "/health/**",
                         "/v3/api-docs/**",
                         "/swagger-resources/**",
                         "/swagger-ui/**");
@@ -74,13 +75,15 @@ public class SecurityConfig {
 
                 .and()
                 .authorizeRequests() // http servletRequest 를 사용하는 요청들에 대한 접근제한을 설정
-                .antMatchers("/api/auth/login").permitAll()
+                .antMatchers("/api/auth/login", "/api/auth/regenerate-access-token", "/api/auth/sign-up").permitAll()
+                .antMatchers("/api/group/public/**").permitAll()
                 .anyRequest().authenticated()   // 나머지 API 는 전부 인증 필요
 
                 .and()
                 .addFilter(corsConfig.corsFilter())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenUtil, authenticationManager), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtExceptionFilter(), JwtAuthenticationFilter.class)
+                .addFilterBefore(new LoggingFilter(), JwtExceptionFilter.class)
 
                 .build();
     }

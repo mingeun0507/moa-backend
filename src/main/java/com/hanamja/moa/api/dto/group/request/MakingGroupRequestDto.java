@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Optional;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -27,13 +30,18 @@ public class MakingGroupRequestDto {
     private String hashtags;
 
     public static Group toEntity(MakingGroupRequestDto makingGroupRequestDto, User user) {
+        LocalDateTime meetingAt = makingGroupRequestDto.getMeetingAt();
+        if (Optional.ofNullable(makingGroupRequestDto.getMeetingAt()).isPresent()){
+            meetingAt = ZonedDateTime.of(makingGroupRequestDto.getMeetingAt(), ZoneId.of("Asia/Seoul"))
+                    .toLocalDateTime().plusHours(9L);
+        }
         return Group
                 .builder()
                 .name(makingGroupRequestDto.getName())
                 .description(makingGroupRequestDto.getDescription())
                 .maxPeopleNum(makingGroupRequestDto.getMaxPeopleNum())
                 .currentPeopleNum(1L)
-                .meetingAt(makingGroupRequestDto.getMeetingAt())
+                .meetingAt(meetingAt)
                 .maker(user)
                 .build();
     }

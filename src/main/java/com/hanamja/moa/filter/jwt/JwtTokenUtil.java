@@ -1,4 +1,4 @@
-package com.hanamja.moa.api.entity.user.UserAccount.jwt;
+package com.hanamja.moa.filter.jwt;
 
 import com.hanamja.moa.api.entity.user.Role;
 import io.jsonwebtoken.Claims;
@@ -23,7 +23,7 @@ public class JwtTokenUtil {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
 
-    private static final int ACCESS_TOKEN_EXPIRATION_MS = 60 * 60 * 1000;
+    private static final int ACCESS_TOKEN_EXPIRATION_MS = 24 * 60 * 60 * 1000;
 
     private static final int REFRESH_TOKEN_EXPIRATION_MS = 14 * 24 * 60 * 60 * 1000;
 

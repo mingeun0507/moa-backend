@@ -13,7 +13,6 @@ import com.hanamja.moa.api.entity.hashtag.HashtagRepository;
 import com.hanamja.moa.api.entity.point_history.PointHistory;
 import com.hanamja.moa.api.entity.point_history.PointHistoryRepository;
 import com.hanamja.moa.api.entity.user.Gender;
-import com.hanamja.moa.api.entity.user.Role;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserRepository;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
@@ -79,19 +78,17 @@ public class InitDatabaseForLocal {
                     .name("김민근")
                     .gender(Gender.MALE)
                     .imageLink("http://example.com")
-                    .role(Role.ROLE_SENIOR)
                     .point(0L)
                     .build();
 
             User changjin = User
                     .builder()
                     .department(software)
-                    .studentId("20112011")
+                    .studentId("20232011")
                     .password(passwordEncoder.encode("12345678"))
                     .name("서창진")
                     .gender(Gender.MALE)
                     .imageLink("http://example2.com")
-                    .role(Role.ROLE_SENIOR)
                     .point(0L)
                     .build();
 
@@ -103,7 +100,6 @@ public class InitDatabaseForLocal {
                     .name("윤석민")
                     .gender(Gender.FEMALE)
                     .imageLink("http://example3.com")
-                    .role(Role.ROLE_FRESHMEN)
                     .point(1L)
                     .build();
 
@@ -134,6 +130,15 @@ public class InitDatabaseForLocal {
                     .build();
 
             groupRepository.save(CC);
+
+            UserGroup mingeunToCC = UserGroup
+                    .builder()
+                    .joiner(mingeun)
+                    .group(CC)
+                    .progress("대기")
+                    .build();
+
+            if (!CC.isFull()) CC.addCurrentPeopleNum();
 
             UserGroup seokminToCC = UserGroup
                     .builder()
@@ -166,6 +171,7 @@ public class InitDatabaseForLocal {
             // else throw CustomException
 
             groupRepository.save(LOL);
+            userGroupRepository.save(mingeunToCC);
             userGroupRepository.save(seokminToCC);
             userGroupRepository.save(changjinToCC);
             userGroupRepository.save(mingeunToLOL);
@@ -175,6 +181,7 @@ public class InitDatabaseForLocal {
                     .owner(mingeun)
                     .metUser(seokmin)
                     .isBadged(true)
+                    .updatedAt(LocalDateTime.now())
                     .build();
 
             Album mingeunChangjinAlbum = Album
@@ -182,6 +189,7 @@ public class InitDatabaseForLocal {
                     .owner(mingeun)
                     .metUser(changjin)
                     .isBadged(false)
+                    .updatedAt(LocalDateTime.now())
                     .build();
 
             albumRepository.save(mingeunSeokminAlbum);
@@ -231,7 +239,9 @@ public class InitDatabaseForLocal {
             PointHistory mingeunPointHistory1 = PointHistory
                     .builder()
                     .title("CC 강의")
-                    .message("윤석민 50점, 윤석민 100점\n모임 참여점수 150점")
+                    .message("모임 점수: 400점\n" +
+                            "카드 점수: 윤석민 100점, 서창진 100점\n" +
+                            "총 점수: 600점")
                     .point(300L)
                     .owner(mingeun)
                     .build();
@@ -239,7 +249,9 @@ public class InitDatabaseForLocal {
             PointHistory mingeunPointHistory2 = PointHistory
                     .builder()
                     .title("협곡 데이트")
-                    .message("윤석민 50점, 윤석민 100점\n모임 참여점수 150점")
+                    .message("모임 점수: 400점\n" +
+                            "카드 점수: 윤석민 100점, 서창진 100점\n" +
+                            "총 점수: 600점")
                     .point(500L)
                     .owner(mingeun)
                     .build();
@@ -247,7 +259,9 @@ public class InitDatabaseForLocal {
             PointHistory seokminPointHistory1 = PointHistory
                     .builder()
                     .title("협곡 데이트")
-                    .message("윤석민 50점, 윤석민 100점\n모임 참여점수 150점")
+                    .message("모임 점수: 400점\n" +
+                            "카드 점수: 윤석민 100점, 서창진 100점\n" +
+                            "총 점수: 600점")
                     .point(400L)
                     .owner(seokmin)
                     .build();

@@ -5,13 +5,14 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AmazonS3Uploader {
@@ -19,7 +20,7 @@ public class AmazonS3Uploader {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    public String saveFileAndGetUrl(MultipartFile multipartFile) throws IOException {
+    public String saveFileAndGetUrl(MultipartFile multipartFile) throws Exception {
         String s3FileName = "image/" + UUID.randomUUID() + "_" + multipartFile.getOriginalFilename();
 
         ObjectMetadata objMeta = new ObjectMetadata();

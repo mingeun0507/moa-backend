@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -22,6 +23,9 @@ public class Album {
     @Column(name = "is_badged", nullable = false)
     private Boolean isBadged;
 
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
@@ -31,8 +35,9 @@ public class Album {
     private User metUser;
 
     @Builder
-    public Album(Boolean isBadged, User owner, User metUser) {
+    public Album(Boolean isBadged, LocalDateTime updatedAt, User owner, User metUser) {
         this.isBadged = isBadged;
+        this.updatedAt = updatedAt;
         this.owner = owner;
         this.metUser = metUser;
     }
