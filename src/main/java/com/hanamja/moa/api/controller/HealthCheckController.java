@@ -15,7 +15,7 @@ public class HealthCheckController {
 
     @GetMapping(value = "/check")
     public ResponseEntity<?> serverCheck() {
-        return ResponseEntity.ok().body("server check");
+        return ResponseEntity.ok().body("server check hello");
     }
 
     @GetMapping(value = "/time")
