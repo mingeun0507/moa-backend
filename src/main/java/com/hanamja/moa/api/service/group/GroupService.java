@@ -35,6 +35,8 @@ import com.hanamja.moa.exception.custom.UserInputException;
 import com.hanamja.moa.utils.s3.AmazonS3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -790,6 +792,7 @@ public class GroupService {
                 .build();
     }
 
+    @Transactional
     public DataResponseDto<CommentInfoResponseDto> updateComment(UserAccount userAccount, Long commentId, WritingCommentRequestDto writingCommentRequestDto) {
         User existingUser = validateUser(userAccount.getUserId());
         Comment existingComment = validateComment(commentId);
@@ -811,6 +814,7 @@ public class GroupService {
                 .build();
     }
 
+    @Transactional
     public DataResponseDto<CommentInfoResponseDto> deleteComment(UserAccount userAccount, Long commentId) {
         User existingUser = validateUser(userAccount.getUserId());
         Comment existingComment = validateComment(commentId);
@@ -836,5 +840,15 @@ public class GroupService {
             return null;
         }
         return CommentInfoResponseDto.from(recentComment.get());
+    }
+
+    public DataResponseDto<Page<CommentInfoResponseDto>> getCommentList(UserAccount userAccount, Long groupId, Pageable pageable) {
+        Group existingGroup = validateGroup(groupId);
+
+        Page<Comment> commentPage = commentRepository.findByGroup(existingGroup, pageable);
+
+        return DataResponseDto.<Page<CommentInfoResponseDto>>builder()
+                .data(commentPage.map(CommentInfoResponseDto::from))
+                .build();
     }
 }
