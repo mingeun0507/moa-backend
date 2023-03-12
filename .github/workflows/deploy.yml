@@ -46,7 +46,7 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew build
-          shell: bash
+        shell: bash
 
       - name: Compile querydsl with Gradle
         run: ./gradlew compilequerydsl
