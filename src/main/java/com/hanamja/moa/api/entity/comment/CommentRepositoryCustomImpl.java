@@ -19,12 +19,15 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom{
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public Page<Comment> findAllByGroupAndIdGreaterThanEqual(Group group, Long cursor, int offset, Pageable pageable) {
+    public Page<Comment> findAllByGroupAndIdGreaterThanEqual(Group group, Long cursor, Pageable pageable) {
+
+
+
         List<Comment> commentList = jpaQueryFactory.selectFrom(comment)
                                                         .where(comment.group.eq(group))
                                                         .where(comment.id.loe(cursor))
                                                         .orderBy(comment.id.desc())
-                                                        .offset(offset)
+                                                        .offset((long) (pageable.getPageNumber()) * pageable.getPageSize())
                                                         .limit(pageable.getPageSize())
                                                     .fetch();
 

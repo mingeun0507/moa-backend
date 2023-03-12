@@ -205,9 +205,8 @@ public class GroupController {
     @GetMapping("/{groupId}/comment")
     public ResponseEntity<DataResponseDto<Page<CommentInfoResponseDto>>> getPagedCommentList(@NotNull @PathVariable Long groupId,
                                                                                              @RequestParam @NotNull Long cursor,
-                                                                                             @RequestParam @NotNull int offset,
                                                                                              @PageableDefault(size = 20, sort = "comment_id", direction = Sort.Direction.DESC) Pageable pageable) {
 
-        return ResponseEntity.ok(groupService.getCommentList(groupId, cursor, offset, pageable));
+        return ResponseEntity.ok(groupService.getCommentList(groupId, cursor, pageable));
     }
 }
