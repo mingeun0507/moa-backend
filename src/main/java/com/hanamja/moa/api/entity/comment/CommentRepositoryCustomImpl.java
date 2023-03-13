@@ -1,6 +1,7 @@
 package com.hanamja.moa.api.entity.comment;
 
 import com.hanamja.moa.api.entity.group.Group;
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,7 +26,7 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom{
 
         List<Comment> commentList = jpaQueryFactory.selectFrom(comment)
                                                         .where(comment.group.eq(group))
-                                                        .where(comment.id.loe(cursor))
+                                                        .where(CommentIdLoeCursor(cursor))
                                                         .orderBy(comment.id.desc())
                                                         .offset((long) (pageable.getPageNumber()) * pageable.getPageSize())
                                                         .limit(pageable.getPageSize())
@@ -34,10 +35,15 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom{
         Long count = jpaQueryFactory.select(comment.count())
                                             .from(comment)
                                             .where(comment.group.eq(group))
-                                            .where(comment.id.loe((cursor)))
+                                            .where(CommentIdLoeCursor(cursor))
                                         .fetchOne();
 
         return new PageImpl<>(commentList, pageable, count);
 
+    }
+
+    private BooleanExpression CommentIdLoeCursor(Long cursor) {
+
+        return cursor == null ? null : comment.id.loe(cursor);
     }
 }

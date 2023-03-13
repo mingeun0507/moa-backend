@@ -21,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -204,7 +205,7 @@ public class GroupController {
     @Operation(summary = "모임 댓글 리스트 조회하기", description = "모임 댓글 리스트 조회하기")
     @GetMapping("/{groupId}/comment")
     public ResponseEntity<DataResponseDto<Page<CommentInfoResponseDto>>> getPagedCommentList(@NotNull @PathVariable Long groupId,
-                                                                                             @RequestParam @NotNull Long cursor,
+                                                                                             @Nullable @RequestParam Long cursor,
                                                                                              @PageableDefault(size = 20, sort = "comment_id", direction = Sort.Direction.DESC) Pageable pageable) {
 
         return ResponseEntity.ok(groupService.getCommentList(groupId, cursor, pageable));
