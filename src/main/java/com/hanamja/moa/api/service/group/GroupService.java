@@ -564,6 +564,7 @@ public class GroupService {
                 });
         List<String> hashtagStringList = getHashtagStringList(existingGroup);
 
+        commentRepository.deleteAllByGroup_Id(gid);
         groupHashtagRepository.deleteAllByGroup_Id(gid);
         userGroupRepository.deleteAllByGroup_Id(gid);
         groupRepository.deleteById(gid);
