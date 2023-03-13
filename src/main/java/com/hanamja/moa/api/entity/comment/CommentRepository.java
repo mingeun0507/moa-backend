@@ -10,5 +10,7 @@ import java.util.Optional;
 public interface CommentRepository extends JpaRepository<Comment, Long>, CommentRepositoryCustom {
     Optional<Comment> findTopByGroupOrderByIdDesc(Group group);
 
+    void deleteAllByGroup_Id(Long groupId);
+
     Page<Comment> findAllByGroupAndIdGreaterThanEqual(Group group, Long cursor, Pageable pageable);
 }
