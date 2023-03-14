@@ -16,7 +16,7 @@ public interface UserGroupRepository extends JpaRepository<UserGroup, Long>, Use
 
     void deleteUserGroupByGroup_IdAndJoiner_Id(Long gid, Long joinerId);
 
-    @Query(value = "SELECT ug FROM UserGroup ug JOIN FETCH ug.joiner WHERE ug.group.id = :gid")
+    @Query(value = "SELECT ug FROM UserGroup ug JOIN FETCH ug.joiner WHERE ug.group.id = :gid ORDER BY ug.id ASC")
     List<UserGroup> findAllByGroup_Id(@Param(value = "gid") Long gid);
 
     @Query(value = "SELECT distinct ug.joiner FROM UserGroup ug JOIN FETCH User u ON ug.joiner.id = u.id WHERE ug.group.id = :gid")
