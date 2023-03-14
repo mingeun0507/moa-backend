@@ -13,7 +13,10 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-@Table(name = "MOA_USER_GROUP")
+@Table(name = "MOA_USER_GROUP", indexes = {
+        @Index(name = "idx__user_id__group_id", columnList = "user_id, group_id", unique = true),
+        @Index(name = "idx__group_id__user_id", columnList = "group_id, user_id", unique = true)
+})
 public class UserGroup {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
