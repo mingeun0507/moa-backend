@@ -24,4 +24,7 @@ spring:
     import:
       application-secret.yml
 logging:
-  config: classpath:logback-spring.xml
+  config:
+    classpath:logback-spring.xml
+  level:
+    org.hibernate.SQL: debug
