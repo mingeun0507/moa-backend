@@ -27,7 +27,7 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom{
         List<Comment> commentList = jpaQueryFactory.selectFrom(comment)
                                                         .where(comment.group.eq(group))
                                                         .where(CommentIdLoeCursor(cursor))
-                                                        .orderBy(comment.id.desc())
+                                                        .orderBy(comment.id.asc())
                                                         .offset((long) (pageable.getPageNumber()) * pageable.getPageSize())
                                                         .limit(pageable.getPageSize())
                                                     .fetch();
