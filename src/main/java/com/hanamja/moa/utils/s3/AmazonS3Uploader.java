@@ -20,8 +20,11 @@ public class AmazonS3Uploader {
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
+    @Value("${image.path}")
+    private String imagePath;
+
     public String saveFileAndGetUrl(MultipartFile multipartFile) throws Exception {
-        String s3FileName = "image/" + UUID.randomUUID() + "_" + multipartFile.getOriginalFilename();
+        String s3FileName = imagePath + UUID.randomUUID() + "_" + multipartFile.getOriginalFilename();
 
         ObjectMetadata objMeta = new ObjectMetadata();
         objMeta.setContentType(multipartFile.getContentType());
