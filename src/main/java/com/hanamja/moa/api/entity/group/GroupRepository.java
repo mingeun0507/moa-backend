@@ -1,6 +1,7 @@
 package com.hanamja.moa.api.entity.group;
 
 
+import com.hanamja.moa.api.entity.department.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -14,8 +15,8 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
 
     Optional<Group> findById(Long id);
 
-    @Query(value = "SELECT g FROM Group g JOIN FETCH UserGroup ug ON g.id = ug.group.id WHERE g.id = :gid")
-    Group findGroupByGid(@Param(value = "gid")Long gid);
+    @Query(value = "SELECT g FROM Group g JOIN FETCH UserGroup ug ON g.id = ug.group.id WHERE g.id = :gid AND g.department = :department")
+    Group findGroupByGid(@Param(value = "gid")Long gid, @Param(value = "department") Department department);
 
     List<Group> findAllByUserId(Long userId);
 

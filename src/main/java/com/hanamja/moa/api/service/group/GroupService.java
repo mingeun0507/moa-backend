@@ -304,6 +304,42 @@ public class GroupService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public DataResponseDto<List<GroupInfoResponseDto>> getExistingGroups2(UserAccount userAccount, SortedBy sortedBy, Long cursor, Pageable pageable) {
+        if (sortedBy == SortedBy.RECENT) {
+            List<GroupInfoResponseDto> resultDtoList = groupRepository
+                    .findExistingGroupsByRECENT(State.RECRUITING, LocalDateTime.now())
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList());
+            return DataResponseDto.<List<GroupInfoResponseDto>>builder()
+                    .data(resultDtoList).build();
+        } else if (sortedBy == SortedBy.SOON) {
+            List<GroupInfoResponseDto> resultDtoList = groupRepository
+                    .findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State.RECRUITING, LocalDateTime.now())
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList());
+            resultDtoList.addAll(groupRepository
+                    .findAllByStateAndMeetingAtOrderByCreatedAtDesc(State.RECRUITING, null)
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList()));
+            return DataResponseDto.<List<GroupInfoResponseDto>>builder()
+                    .data(resultDtoList).build();
+        } else if (sortedBy == SortedBy.PAST) {
+            List<GroupInfoResponseDto> resultDtoList = groupRepository
+                    .findAllByStateAndMeetingAtBeforeOrderByCreatedAtDesc(State.DONE, LocalDateTime.now())
+                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+                    .collect(Collectors.toList());
+            return DataResponseDto.<List<GroupInfoResponseDto>>builder()
+                    .data(resultDtoList).build();
+        } else {
+            throw InvalidParameterException
+                    .builder()
+                    .httpStatus(HttpStatus.BAD_REQUEST)
+                    .message("올바르지 않은 Query String입니다.")
+                    .build();
+        }
+    }
+
     public GroupDetailInfoResponseDto getExistingGroupDetail(UserAccount userAccount, Long groupId) {
         User user = validateUser(userAccount.getUserId());
 

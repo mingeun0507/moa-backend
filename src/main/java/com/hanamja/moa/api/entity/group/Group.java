@@ -1,6 +1,7 @@
 package com.hanamja.moa.api.entity.group;
 
 import com.hanamja.moa.api.entity.comment.Comment;
+import com.hanamja.moa.api.entity.department.Department;
 import com.hanamja.moa.api.entity.group_hashtag.GroupHashtag;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
@@ -69,6 +70,10 @@ public class Group {
     @OneToMany(mappedBy = "group")
     private List<Comment> commentList;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dept_id", nullable = false)
+    private Department department;
+
     @Builder
     public Group(String name, String description, Long maxPeopleNum, Long currentPeopleNum, LocalDateTime meetingAt, String imageLink, User maker) {
         this.name = name;
@@ -81,6 +86,7 @@ public class Group {
         this.meetingAt = meetingAt;
         this.imageLink = imageLink;
         this.maker = maker;
+        this.department = maker.getDepartment();
     }
 
     // 인증샷에 대한 update 메소드

@@ -51,8 +51,8 @@ public class AuthService {
                     .build();
         }
 
-        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getRole(), user.getIsActive());
-        String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole(), user.getIsActive());
+        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getDepartment(), user.getRole(), user.getIsActive(), user.getIsOnboarded());
+        String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId() ,user.getRole(), user.getIsActive());
 
         UserToken userToken = UserToken.builder().user(user).refreshToken(refreshToken).build();
 
@@ -91,7 +91,7 @@ public class AuthService {
 
         User user = userToken.getUser();
 
-        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getRole(), user.getIsActive());
+        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getDepartment(), user.getRole(), user.getIsActive(), user.getIsOnboarded());
         String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole(), user.getIsActive());
 
         userTokenRepository.updateRefreshToken(user.getId(), refreshToken);
