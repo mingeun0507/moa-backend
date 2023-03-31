@@ -75,8 +75,8 @@ public class GroupController {
     public ResponseEntity<DataResponseDto<List<GroupInfoResponseDto>>> getExistingGroups2
             (@AuthenticationPrincipal UserAccount userAccount,
              @RequestParam SortedBy sortedBy,
-             @Nullable @RequestParam Long cursor,
-             @PageableDefault(size = 10, sort = "group_id", direction = Sort.Direction.DESC) Pageable pageable)
+             @Nullable @RequestParam(required = false) Long cursor,
+             @PageableDefault(size = 2) Pageable pageable)
     {
         return ResponseEntity.ok(groupService.getExistingGroups2(userAccount, sortedBy, cursor, pageable));
     }
@@ -169,7 +169,7 @@ public class GroupController {
             @RequestParam(value = "image") MultipartFile image
     ) throws Exception {
         // 모임 완료 후 -> card 생성하는 로직
-        GroupCompleteRespDto groupCompleteRespDto = groupService.completeGroup(userAccount.getUserId(), gid, image);
+        GroupCompleteRespDto groupCompleteRespDto = groupService.completeGroup(userAccount, gid, image);
         return ResponseEntity.ok().body(groupCompleteRespDto);
     }
 

@@ -1,7 +1,9 @@
 package com.hanamja.moa.api.entity.group;
 
 
-import com.hanamja.moa.api.entity.department.Department;
+import com.hanamja.moa.api.controller.group.SortedBy;
+import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -15,8 +17,8 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
 
     Optional<Group> findById(Long id);
 
-    @Query(value = "SELECT g FROM Group g JOIN FETCH UserGroup ug ON g.id = ug.group.id WHERE g.id = :gid AND g.department = :department")
-    Group findGroupByGid(@Param(value = "gid")Long gid, @Param(value = "department") Department department);
+    @Query(value = "SELECT g FROM Group g JOIN FETCH UserGroup ug ON g.id = ug.group.id WHERE g.id = :gid AND g.department.id = :department")
+    Group findGroupByGid(@Param(value = "gid")Long gid, @Param(value = "department") Long department);
 
     List<Group> findAllByUserId(Long userId);
 
@@ -63,5 +65,7 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
             "WHERE ug.joiner.id = :uid AND g.state = :state " +
             "ORDER BY g.createdAt DESC")
     List<Group> findAllJoinGroupByUserId(@Param(value = "uid") Long uid, @Param(value = "state") State state);
+
+    List<Group> findAllByPageAndSort(UserAccount userAccount, LocalDateTime now, SortedBy sortedBy, Long cursorId, Pageable pageable);
 
 }

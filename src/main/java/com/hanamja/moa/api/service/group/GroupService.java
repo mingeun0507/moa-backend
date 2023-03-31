@@ -306,10 +306,10 @@ public class GroupService {
 
     @Transactional(readOnly = true)
     public DataResponseDto<List<GroupInfoResponseDto>> getExistingGroups2(UserAccount userAccount, SortedBy sortedBy, Long cursor, Pageable pageable) {
-        if (sortedBy == SortedBy.RECENT) {
-            List<GroupInfoResponseDto> resultDtoList = groupRepository
-                    .findExistingGroupsByRECENT(State.RECRUITING, LocalDateTime.now())
-                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+        LocalDateTime now = LocalDateTime.now();
+        if (sortedBy == SortedBy.RECENT || sortedBy == SortedBy.PAST) {
+            List<GroupInfoResponseDto> resultDtoList = groupRepository.findAllByPageAndSort(userAccount, now, sortedBy, cursor, pageable).stream()
+                    .map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
                     .collect(Collectors.toList());
             return DataResponseDto.<List<GroupInfoResponseDto>>builder()
                     .data(resultDtoList).build();
@@ -322,13 +322,6 @@ public class GroupService {
                     .findAllByStateAndMeetingAtOrderByCreatedAtDesc(State.RECRUITING, null)
                     .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
                     .collect(Collectors.toList()));
-            return DataResponseDto.<List<GroupInfoResponseDto>>builder()
-                    .data(resultDtoList).build();
-        } else if (sortedBy == SortedBy.PAST) {
-            List<GroupInfoResponseDto> resultDtoList = groupRepository
-                    .findAllByStateAndMeetingAtBeforeOrderByCreatedAtDesc(State.DONE, LocalDateTime.now())
-                    .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
-                    .collect(Collectors.toList());
             return DataResponseDto.<List<GroupInfoResponseDto>>builder()
                     .data(resultDtoList).build();
         } else {
@@ -650,16 +643,16 @@ public class GroupService {
 
 
     @Transactional
-    public GroupCompleteRespDto completeGroup(Long uid, Long gid, MultipartFile image) throws Exception {
+    public GroupCompleteRespDto completeGroup(UserAccount userAccount, Long gid, MultipartFile image) throws Exception {
         LocalDateTime now = ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("Asia/Seoul")).toLocalDateTime();
         // 모임 완료하면 카드 앞면 사진 업데이트
-        if(!groupRepository.existsByIdAndMaker_Id(gid, uid)){
+        if(!groupRepository.existsByIdAndMaker_Id(gid, userAccount.getUserId())){
             throw NotFoundException.builder()
                     .httpStatus(HttpStatus.UNAUTHORIZED)
                     .message("Group 생성자가 아닙니다.")
                     .build();
         }
-        Group group = groupRepository.findGroupByGid(gid);
+        Group group = groupRepository.findGroupByGid(gid, userAccount.getDepartmentId());
         String groupMakerName = group.getMaker().getName();
 
         String imageLink = amazonS3Uploader.saveFileAndGetUrl(image);
@@ -758,8 +751,8 @@ public class GroupService {
         groupRepository.updateCompleteGroup(imageLink, now, gid, State.DONE);
 
         for (User albumOwner : groupJoinUsers) {
-            if (!albumOwner.getId().equals(uid)) {
-                List<UserGroup> onePersonCard = userGroupRepository.findOnePersonCard(uid, albumOwner.getId(), State.DONE);
+            if (!albumOwner.getId().equals(userAccount.getUserId())) {
+                List<UserGroup> onePersonCard = userGroupRepository.findOnePersonCard(userAccount.getUserId(), albumOwner.getId(), State.DONE);
                 cardList.add(GroupCompleteRespDto.Card.builder()
                         .userId(albumOwner.getId())
                         .username(albumOwner.getName())

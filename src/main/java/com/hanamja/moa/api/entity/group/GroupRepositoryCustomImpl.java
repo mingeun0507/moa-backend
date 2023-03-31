@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static com.hanamja.moa.api.entity.group.QGroup.group;
@@ -19,7 +20,6 @@ import static com.hanamja.moa.api.entity.user_group.QUserGroup.userGroup;
 public class GroupRepositoryCustomImpl implements GroupRepositoryCustom{
 
     private final JPAQueryFactory jpaQueryFactory;
-
     public List<Group> findAllByUserId(Long userId){
         return jpaQueryFactory.selectFrom(group)
                 .join(userGroup.group, group)
@@ -28,30 +28,58 @@ public class GroupRepositoryCustomImpl implements GroupRepositoryCustom{
     }
 
     @Override
-    List<Group> findAllByPageAndSort(UserAccount userAccount, SortedBy sortedBy, Long cursorId, Pageable pageable){
+    public List<Group> findAllByPageAndSort(UserAccount userAccount, LocalDateTime now, SortedBy sortedBy, Long cursorId, Pageable pageable){
         JPAQuery<Group> query = jpaQueryFactory
                 .selectFrom(group)
                 .where(
-                    group.department.id.eq(userAccount.getDepartmentId())
+                        cursorIdBySortedBy(cursorId, sortedBy, now),
+                        group.department.id.eq(userAccount.getDepartmentId())
                 )
                 ;
         if (sortedBy.equals(SortedBy.RECENT)) {
             query
-                    .limit(pageable.getPageSize()+1)
-                    .orderBy(group.createdAt.desc()).fetch();
-        } else if (sortedBy.equals(SortedBy.SOON)) {
-            query
-                    .limit(pageable.getPageSize()+1)
-                    .orderBy(group.meetingAt.desc()).fetch();
-        } else if (sortedBy.equals(SortedBy.PAST)) {
-            query
-                    .where(group.state.eq(State.DONE))
-                    .limit(pageable.getPageSize()+1)
-                    .orderBy(group.createdAt.asc()).fetch();
+                    .orderBy(group.createdAt.desc());
         }
-        return query.fetch();
+//        else if (sortedBy.equals(SortedBy.SOON)) {
+//            query
+//                    .orderBy(
+//                            group.meetingAt.asc().nullsLast(),
+//                            group.createdAt.asc()
+//                    );
+//        }
+        else if (sortedBy.equals(SortedBy.PAST)) {
+            query
+                    .orderBy(group.createdAt.asc());
+        }
+        System.out.println(query.toString());
+        return query.limit(pageable.getPageSize()).fetch();
     }
 
+    private BooleanExpression cursorIdBySortedBy(Long cursorId, SortedBy sortedBy, LocalDateTime now) {
+        if (sortedBy.equals(SortedBy.RECENT)) {
+            return cursorId == null ?
+                    group.state.eq(State.RECRUITING).and(group.meetingAt.coalesce(now.plusDays(1)).gt(now))
+                    :
+                    group.state.eq(State.RECRUITING).and(group.meetingAt.coalesce(now.plusDays(1)).gt(now))
+                    .and(group.id.lt(cursorId));
+        }
+//        else if (sortedBy.equals(SortedBy.SOON)) {
+//            return cursorId == null ?
+//                    group.state.eq(State.RECRUITING).and(group.meetingAt.coalesce(now.plusYears(5)).gt(now))
+//                    :
+//                    group.state.eq(State.RECRUITING).and(group.meetingAt.coalesce(now.plusYears(5)).gt(now))
+//                    .and(group.meetingAt.after(meetingAt));
+//        }
+        else if (sortedBy.equals(SortedBy.PAST)) {
+            return cursorId == null ?
+                    group.state.eq(State.DONE)
+                    :
+                    group.state.eq(State.DONE)
+                    .and(group.id.gt(cursorId));
+        } else {
+            return group.id.lt(cursorId);
+        }
+    }
     private BooleanExpression ltGroupId(Long cursorId) {
         return cursorId == null ? null : group.id.lt(cursorId);
     }
