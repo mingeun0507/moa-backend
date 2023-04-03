@@ -86,7 +86,7 @@ public class Group {
         this.meetingAt = meetingAt;
         this.imageLink = imageLink;
         this.maker = maker;
-        this.department = maker.getDepartment();
+        this.department = maker.getDepartments().get(0).getDepartment();
     }
 
     // 인증샷에 대한 update 메소드
