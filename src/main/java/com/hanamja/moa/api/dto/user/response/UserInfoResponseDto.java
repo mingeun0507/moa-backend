@@ -1,12 +1,17 @@
 package com.hanamja.moa.api.dto.user.response;
 
+import com.hanamja.moa.api.entity.department.Department;
 import com.hanamja.moa.api.entity.user.Gender;
 import com.hanamja.moa.api.entity.user.Role;
 import com.hanamja.moa.api.entity.user.User;
+import com.hanamja.moa.api.entity.user_department.UserDepartment;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -19,12 +24,12 @@ public class UserInfoResponseDto {
     private Long point;
     private String intro;
     private Role role;
-    private String department;
+    private List<Department> departments;
     private boolean isNotified;
     private int rank;
 
     @Builder
-    public UserInfoResponseDto(Long id, String studentId, String name, Gender gender, String imageLink, Long point, String intro, Role role, String department, boolean isNotified, int rank) {
+    public UserInfoResponseDto(Long id, String studentId, String name, Gender gender, String imageLink, Long point, String intro, Role role, List<Department> departments, boolean isNotified, int rank) {
         this.id = id;
         this.studentId = studentId;
         this.name = name;
@@ -33,12 +38,13 @@ public class UserInfoResponseDto {
         this.point = point;
         this.intro = intro;
         this.role = role;
-        this.department = department;
+        this.departments = departments;
         this.isNotified = isNotified;
         this.rank = rank;
     }
 
     public static UserInfoResponseDto from(User user) {
+        List<Department> depts = user.getDepartments().stream().map(UserDepartment::getDepartment).collect(Collectors.toList());
         return UserInfoResponseDto.builder()
                 .id(user.getId())
                 .studentId(user.getStudentId())
@@ -48,12 +54,13 @@ public class UserInfoResponseDto {
                 .point(user.getPoint())
                 .intro(user.getIntro())
                 .role(user.getRole())
-                .department(user.getDepartment() != null ? user.getDepartment().getName() : null)
+                .departments(depts)
                 .isNotified(user.getIsNotified())
                 .build();
     }
 
     public static UserInfoResponseDto from(User user, int rank) {
+        List<Department> depts = user.getDepartments().stream().map(UserDepartment::getDepartment).collect(Collectors.toList());
         return UserInfoResponseDto.builder()
                 .id(user.getId())
                 .studentId(user.getStudentId())
@@ -63,7 +70,7 @@ public class UserInfoResponseDto {
                 .point(user.getPoint())
                 .intro(user.getIntro())
                 .role(user.getRole())
-                .department(user.getDepartment() != null ? user.getDepartment().getName() : null)
+                .departments(depts)
                 .isNotified(user.getIsNotified())
                 .rank(rank)
                 .build();
