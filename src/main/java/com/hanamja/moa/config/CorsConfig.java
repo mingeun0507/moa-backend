@@ -17,10 +17,10 @@ public class CorsConfig {
         config.addAllowedOrigin("http://localhost:3000");
         config.addAllowedOrigin("http://moafrontend-env.eba-qtcfatkw.ap-northeast-2.elasticbeanstalk.com");
         config.addAllowedOrigin("http://moa-frontend.s3-website.ap-northeast-2.amazonaws.com/");
-        config.addAllowedOrigin("http://dev.moa-univ.com");
-        config.addAllowedOrigin("https://dev.moa-univ.com");
+        config.addAllowedOrigin("https://d2xztibv89z47n.cloudfront.net/");
         config.addAllowedOrigin("http://moa-univ.com");
         config.addAllowedOrigin("https://moa-univ.com");
+        config.addAllowedOrigin("https://dbuzo8hxq26v0.cloudfront.net");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         config.addExposedHeader("*");
