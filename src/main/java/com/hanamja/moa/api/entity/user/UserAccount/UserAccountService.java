@@ -2,7 +2,6 @@ package com.hanamja.moa.api.entity.user.UserAccount;
 
 
 import com.hanamja.moa.api.entity.user.Role;
-import com.hanamja.moa.api.entity.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -12,8 +11,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.Date;
 
 @Slf4j
 @Service
@@ -27,8 +24,9 @@ public class UserAccountService implements UserDetailsService {
         Jws<Claims> claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
         Long userId = claims.getBody().get("user_id", Long.class);
         String studentId = claims.getBody().get("student_id", String.class);
+        Long departmentId = claims.getBody().get("department_id", Long.class);
         Role role = Role.valueOf(claims.getBody().get("role", String.class));
 
-        return new UserAccount(userId, studentId, role);
+        return new UserAccount(userId, studentId, departmentId, role);
     }
 }

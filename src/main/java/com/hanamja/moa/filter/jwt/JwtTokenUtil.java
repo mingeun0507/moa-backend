@@ -1,5 +1,6 @@
 package com.hanamja.moa.filter.jwt;
 
+import com.hanamja.moa.api.entity.department.Department;
 import com.hanamja.moa.api.entity.user.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -28,7 +29,7 @@ public class JwtTokenUtil {
     private static final int REFRESH_TOKEN_EXPIRATION_MS = 14 * 24 * 60 * 60 * 1000;
 
     // jwt 토큰 생성
-    public String generateAccessToken(long userId, String studentId, Role role, boolean isActive) {
+    public String generateAccessToken(long userId, String studentId, Department department, Role role, boolean isActive, boolean isOnboarded) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + ACCESS_TOKEN_EXPIRATION_MS);
         Claims claims = Jwts.claims()
@@ -38,8 +39,10 @@ public class JwtTokenUtil {
                 ;
         claims.put("user_id", userId);
         claims.put("student_id", studentId);
+        claims.put("department_id", department.getId());
         claims.put("role", role);
         claims.put("is_active", isActive);
+        claims.put("is_onboarded", isOnboarded);
 
 
         return Jwts.builder()
@@ -82,8 +85,9 @@ public class JwtTokenUtil {
             Jws<Claims> claims = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
 
             boolean isActive = claims.getBody().get("is_active", Boolean.class);
+            boolean isOnboarded = claims.getBody().get("is_onboarded", Boolean.class);
 
-            return isActive;
+            return isActive && isOnboarded;
         } catch (Exception e) {
             log.error(e.getMessage());
             return false;

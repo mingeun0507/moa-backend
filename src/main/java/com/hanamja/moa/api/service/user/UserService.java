@@ -40,9 +40,13 @@ public class UserService {
     public UserInfoResponseDto modifyUserInfo(UserAccount userAccount, ModifyingUserInfoRequestDto modifyingUserInfoRequestDto) {
         User user = userRepository.findById(userAccount.getUserId()).orElseThrow(() -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당 유저가 없습니다. id=" + userAccount.getUserId()));
 
-        user.modifyUserInfo(modifyingUserInfoRequestDto.getGender(), departmentRepository.findByName(modifyingUserInfoRequestDto.getDepartment()).orElseThrow(
-                () -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당 학과가 없습니다. name=" + modifyingUserInfoRequestDto.getDepartment())
-        ), modifyingUserInfoRequestDto.getIntro(), modifyingUserInfoRequestDto.getImageLink());
+        user.modifyUserInfo(
+                modifyingUserInfoRequestDto.getGender(),
+//              modifyingUserInfo 메서드 인자 3개인데 왜 4개 들어있는지?
+//                departmentRepository.findByName(modifyingUserInfoRequestDto.getDepartment()).orElseThrow(
+//                    () -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당 학과가 없습니다. name=" + modifyingUserInfoRequestDto.getDepartment())),
+                modifyingUserInfoRequestDto.getIntro(),
+                modifyingUserInfoRequestDto.getImageLink());
         user.updateProfileImage(modifyingUserInfoRequestDto.getImageLink());
         userRepository.save(user);
 

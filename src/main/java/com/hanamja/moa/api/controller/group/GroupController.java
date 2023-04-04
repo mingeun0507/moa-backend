@@ -15,7 +15,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import net.bytebuddy.implementation.bind.annotation.Default;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -70,6 +69,17 @@ public class GroupController {
     public ResponseEntity<DataResponseDto<List<GroupInfoResponseDto>>> getExistingGroups(@RequestParam SortedBy sortedBy) {
 
         return ResponseEntity.ok(groupService.getExistingGroups(sortedBy));
+    }
+
+    @Operation(summary = "기존 모임 조회하기(채널분리버전) - ver2.0", description = "기존 모임 조회하기(채널분리버전) - ver2.0")
+    @GetMapping("/channel")
+    public ResponseEntity<DataResponseDto<List<GroupInfoResponseDto>>> getExistingGroups2
+            (@AuthenticationPrincipal UserAccount userAccount,
+             @RequestParam SortedBy sortedBy,
+             @Nullable @RequestParam(required = false) Long cursor,
+             @PageableDefault(size = 2) Pageable pageable)
+    {
+        return ResponseEntity.ok(groupService.getExistingGroups2(userAccount, sortedBy, cursor, pageable));
     }
 
     @Operation(summary = "기존 모임 상세 조회하기", description = "기존 모임 상세 조회하기")
@@ -151,11 +161,6 @@ public class GroupController {
         return ResponseEntity.ok().build();
     }
 
-
-    /**
-     * 승민 TODO
-     * 1. 인증샷 업로드가 되면 imageLink 및 진행상황 complete 로 업데이트 - PUT
-     */
     @Operation(summary = "카드 만들기", description = "카드 만들기")
     @PostMapping(value = "/complete")
     public ResponseEntity<GroupCompleteRespDto> makeCard
@@ -165,7 +170,7 @@ public class GroupController {
             @RequestParam(value = "image") MultipartFile image
     ) throws Exception {
         // 모임 완료 후 -> card 생성하는 로직
-        GroupCompleteRespDto groupCompleteRespDto = groupService.completeGroup(userAccount.getUserId(), gid, image);
+        GroupCompleteRespDto groupCompleteRespDto = groupService.completeGroup(userAccount, gid, image);
         return ResponseEntity.ok().body(groupCompleteRespDto);
     }
 

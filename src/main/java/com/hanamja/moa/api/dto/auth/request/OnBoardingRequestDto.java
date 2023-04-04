@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -17,13 +18,13 @@ public class OnBoardingRequestDto {
     private Gender gender;
 
     @NotNull
-    private String department;
+    private List<String> departments;
     private String imageLink;
 
     @Builder
-    public OnBoardingRequestDto(Gender gender, String department, String imageLink) {
+    public OnBoardingRequestDto(Gender gender, List<String> departments, String imageLink) {
         this.gender = gender;
-        this.department = department;
+        this.departments = departments;
         this.imageLink = imageLink;
     }
 }

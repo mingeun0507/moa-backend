@@ -1,9 +1,9 @@
 package com.hanamja.moa.api.entity.user;
 
 import com.hanamja.moa.api.entity.album.Album;
-import com.hanamja.moa.api.entity.department.Department;
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.point_history.PointHistory;
+import com.hanamja.moa.api.entity.user_department.UserDepartment;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -53,9 +53,10 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dept_id")
-    private Department department;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "dept_id")
+    @OneToMany(mappedBy = "user")
+    private List<UserDepartment> departments;
 
     @OneToMany(mappedBy = "owner")
     private List<Album> albumList;
@@ -83,7 +84,7 @@ public class User {
     private List<PointHistory> pointHistoryList;
 
     @Builder
-    public User(String studentId, String password, String name, Gender gender, String imageLink, Long point, String intro, Department department) {
+    public User(String studentId, String password, String name, Gender gender, String imageLink, Long point, String intro) {
         this.studentId = studentId;
         this.password = password;
         this.name = name;
@@ -92,7 +93,6 @@ public class User {
         this.point = 0L;
         this.intro = intro;
         this.role = studentId.startsWith(FRESHMAN_YEAR) ? Role.ROLE_FRESHMEN : Role.ROLE_SENIOR;
-        this.department = department;
         this.isOnboarded = false;
         this.isActive = false;
         this.isNotified = false;
@@ -104,17 +104,16 @@ public class User {
     }
 
     // 온보딩용 업데이트 함수
-    public void updateOnBoardingInfo(Gender gender, Department department, String imageLink) {
+    public void updateOnBoardingInfo(Gender gender, String imageLink) {
         this.gender = gender;
-        this.department = department;
+//        this.department = department;
         this.imageLink = imageLink == null ? this.imageLink : imageLink;
         this.isOnboarded = true;
     }
 
     // 마이페이지 수정용 업데이트 함수
-    public void modifyUserInfo(Gender gender, Department department, String intro, String imageLink) {
+    public void modifyUserInfo(Gender gender, String intro, String imageLink) {
         this.gender = gender;
-        this.department = department;
         this.intro = intro;
         this.imageLink = imageLink == null ? this.imageLink : imageLink;
     }

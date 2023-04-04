@@ -72,7 +72,7 @@ public class InitDatabaseForLocal {
 
             User mingeun = User
                     .builder()
-                    .department(software)
+//                    .department(software)
                     .studentId("20180268")
                     .password(passwordEncoder.encode("12345678"))
                     .name("김민근")
@@ -83,7 +83,7 @@ public class InitDatabaseForLocal {
 
             User changjin = User
                     .builder()
-                    .department(software)
+//                    .department(software)
                     .studentId("20232011")
                     .password(passwordEncoder.encode("12345678"))
                     .name("서창진")
@@ -94,7 +94,7 @@ public class InitDatabaseForLocal {
 
             User seokmin = User
                     .builder()
-                    .department(software)
+//                    .department(software)
                     .studentId("20232023")
                     .password(passwordEncoder.encode("12345678"))
                     .name("윤석민")

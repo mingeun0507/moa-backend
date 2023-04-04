@@ -4,11 +4,13 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class LoginResponseDto {
 
-    private String accessToken;
+    private List<String> accessTokens;
 
     private String refreshToken;
 
@@ -17,9 +19,9 @@ public class LoginResponseDto {
     private boolean isActive;
 
 
-    public static LoginResponseDto of(String accessToken, String refreshToken, boolean isOnBoarded, boolean isActive) {
+    public static LoginResponseDto of(List<String> accessTokens, String refreshToken, boolean isOnBoarded, boolean isActive) {
         LoginResponseDto responseDto = new LoginResponseDto();
-        responseDto.accessToken = accessToken;
+        responseDto.accessTokens = accessTokens;
         responseDto.refreshToken = refreshToken;
         responseDto.isOnBoarded = isOnBoarded;
         responseDto.isActive = isActive;
