@@ -1,5 +1,6 @@
 package com.hanamja.moa.api.dto.group.request;
 
+import com.hanamja.moa.api.entity.department.Department;
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.user.User;
 import lombok.AccessLevel;
@@ -29,7 +30,7 @@ public class MakingGroupRequestDto {
 
     private String hashtags;
 
-    public static Group toEntity(MakingGroupRequestDto makingGroupRequestDto, User user) {
+    public static Group toEntity(MakingGroupRequestDto makingGroupRequestDto, Department department, User user) {
         LocalDateTime meetingAt = makingGroupRequestDto.getMeetingAt();
         if (Optional.ofNullable(makingGroupRequestDto.getMeetingAt()).isPresent()){
             meetingAt = ZonedDateTime.of(makingGroupRequestDto.getMeetingAt(), ZoneId.of("Asia/Seoul"))
@@ -43,6 +44,7 @@ public class MakingGroupRequestDto {
                 .currentPeopleNum(1L)
                 .meetingAt(meetingAt)
                 .maker(user)
+                .department(department)
                 .build();
     }
 }

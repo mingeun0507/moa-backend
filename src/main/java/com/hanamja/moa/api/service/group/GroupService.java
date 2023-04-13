@@ -12,6 +12,8 @@ import com.hanamja.moa.api.entity.album.Album;
 import com.hanamja.moa.api.entity.album.AlbumRepository;
 import com.hanamja.moa.api.entity.comment.Comment;
 import com.hanamja.moa.api.entity.comment.CommentRepository;
+import com.hanamja.moa.api.entity.department.Department;
+import com.hanamja.moa.api.entity.department.DepartmentRepository;
 import com.hanamja.moa.api.entity.group.Group;
 import com.hanamja.moa.api.entity.group.GroupRepository;
 import com.hanamja.moa.api.entity.group.State;
@@ -54,6 +56,7 @@ import java.util.stream.Collectors;
 public class GroupService {
     private final AlbumRepository albumRepository;
     private final UserRepository userRepository;
+    private final DepartmentRepository departmentRepository;
     private final UserGroupRepository userGroupRepository;
     private final GroupRepository groupRepository;
     private final GroupHashtagRepository groupHashtagRepository;
@@ -63,6 +66,15 @@ public class GroupService {
     private final CommentRepository commentRepository;
     private final AmazonS3Uploader amazonS3Uploader;
 
+    public void validateChannel(UserAccount userAccount, Long groupDepartmentId){
+        if (!userAccount.getDepartmentId().equals(groupDepartmentId)){
+            throw InvalidParameterException
+                    .builder()
+                    .httpStatus(HttpStatus.BAD_REQUEST)
+                    .message("해당 모임의 채널이 아닙니다.")
+                    .build();
+        }
+    }
     @Transactional
     public GroupInfoResponseDto makeNewGroup(UserAccount userAccount, MakingGroupRequestDto makingGroupRequestDto) {
 
@@ -70,8 +82,14 @@ public class GroupService {
 
         // Hashtag #으로 파싱 후 분리, 저장 (다른 메소드로 분리 구현)
         List<Hashtag> hashtagList = saveHashtags(makingGroupRequestDto.getHashtags());
-
-        Group newGroup = MakingGroupRequestDto.toEntity(makingGroupRequestDto, user);
+        Department department = departmentRepository.findById(userAccount.getDepartmentId()).orElseThrow(
+                () -> NotFoundException
+                        .builder()
+                        .httpStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .message("존재하지 않는 채널입니다.")
+                        .build()
+        );
+        Group newGroup = MakingGroupRequestDto.toEntity(makingGroupRequestDto, department, user);
         groupRepository.save(newGroup);
 
         UserGroup userGroup = UserGroup
@@ -110,6 +128,13 @@ public class GroupService {
                         .build()
         );
 
+        if (!userAccount.getDepartmentId().equals(existingGroup.getDepartment().getId())){
+            throw InvalidParameterException
+                    .builder()
+                    .httpStatus(HttpStatus.BAD_REQUEST)
+                    .message("해당 모임의 채널이 아닙니다.")
+                    .build();
+        }
         validateMaker(user, existingGroup);
 
         if (existingGroup.getCurrentPeopleNum() > modifyingGroupRequestDto.getMaxPeopleNum()) {
@@ -315,7 +340,7 @@ public class GroupService {
                     .data(resultDtoList).build();
         } else if (sortedBy == SortedBy.SOON) {
             List<GroupInfoResponseDto> resultDtoList = groupRepository
-                    .findAllByStateAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State.RECRUITING, LocalDateTime.now())
+                    .findAllByStateAndDepartment_IdAndMeetingAtAfterOrderByMeetingAtAscCreatedAtDesc(State.RECRUITING, userAccount.getDepartmentId(), LocalDateTime.now())
                     .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
                     .collect(Collectors.toList());
             resultDtoList.addAll(groupRepository
