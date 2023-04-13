@@ -27,9 +27,6 @@ public class UserDepartment {
     @JoinColumn(name = "dept_id", nullable = false)
     private Department department;
 
-    @Column(name = "is_main")
-    private Boolean isMain;
-
     @Builder
     public UserDepartment(User user, Department department) {
         this.user = user;
