@@ -1,6 +1,5 @@
 package com.hanamja.moa.filter.jwt;
 
-import com.hanamja.moa.api.entity.department.Department;
 import com.hanamja.moa.api.entity.user.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -13,6 +12,8 @@ import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -29,7 +30,8 @@ public class JwtTokenUtil {
     private static final int REFRESH_TOKEN_EXPIRATION_MS = 14 * 24 * 60 * 60 * 1000;
 
     // jwt 토큰 생성
-    public String generateAccessToken(long userId, String studentId, Department department, Role role, boolean isActive, boolean isOnboarded) {
+    public Map<Long, String> generateAccessToken(long userId, String studentId, Long departmentId, Role role, boolean isActive, boolean isOnboarded) {
+        Map<Long, String> tokenMap = new HashMap<>();
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + ACCESS_TOKEN_EXPIRATION_MS);
         Claims claims = Jwts.claims()
@@ -39,16 +41,17 @@ public class JwtTokenUtil {
                 ;
         claims.put("user_id", userId);
         claims.put("student_id", studentId);
-        claims.put("department_id", department.getId());
+        claims.put("department_id", departmentId);
         claims.put("role", role);
         claims.put("is_active", isActive);
         claims.put("is_onboarded", isOnboarded);
 
-
-        return Jwts.builder()
+        String token = Jwts.builder()
                 .setClaims(claims)
                 .signWith(SignatureAlgorithm.HS512, jwtSecret) // 사용할 암호화 알고리즘, signature에 들어갈 secret 값 세팅
                 .compact();
+        tokenMap.put(departmentId, token);
+        return tokenMap;
     }
 
     public String generateRefreshToken(long userId, String studentId, Role role, boolean isActive) {
