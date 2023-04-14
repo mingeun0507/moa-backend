@@ -17,8 +17,8 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
 
     Optional<Group> findById(Long id);
 
-    @Query(value = "SELECT g FROM Group g JOIN FETCH UserGroup ug ON g.id = ug.group.id WHERE g.id = :gid AND g.department.id = :department")
-    Group findGroupByGid(@Param(value = "gid")Long gid, @Param(value = "department") Long department);
+    @Query(value = "SELECT g FROM Group g JOIN FETCH UserGroup ug ON g.id = ug.group.id WHERE g.id = :gid")
+    Group findGroupByGid(@Param(value = "gid")Long gid);
 
     List<Group> findAllByUserId(Long userId);
 
@@ -45,16 +45,16 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
 
 
     // TODO 아래 두 함수 하나로 합칠것
-    @Query(value = "SELECT distinct g FROM Group g LEFT JOIN FETCH GroupHashtag gh ON g.id = gh.group.id LEFT JOIN FETCH Hashtag h ON gh.hashtag.id = h.id WHERE (g.name LIKE %:keyword% OR h.name LIKE %:keyword%) AND g.state = 'RECRUITING' AND (g.meetingAt > now() OR g.meetingAt is Null) ORDER BY g.createdAt DESC")
-    List<Group> searchGroupByKeyword(@Param(value = "keyword") String keyword);
+    @Query(value = "SELECT distinct g FROM Group g LEFT JOIN FETCH GroupHashtag gh ON g.id = gh.group.id LEFT JOIN FETCH Hashtag h ON gh.hashtag.id = h.id WHERE (g.name LIKE %:keyword% OR h.name LIKE %:keyword%) AND g.department.id = :deptId AND g.state = 'RECRUITING' AND (g.meetingAt > now() OR g.meetingAt is Null) ORDER BY g.createdAt DESC")
+    List<Group> searchGroupByKeyword(@Param(value = "keyword") String keyword, @Param(value = "deptId") Long deptId);
 
-    @Query(value = "SELECT distinct g FROM Group g LEFT JOIN FETCH GroupHashtag gh ON g.id = gh.group.id LEFT JOIN FETCH Hashtag h ON gh.hashtag.id = h.id WHERE (g.name LIKE %:keyword% OR h.name LIKE %:keyword%) AND g.state = 'RECRUITING' AND (g.meetingAt > now() OR g.meetingAt is Null) ORDER BY g.meetingAt asc nulls last, g.createdAt DESC")
-    List<Group> searchGroupByMeetingAtAndKeyword(@Param(value = "keyword") String keyword);
+    @Query(value = "SELECT distinct g FROM Group g LEFT JOIN FETCH GroupHashtag gh ON g.id = gh.group.id LEFT JOIN FETCH Hashtag h ON gh.hashtag.id = h.id WHERE (g.name LIKE %:keyword% OR h.name LIKE %:keyword%) AND g.department.id = :deptId AND g.state = 'RECRUITING' AND (g.meetingAt > now() OR g.meetingAt is Null) ORDER BY g.meetingAt asc nulls last, g.createdAt DESC")
+    List<Group> searchGroupByMeetingAtAndKeyword(@Param(value = "keyword") String keyword, @Param(value = "deptId") Long deptId);
 
 
     List<Group> findAllByStateAndNameContainsOrderByCreatedAtDesc(State state, String name);
 
-    List<Group> findAllByMaker_Id(Long userId);
+    List<Group> findAllByMaker_IdAndDepartment_Id(Long userId, Long departmentId);
 
     void deleteById(Long gid);
 
@@ -63,9 +63,9 @@ public interface GroupRepository extends JpaRepository<Group, Long>, GroupReposi
     void updateGroupState(@Param(value = "state") State state, @Param(value = "gid") Long gid);
 
     @Query(value = "SELECT g FROM Group AS g JOIN FETCH UserGroup AS ug ON g.id = ug.group.id " +
-            "WHERE ug.joiner.id = :uid AND g.state = :state " +
+            "WHERE ug.joiner.id = :uid AND g.state = :state AND g.department.id = :deptId " +
             "ORDER BY g.createdAt DESC")
-    List<Group> findAllJoinGroupByUserId(@Param(value = "uid") Long uid, @Param(value = "state") State state);
+    List<Group> findAllJoinGroupByUserId(@Param(value = "uid") Long uid, @Param(value = "state") State state, @Param(value = "deptId") Long deptId);
 
     List<Group> findAllByPageAndSort(UserAccount userAccount, LocalDateTime now, SortedBy sortedBy, Long cursorId, Pageable pageable);
 
