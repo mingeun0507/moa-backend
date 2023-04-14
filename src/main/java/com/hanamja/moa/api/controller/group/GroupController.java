@@ -26,7 +26,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -116,7 +115,7 @@ public class GroupController {
     public ResponseEntity<DataResponseDto<List<GroupStateInfoResponseDto>>> getMyGroupList(
             @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount) {
 
-        DataResponseDto<List<GroupStateInfoResponseDto>> myGroupList = groupService.getMyGroupList(userAccount.getUserId());
+        DataResponseDto<List<GroupStateInfoResponseDto>> myGroupList = groupService.getMyGroupList(userAccount);
 
         return ResponseEntity.ok().body(myGroupList);
     }
@@ -135,7 +134,7 @@ public class GroupController {
     @Operation(summary = "내가 만든 모임 보기", description = "내가 만든 모임 보기")
     @GetMapping(value = "/maker")
     public ResponseEntity<GroupInfoListResponseDto> getGroupListMadeMyMe(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount){
-        GroupInfoListResponseDto groupListMadeByMe = groupService.getGroupListMadeByMe(userAccount.getUserId());
+        GroupInfoListResponseDto groupListMadeByMe = groupService.getGroupListMadeByMe(userAccount);
         return ResponseEntity.ok().body(groupListMadeByMe);
     }
 
@@ -143,21 +142,21 @@ public class GroupController {
     @DeleteMapping(value = "/out")
     public ResponseEntity<?> outMemberFromGroup(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
                                                 @Validated @ModelAttribute KickOutRequestDto kickOutRequestDto){
-        return ResponseEntity.ok(groupService.kickOutMemberFromGroup(userAccount.getUserId(), kickOutRequestDto));
+        return ResponseEntity.ok(groupService.kickOutMemberFromGroup(userAccount, kickOutRequestDto));
     }
 
     @Operation(summary = "모임 취소하기", description = "모임 취소하기")
     @DeleteMapping(value = "/cancel/{groupId}")
     public ResponseEntity<?> cancelGroup(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
                                          @NotNull @PathVariable Long groupId){
-        return ResponseEntity.ok(groupService.cancelGroup(userAccount.getUserId(), groupId));
+        return ResponseEntity.ok(groupService.cancelGroup(userAccount, groupId));
     }
 
     @Operation(summary = "모임 모집 마감하기", description = "모임 모집 마감하기")
     @PutMapping(value = "/recruit/end/{groupId}")
     public ResponseEntity<?> recruitDone(@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
                                          @NotNull @PathVariable Long groupId){
-        groupService.groupRecruitDone(userAccount.getUserId(), groupId);
+        groupService.groupRecruitDone(userAccount, groupId);
         return ResponseEntity.ok().build();
     }
 
@@ -182,8 +181,11 @@ public class GroupController {
 
     @Operation(summary = "모임 검색하기 - 정렬", description = "모임 검색하기 - 정렬")
     @GetMapping("/search")
-    public ResponseEntity<DataResponseDto<List<GroupInfoResponseDto>>> searchAndSortGroupByKeyword(@RequestParam String keyword, @RequestParam SortedBy sortedBy) {
-        return ResponseEntity.ok(groupService.searchAndSortGroupByKeyword(keyword, sortedBy));
+    public ResponseEntity<DataResponseDto<List<GroupInfoResponseDto>>> searchAndSortGroupByKeyword
+            (@Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
+             @RequestParam String keyword,
+             @RequestParam SortedBy sortedBy) {
+        return ResponseEntity.ok(groupService.searchAndSortGroupByKeyword(userAccount, keyword, sortedBy));
     }
 
     @Operation(summary = "모임 댓글 작성하기", description = "모임 댓글 작성하기")
@@ -209,10 +211,10 @@ public class GroupController {
 
     @Operation(summary = "모임 댓글 리스트 조회하기", description = "모임 댓글 리스트 조회하기")
     @GetMapping("/{groupId}/comment")
-    public ResponseEntity<DataResponseDto<Page<CommentInfoResponseDto>>> getPagedCommentList(@NotNull @PathVariable Long groupId,
-                                                                                             @Nullable @RequestParam Long cursor,
-                                                                                             @PageableDefault(size = 20, sort = "comment_id", direction = Sort.Direction.DESC) Pageable pageable) {
-
-        return ResponseEntity.ok(groupService.getCommentList(groupId, cursor, pageable));
+    public ResponseEntity<DataResponseDto<Page<CommentInfoResponseDto>>> getPagedCommentList(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
+            @NotNull @PathVariable Long groupId, @Nullable @RequestParam Long cursor,
+            @PageableDefault(size = 20, sort = "comment_id", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(groupService.getCommentList(userAccount, groupId, cursor, pageable));
     }
 }

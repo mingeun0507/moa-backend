@@ -185,7 +185,7 @@ public class GroupService {
                         .message("일시적 오류입니다. 다시 시도해주세요.")
                         .build()
         );
-
+        validateChannel(userAccount, existingGroup.getDepartment().getId());
         List<String> hashtagStringList = getHashtagStringList(existingGroup);
 
         GroupInfoResponseDto removedGroupDto =
@@ -368,7 +368,7 @@ public class GroupService {
                         .message("groupId로 group을 찾을 수 없습니다.")
                         .build()
         );
-
+        validateChannel(userAccount, existingGroup.getDepartment().getId());
         // 참여자들의 간단한 프로필 추가
         List<SimpleUserInfoResponseDto> simpleUserInfoDtoList =
                 userGroupRepository.findAllByGroup_Id(groupId).stream()
@@ -430,6 +430,8 @@ public class GroupService {
                 () -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당 그룹을 찾을 수 없습니다.")
         );
 
+        validateChannel(userAccount, group.getDepartment().getId());
+
         User user = userRepository.findUserById(userAccount.getUserId())
                 .orElseThrow(() -> NotFoundException.builder()
                         .httpStatus(HttpStatus.NOT_FOUND)
@@ -475,7 +477,7 @@ public class GroupService {
                                         .builder()
                                         .sender(groupMaker)
                                         .receiver(joiner)
-                                        .content(groupName + " 모임의 정원이 꽉 찼어요. 우리 한번 모여볼까요?")
+                                        .content("[ " + group.getDepartment().getName() + " ] " + groupName + " 모임의 정원이 꽉 찼어요. 우리 한번 모여볼까요?")
                                         .reason("모임 생성자: " + groupMakerName + "님")
                                         .build()
                         );
@@ -490,13 +492,13 @@ public class GroupService {
         return GroupInfoResponseDto.from(group, getHashtagStringList(group));
     }
 
-    public DataResponseDto<List<GroupStateInfoResponseDto>> getMyGroupList(Long userId) {
+    public DataResponseDto<List<GroupStateInfoResponseDto>> getMyGroupList(UserAccount userAccount) {
         List<GroupStateInfoResponseDto> dto = new ArrayList<>();
 
         Arrays.stream(State.values()).collect(Collectors.toList())
                         .stream()
                         .forEach(state -> {
-                            List<GroupInfoResponseDto> groupInfos = groupRepository.findAllJoinGroupByUserId(userId, state).stream()
+                            List<GroupInfoResponseDto> groupInfos = groupRepository.findAllJoinGroupByUserId(userAccount.getUserId(), state, userAccount.getDepartmentId()).stream()
                                     .map(group -> GroupInfoResponseDto.from(group, getHashtagStringList(group)))
                                     .collect(Collectors.toList());
 
@@ -516,6 +518,9 @@ public class GroupService {
                 .orElseThrow(() -> new NotFoundException(HttpStatus.BAD_REQUEST, "해당 그룹을 찾을 수 없습니다."));
 
         Group group = userGroup.getGroup();
+
+        validateChannel(userAccount, group.getDepartment().getId());
+
         if(group.getState().equals(State.RECRUITING)){
             group.subtractCurrentPeopleNum();
             userGroupRepository.delete(userGroup);
@@ -547,19 +552,19 @@ public class GroupService {
     }
 
     @Transactional(readOnly = true)
-    public GroupInfoListResponseDto getGroupListMadeByMe(Long userId){
-        List<GroupInfoResponseDto> response = groupRepository.findAllByMaker_Id(userId).stream()
+    public GroupInfoListResponseDto getGroupListMadeByMe(UserAccount userAccount){
+        List<GroupInfoResponseDto> response = groupRepository.findAllByMaker_IdAndDepartment_Id(userAccount.getUserId(), userAccount.getDepartmentId()).stream()
                 .map(group -> GroupInfoResponseDto.from(group, getHashtagStringList(group)))
                 .collect(Collectors.toList());
         return GroupInfoListResponseDto.of(response);
     }
 
     @Transactional
-    public GroupInfoResponseDto kickOutMemberFromGroup(Long uid, KickOutRequestDto kickOutRequestDto) {
-        User existingUser = validateUser(uid);
-        validateGroupMaker(uid, kickOutRequestDto.getGroupId());
+    public GroupInfoResponseDto kickOutMemberFromGroup(UserAccount userAccount, KickOutRequestDto kickOutRequestDto) {
+        User existingUser = validateUser(userAccount.getUserId());
+        validateGroupMaker(userAccount.getUserId(), kickOutRequestDto.getGroupId());
         Group existingGroup = groupRepository.findById(kickOutRequestDto.getGroupId()).orElseThrow();
-
+        validateChannel(userAccount, existingGroup.getDepartment().getId());
         kickOutRequestDto.getUserList()
                 .forEach(userId -> {
                             userGroupRepository.deleteUserGroupByGroup_IdAndJoiner_Id(kickOutRequestDto.getGroupId(), userId);
@@ -577,7 +582,7 @@ public class GroupService {
                                             .builder()
                                             .sender(existingUser)
                                             .receiver(receiver)
-                                            .content(existingUser.getName() + "님이 '" + existingGroup.getName() + "'에서 " + receiver.getName() + "님을 내보냈어요.")
+                                            .content("[ " + existingGroup.getDepartment().getName() + " ] " + existingUser.getName() + "님이 '" + existingGroup.getName() + "'에서 " + receiver.getName() + "님을 내보냈어요.")
                                             .reason(kickOutRequestDto.getReason())
                                             .build()
                             );
@@ -594,11 +599,11 @@ public class GroupService {
     }
 
     @Transactional
-    public GroupInfoResponseDto cancelGroup(Long uid, Long gid) {
-        User groupMaker = validateUser(uid);
-        validateGroupMaker(uid, gid);
+    public GroupInfoResponseDto cancelGroup(UserAccount userAccount, Long gid) {
+        User groupMaker = validateUser(userAccount.getUserId());
+        validateGroupMaker(userAccount.getUserId(), gid);
         Group existingGroup = groupRepository.findById(gid).orElseThrow();
-
+        validateChannel(userAccount, existingGroup.getDepartment().getId());
         // 모임 취소 알림 보내기
         userGroupRepository.findAllByGroup_Id(gid).stream()
                 .map(UserGroup::getJoiner)
@@ -608,7 +613,7 @@ public class GroupService {
                                     .builder()
                                     .sender(groupMaker)
                                     .receiver(joiner)
-                                    .content(groupMaker.getName() + "님이 '" + existingGroup.getName() + "'을 취소했어요.")
+                                    .content("[ " + existingGroup.getDepartment().getName() + " ] " + groupMaker.getName() + "님이 '" + existingGroup.getName() + "'을 취소했어요.")
                                     .reason("모임 생성자: " + groupMaker.getName() + "님")
                                     .build()
                     );
@@ -627,8 +632,8 @@ public class GroupService {
     }
 
     @Transactional
-    public void groupRecruitDone(Long uid, Long gid){
-        validateGroupMaker(uid, gid);
+    public void groupRecruitDone(UserAccount userAccount, Long gid){
+        validateGroupMaker(userAccount.getUserId(), gid);
         Group existingGroup = groupRepository.findById(gid).orElseThrow(
                 () ->
                         NotFoundException.builder()
@@ -636,6 +641,7 @@ public class GroupService {
                                 .message("groupId로 모임을 찾을 수 없습니다.")
                                 .build()
         );
+        validateChannel(userAccount, existingGroup.getDepartment().getId());
 
         String groupMakerName = existingGroup.getMaker().getName();
 
@@ -677,7 +683,9 @@ public class GroupService {
                     .message("Group 생성자가 아닙니다.")
                     .build();
         }
-        Group group = groupRepository.findGroupByGid(gid, userAccount.getDepartmentId());
+        validateGroupMaker(userAccount.getUserId(), gid);
+        Group group = groupRepository.findGroupByGid(gid);
+        validateChannel(userAccount, group.getDepartment().getId());
         String groupMakerName = group.getMaker().getName();
 
         String imageLink = amazonS3Uploader.saveFileAndGetUrl(image);
@@ -749,7 +757,7 @@ public class GroupService {
                             .builder()
                             .sender(group.getMaker())
                             .receiver(albumOwner)
-                            .content(String.join(", ", nameList) + "님과의 카드를 만들었어요.")
+                            .content("[ " + group.getDepartment().getName() + " ] " + String.join(", ", nameList) + "님과의 카드를 만들었어요.")
                             .reason("모임 생성자: " + groupMakerName + "님")
                             .build()
             );
@@ -794,26 +802,26 @@ public class GroupService {
 
     }
 
-    public DataResponseDto<List<GroupInfoResponseDto>> searchGroupByKeyword(String keyword) {
-        List<GroupInfoResponseDto> resultDtoList = groupRepository
-                .searchGroupByKeyword(keyword)
-                .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
-                .collect(Collectors.toList());
+//    public DataResponseDto<List<GroupInfoResponseDto>> searchGroupByKeyword(String keyword) {
+//        List<GroupInfoResponseDto> resultDtoList = groupRepository
+//                .searchGroupByKeyword(keyword)
+//                .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
+//                .collect(Collectors.toList());
+//
+//        return DataResponseDto.<List<GroupInfoResponseDto>>builder()
+//                .data(resultDtoList).build();
+//    }
 
-        return DataResponseDto.<List<GroupInfoResponseDto>>builder()
-                .data(resultDtoList).build();
-    }
-
-    public DataResponseDto<List<GroupInfoResponseDto>> searchAndSortGroupByKeyword(String keyword, SortedBy sortedBy) {
+    public DataResponseDto<List<GroupInfoResponseDto>> searchAndSortGroupByKeyword(UserAccount userAccount, String keyword, SortedBy sortedBy) {
         List<GroupInfoResponseDto> resultDtoList;
         if (sortedBy == SortedBy.RECENT) {
             resultDtoList = groupRepository
-                    .searchGroupByKeyword(keyword)
+                    .searchGroupByKeyword(keyword, userAccount.getDepartmentId())
                     .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
                     .collect(Collectors.toList());
         } else if (sortedBy == SortedBy.SOON) {
             resultDtoList = groupRepository
-                    .searchGroupByMeetingAtAndKeyword(keyword)
+                    .searchGroupByMeetingAtAndKeyword(keyword, userAccount.getDepartmentId())
                     .stream().map(x -> GroupInfoResponseDto.from(x, getHashtagStringList(x)))
                     .collect(Collectors.toList());
         } else {
@@ -834,6 +842,8 @@ public class GroupService {
         User existingUser = validateUser(userAccount.getUserId());
         Group existingGroup = validateGroup(groupId);
 
+        validateChannel(userAccount, existingGroup.getDepartment().getId());
+
         Comment comment = Comment.builder()
                 .group(existingGroup)
                 .user(existingUser)
@@ -851,6 +861,8 @@ public class GroupService {
     public DataResponseDto<CommentInfoResponseDto> updateComment(UserAccount userAccount, Long commentId, WritingCommentRequestDto writingCommentRequestDto) {
         User existingUser = validateUser(userAccount.getUserId());
         Comment existingComment = validateComment(commentId);
+
+        validateChannel(userAccount, existingComment.getGroup().getDepartment().getId());
 
         if (!existingComment.getUser().getId().equals(existingUser.getId())) {
             throw InvalidParameterException
@@ -873,6 +885,8 @@ public class GroupService {
     public DataResponseDto<CommentInfoResponseDto> deleteComment(UserAccount userAccount, Long commentId) {
         User existingUser = validateUser(userAccount.getUserId());
         Comment existingComment = validateComment(commentId);
+
+        validateChannel(userAccount, existingComment.getGroup().getDepartment().getId());
 
         if (!existingComment.getUser().getId().equals(existingUser.getId())) {
             throw InvalidParameterException
@@ -897,9 +911,9 @@ public class GroupService {
         return CommentInfoResponseDto.from(recentComment.get());
     }
 
-    public DataResponseDto<Page<CommentInfoResponseDto>> getCommentList(Long groupId, Long cursor, Pageable pageable) {
+    public DataResponseDto<Page<CommentInfoResponseDto>> getCommentList(UserAccount userAccount, Long groupId, Long cursor, Pageable pageable) {
         Group existingGroup = validateGroup(groupId);
-
+        validateChannel(userAccount, existingGroup.getDepartment().getId());
         Page<Comment> commentPage = commentRepository.findAllByGroupAndIdGreaterThanEqual(existingGroup, cursor, pageable);;
 
         return DataResponseDto.<Page<CommentInfoResponseDto>>builder()
