@@ -25,8 +25,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -46,7 +46,6 @@ public class AuthService {
 
     @Transactional
     public LoginResponseDto login(LoginRequestDto loginRequestDto) {
-        List<String> accessTokens = new ArrayList<>();
         User user = userRepository.findByStudentId(loginRequestDto.getStudentId()).orElseThrow(
                 () -> NotFoundException.builder().message("유저를 찾을 수 없습니다.")
                         .httpStatus(HttpStatus.UNAUTHORIZED)
@@ -58,20 +57,11 @@ public class AuthService {
                     .httpStatus(HttpStatus.UNAUTHORIZED)
                     .build();
         }
-        String mainAccessTokens = user.getDepartments().stream()
-                .filter(userDepartment -> userDepartment.getIsMain().equals(Boolean.TRUE))
+        List<Map<Long, String>> accessTokens = user.getDepartments().stream()
                 .map(UserDepartment::getDepartment)
-                .map(department -> jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), department, user.getRole(), user.getIsActive(), user.getIsOnboarded()))
-                .collect(Collectors.toList()).get(0);
-        accessTokens.add(mainAccessTokens);
-        if (user.getDepartments().size() > 1) {
-            accessTokens.addAll(user.getDepartments().stream()
-                    .filter(userDepartment -> userDepartment.getIsMain().equals(Boolean.FALSE))
-                    .map(UserDepartment::getDepartment)
-                    .map(department -> jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), department, user.getRole(), user.getIsActive(), user.getIsOnboarded()))
-                    .collect(Collectors.toList()));
-        }
-//        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getDepartment(), user.getRole(), user.getIsActive(), user.getIsOnboarded());
+                .map(department -> jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), department.getId(), user.getRole(), user.getIsActive(), user.getIsOnboarded()))
+                .collect(Collectors.toList());
+
         String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId() ,user.getRole(), user.getIsActive());
 
         UserToken userToken = UserToken.builder().user(user).refreshToken(refreshToken).build();
@@ -115,26 +105,16 @@ public class AuthService {
 
     @Transactional
     public RegenerateAccessTokenResponseDto regenerateAccessToken(RegenerateAccessTokenRequestDto requestDto) {
-        List<String> accessTokens = new ArrayList<>();
         UserToken userToken = userTokenRepository.findByRefreshToken(requestDto.getRefreshToken()).orElseThrow(
                 () -> NotFoundException.builder().message("해당 유저를 찾을 수 없습니다.").httpStatus(HttpStatus.UNAUTHORIZED).build()
         );
 
         User user = userToken.getUser();
-        String mainAccessTokens = user.getDepartments().stream()
-                .filter(userDepartment -> userDepartment.getIsMain().equals(Boolean.TRUE))
+        List<Map<Long, String>> accessTokens = user.getDepartments().stream()
                 .map(UserDepartment::getDepartment)
-                .map(department -> jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), department, user.getRole(), user.getIsActive(), user.getIsOnboarded()))
-                .collect(Collectors.toList()).get(0);
-        accessTokens.add(mainAccessTokens);
-        if (user.getDepartments().size() > 1) {
-            accessTokens.addAll(user.getDepartments().stream()
-                    .filter(userDepartment -> userDepartment.getIsMain().equals(Boolean.FALSE))
-                    .map(UserDepartment::getDepartment)
-                    .map(department -> jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), department, user.getRole(), user.getIsActive(), user.getIsOnboarded()))
-                    .collect(Collectors.toList()));
-        }
-//        String accessToken = jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), user.getDepartment(), user.getRole(), user.getIsActive(), user.getIsOnboarded());
+                .map(department -> jwtTokenUtil.generateAccessToken(user.getId(), user.getStudentId(), department.getId(), user.getRole(), user.getIsActive(), user.getIsOnboarded()))
+                .collect(Collectors.toList());
+
         String refreshToken = jwtTokenUtil.generateRefreshToken(user.getId(), user.getStudentId(), user.getRole(), user.getIsActive());
 
         userTokenRepository.updateRefreshToken(user.getId(), refreshToken);

@@ -75,7 +75,7 @@ public class Group {
     private Department department;
 
     @Builder
-    public Group(String name, String description, Long maxPeopleNum, Long currentPeopleNum, LocalDateTime meetingAt, String imageLink, User maker) {
+    public Group(String name, String description, Long maxPeopleNum, Long currentPeopleNum, LocalDateTime meetingAt, String imageLink, User maker, Department department) {
         this.name = name;
         this.description = description;
         this.state = State.RECRUITING;
@@ -86,7 +86,7 @@ public class Group {
         this.meetingAt = meetingAt;
         this.imageLink = imageLink;
         this.maker = maker;
-        this.department = maker.getDepartments().get(0).getDepartment();
+        this.department = department;
     }
 
     // 인증샷에 대한 update 메소드
