@@ -26,17 +26,9 @@ public class BoardCategory {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "request_count")
-    private Integer requestCount;
-
-    @Column(name = "is_active", nullable = false)
-    private Boolean isActive;
-
     @Builder
-    public BoardCategory(Post post, String name, Boolean isActive) {
+    public BoardCategory(Post post, String name) {
         this.post = post;
         this.name = name;
-        this.requestCount = 0;
-        this.isActive = isActive;
     }
 }
