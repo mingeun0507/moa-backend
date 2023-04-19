@@ -45,11 +45,11 @@ public class PostComment extends BaseTimeEntity {
     @Column(name = "is_reply")
     private boolean isReply;
 
-    @Column(name = "order")
-    private Integer order;
+    @Column(name = "comment_order")
+    private Integer commentOrder;
 
     @Builder
-    public PostComment(Post post, User user, String content, PostComment parentComment, boolean isReply, Integer order) {
+    public PostComment(Post post, User user, String content, PostComment parentComment, boolean isReply, Integer commentOrder) {
         this.post = post;
         this.user = user;
         this.content = content;
@@ -57,6 +57,6 @@ public class PostComment extends BaseTimeEntity {
         this.isDeleted = false;
         this.parentComment = parentComment;
         this.isReply = isReply;
-        this.order = order;
+        this.commentOrder = commentOrder;
     }
 }
