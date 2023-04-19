@@ -1,6 +1,6 @@
 package com.hanamja.moa.api.entity.board_category;
 
-import com.hanamja.moa.api.entity.post.Post;
+import com.hanamja.moa.api.entity.board.Board;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -21,14 +21,14 @@ public class BoardCategory {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id", nullable = false)
-    private Post post;
+    private Board board;
 
     @Column(name = "name", nullable = false)
     private String name;
 
     @Builder
-    public BoardCategory(Post post, String name) {
-        this.post = post;
+    public BoardCategory(Board board, String name) {
+        this.board = board;
         this.name = name;
     }
 }
