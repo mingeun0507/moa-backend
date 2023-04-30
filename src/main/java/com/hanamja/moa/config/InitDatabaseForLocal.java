@@ -2,6 +2,11 @@ package com.hanamja.moa.config;
 
 import com.hanamja.moa.api.entity.album.Album;
 import com.hanamja.moa.api.entity.album.AlbumRepository;
+import com.hanamja.moa.api.entity.board.Board;
+import com.hanamja.moa.api.entity.board.BoardRepository;
+import com.hanamja.moa.api.entity.board_category.BoardCategory;
+import com.hanamja.moa.api.entity.board_category.BoardCategoryRepository;
+import com.hanamja.moa.api.entity.board_category.BoardCategoryRepositoryCustom;
 import com.hanamja.moa.api.entity.department.Department;
 import com.hanamja.moa.api.entity.department.DepartmentRepository;
 import com.hanamja.moa.api.entity.group.Group;
@@ -15,6 +20,8 @@ import com.hanamja.moa.api.entity.point_history.PointHistoryRepository;
 import com.hanamja.moa.api.entity.user.Gender;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserRepository;
+import com.hanamja.moa.api.entity.user_department.UserDepartment;
+import com.hanamja.moa.api.entity.user_department.UserDepartmentRepository;
 import com.hanamja.moa.api.entity.user_group.UserGroup;
 import com.hanamja.moa.api.entity.user_group.UserGroupRepository;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +51,8 @@ public class InitDatabaseForLocal {
 
         private final UserRepository userRepository;
 
+        private final UserDepartmentRepository userDepartmentRepository;
+
         private final GroupRepository groupRepository;
 
         private final DepartmentRepository departmentRepository;
@@ -60,8 +69,14 @@ public class InitDatabaseForLocal {
 
         private final PasswordEncoder passwordEncoder;
 
+        private final BoardCategoryRepository boardCategoryRepository;
+
+        private final BoardCategoryRepositoryCustom boardCategoryRepositoryCustom;
+
+        private final BoardRepository boardRepository;
+
         @Transactional
-        public void init() {
+        public void initUser() {
 
             Department software = Department
                     .builder()
@@ -271,6 +286,107 @@ public class InitDatabaseForLocal {
             pointHistoryRepository.save(seokminPointHistory1);
         }
 
+        public void init() {
+
+            Department software = Department
+                    .builder()
+                    .name("소프트웨어학부")
+                    .build();
+
+            departmentRepository.save(software);
+
+            User mingeun = User
+                    .builder()
+                    .studentId("20180268")
+                    .password(passwordEncoder.encode("12345678"))
+                    .name("김민근")
+                    .gender(Gender.MALE)
+                    .imageLink("http://example.com")
+                    .point(0L)
+                    .build();
+
+            userRepository.save(mingeun);
+
+            UserDepartment mingeunSoft = UserDepartment
+                    .builder()
+                    .user(mingeun)
+                    .department(software)
+                    .build();
+
+            userDepartmentRepository.save(mingeunSoft);
+
+            Board board = Board
+                    .builder()
+                    .department(software)
+                    .name("자유게시판")
+                    .build();
+
+            boardRepository.save(board);
+
+            Board board2 = Board
+                    .builder()
+                    .department(software)
+                    .name("공지사항")
+                    .build();
+
+            boardRepository.save(board2);
+
+            Board board3 = Board
+                    .builder()
+                    .department(software)
+                    .name("후기게시판")
+                    .build();
+
+            boardRepository.save(board3);
+
+            BoardCategory boardCategory = BoardCategory
+                    .builder()
+                    .name("동아리")
+                    .board(board)
+                    .build();
+
+            boardCategoryRepository.save(boardCategory);
+
+            BoardCategory boardCategory2 = BoardCategory
+                    .builder()
+                    .name("학회")
+                    .board(board)
+                    .build();
+
+            boardCategoryRepository.save(boardCategory2);
+
+            BoardCategory boardCategory3 = BoardCategory
+                    .builder()
+                    .name("몰루몰루")
+                    .board(board)
+                    .build();
+
+            boardCategoryRepository.save(boardCategory3);
+
+            BoardCategory boardCategory4 = BoardCategory
+                    .builder()
+                    .name("후기")
+                    .board(board2)
+                    .build();
+
+            boardCategoryRepository.save(boardCategory4);
+
+            BoardCategory boardCategory5 = BoardCategory
+                    .builder()
+                    .name("우하하")
+                    .board(board2)
+                    .build();
+
+            boardCategoryRepository.save(boardCategory5);
+
+//            BoardCategory boardCategory6 = BoardCategory
+//                    .builder()
+//                    .name("후기")
+//                    .board(board3)
+//                    .build();
+//
+//            boardCategoryRepository.save(boardCategory6);
+        }
     }
 
 
