@@ -1,5 +1,6 @@
 package com.hanamja.moa.api.entity.post;
 
+import com.hanamja.moa.api.dto.post.request.BoardPostSaveAndEditRequestDto;
 import com.hanamja.moa.api.entity.board_category.BoardCategory;
 import com.hanamja.moa.api.entity.department.Department;
 import com.hanamja.moa.api.entity.user.User;
@@ -47,12 +48,20 @@ public class Post extends BaseTimeEntity {
     private String thumbnail; // 예비 컬럼
 
     @Builder
-    public Post(User user, Department department, BoardCategory boardCategory, String title, String content) {
+    public Post(User user, Department department, BoardCategory boardCategory, String title, String content, String thumbnail) {
         this.user = user;
         this.department = department;
         this.boardCategory = boardCategory;
         this.title = title;
         this.content = content;
+        this.thumbnail = thumbnail;
         this.isModified = false;
+    }
+
+    public void updatePostInfo(BoardPostSaveAndEditRequestDto editRequestDto, BoardCategory boardCategory, String thumbnail){
+        this.title = editRequestDto.getTitle();
+        this.content = editRequestDto.getContent();
+        this.boardCategory = boardCategory;
+        this.thumbnail = thumbnail.length() > 2 ? thumbnail : null;
     }
 }
