@@ -6,9 +6,9 @@ import com.hanamja.moa.api.dto.post_comment.response.PostCommentResponseDto;
 
 public interface PostCommentService {
 
-    PostCommentResponseDto createPostComment(Long postId, Long userId, CreatePostCommentRequestDto requestDto);
+    PostCommentResponseDto createPostComment(Long postId, Long userId, Long departmentId, CreatePostCommentRequestDto requestDto);
 
-    PostCommentResponseDto updatePostComment(Long postId, Long commentId, Long userId, ModifyPostCommentRequestDto requestDto);
+    PostCommentResponseDto updatePostComment(Long postId, Long commentId, Long departmentId, Long userId, ModifyPostCommentRequestDto requestDto);
 
-    PostCommentResponseDto deletePostComment(Long postId, Long commentId, Long userId);
+    PostCommentResponseDto deletePostComment(Long postId, Long commentId, Long departmentId, Long userId);
 }

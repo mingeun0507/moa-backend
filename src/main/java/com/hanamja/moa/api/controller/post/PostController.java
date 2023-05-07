@@ -35,6 +35,7 @@ public class PostController {
         PostCommentResponseDto responseDto = postCommentService.createPostComment(
                 postId,
                 userAccount.getUserId(),
+                userAccount.getDepartmentId(),
                 requestDto
         );
 
@@ -52,6 +53,7 @@ public class PostController {
         PostCommentResponseDto responseDto = postCommentService.updatePostComment(
                 postId,
                 commentId,
+                userAccount.getDepartmentId(),
                 userAccount.getUserId(),
                 requestDto
         );
@@ -69,6 +71,7 @@ public class PostController {
         PostCommentResponseDto responseDto = postCommentService.deletePostComment(
                 postId,
                 commentId,
+                userAccount.getDepartmentId(),
                 userAccount.getUserId()
         );
 
