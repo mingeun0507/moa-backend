@@ -62,7 +62,7 @@ public class PostController {
     }
 
     @Operation(summary = "게시판 댓글 달기", description = "게시판 댓글 달기")
-    @DeleteMapping("{postId|/comment/{commentId}")
+    @DeleteMapping("{postId}/comment/{commentId}")
     public ResponseEntity<PostCommentResponseDto> deletePostComment(
             @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
             @PathVariable("postId") Long postId,
@@ -77,6 +77,5 @@ public class PostController {
 
         return ResponseEntity.status(HttpStatus.OK).body(responseDto);
     }
-
 
 }
