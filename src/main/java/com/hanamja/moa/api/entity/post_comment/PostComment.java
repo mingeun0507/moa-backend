@@ -59,4 +59,13 @@ public class PostComment extends BaseTimeEntity {
         this.isReply = isReply;
         this.commentOrder = commentOrder;
     }
+
+    public void updateContent(String content) {
+        this.content = content;
+        this.isModified = true;
+    }
+
+    public void updateCommentOrder(Integer commentOrder) {
+        this.commentOrder = commentOrder;
+    }
 }
