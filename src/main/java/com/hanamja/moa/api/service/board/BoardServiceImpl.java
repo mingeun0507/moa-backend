@@ -16,7 +16,7 @@ import com.hanamja.moa.api.entity.department.DepartmentRepository;
 import com.hanamja.moa.api.entity.post.PostRepository;
 import com.hanamja.moa.api.entity.post.PostRepositoryCustom;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
-import com.hanamja.moa.exception.custom.NotFoundException;
+import com.hanamja.moa.api.service.util.UtilServiceImpl;
 import com.hanamja.moa.exception.custom.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,31 +54,6 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public Department resolveDepartmentByUserAccount(UserAccount userAccount) {
-        return departmentRepository
-                .findById(userAccount.getDepartmentId())
-                .orElseThrow(
-                        () -> CustomException
-                                .builder()
-                                .httpStatus(HttpStatus.NOT_FOUND)
-                                .message("해당 학과가 존재하지 않습니다.")
-                                .build());
-    }
-
-    @Override
-    public Board resolveBoardById(Long boardId) {
-        return boardRepository
-                .findById(boardId)
-                .orElseThrow(
-                        () -> NotFoundException
-                                .builder()
-                                .httpStatus(HttpStatus.NOT_FOUND)
-                                .message("해당 게시판이 존재하지 않습니다.")
-                                .build()
-                );
-    }
-
-    @Override
     public DepartmentBoardInfoResponseDto getBoardInfoByDepartment(UserAccount userAccount) {
         Department resolvedDepartment = utilService.resolveDepartmentById(userAccount);
 
@@ -95,7 +70,7 @@ public class BoardServiceImpl implements BoardService {
         boardCategoryRequestRepository.save(
                 BoardCategoryRequest.builder()
                         .user(utilService.resolveUserById(userAccount))
-                        .board(resolveBoardById(newBoardCategoryRequestDto.getBoardId()))
+                        .board(utilService.resolveBoardById(newBoardCategoryRequestDto.getBoardId()))
                         .name(newBoardCategoryRequestDto.getCategory())
                         .build()
         );
@@ -104,7 +79,7 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public DataResponseDto<Slice<PostInfoResponseDto>> getPostListByBoardId(UserAccount userAccount, Long boardId, Long cursor, Pageable pageable) {
         validateDepartmentByUserAccount(userAccount.getDepartmentId(), userAccount);
-        Board resolvedBoard = resolveBoardById(boardId);
+        Board resolvedBoard = utilService.resolveBoardById(boardId);
 
         return DataResponseDto.<Slice<PostInfoResponseDto>>builder().data(postRepositoryCustom.findAllSimplePostInfo(resolvedBoard, cursor, pageable)).build();
     }
