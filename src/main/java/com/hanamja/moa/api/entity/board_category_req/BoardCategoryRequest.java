@@ -3,6 +3,7 @@ package com.hanamja.moa.api.entity.board_category_req;
 import com.hanamja.moa.api.entity.board.Board;
 import com.hanamja.moa.api.entity.user.User;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -30,6 +31,7 @@ public class BoardCategoryRequest {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @Builder
     public BoardCategoryRequest(User user, Board board, String name) {
         this.user = user;
         this.board = board;
