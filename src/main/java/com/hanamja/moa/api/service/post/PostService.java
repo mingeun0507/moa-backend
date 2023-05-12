@@ -1,9 +1,9 @@
 package com.hanamja.moa.api.service.post;
 
-import com.hanamja.moa.api.dto.post.request.BoardPostEditRequestDto;
-import com.hanamja.moa.api.dto.post.request.BoardPostSaveRequestDto;
-import com.hanamja.moa.api.dto.post.response.CreatePostImageResponseDto;
+import com.hanamja.moa.api.dto.post.request.CreatePostRequestDto;
+import com.hanamja.moa.api.dto.post.request.EditPostRequestDto;
 import com.hanamja.moa.api.dto.post.response.CreatePostResponseDto;
+import com.hanamja.moa.api.dto.post.response.PostImageResponseDto;
 import com.hanamja.moa.api.entity.board_category.BoardCategory;
 import com.hanamja.moa.api.entity.post.Post;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
@@ -19,9 +19,9 @@ public interface PostService {
     String registerImageToPostImage(MultipartFile image);
 
     /* Controller 에서 사용할 함수들 */
-    CreatePostResponseDto registerNewBoardPost(UserAccount userAccount, BoardPostSaveRequestDto boardPostSaveRequestDto);
-    CreatePostImageResponseDto uploadImage(UserAccount userAccount, MultipartFile image);
-    CreatePostResponseDto editBoardPost(UserAccount userAccount, BoardPostEditRequestDto boardPostEditRequestDto);
+    CreatePostResponseDto createNewPost(UserAccount userAccount, CreatePostRequestDto createPostRequestDto);
+    PostImageResponseDto uploadImage(UserAccount userAccount, MultipartFile image);
+    CreatePostResponseDto editPost(UserAccount userAccount, EditPostRequestDto editPostRequestDto);
     void deleteBoardPost(Long postId, UserAccount userAccount);
 
     void likeBoardPost(Long postId, UserAccount userAccount);

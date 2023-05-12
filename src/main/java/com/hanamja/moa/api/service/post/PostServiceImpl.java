@@ -1,9 +1,9 @@
 package com.hanamja.moa.api.service.post;
 
-import com.hanamja.moa.api.dto.post.request.BoardPostEditRequestDto;
-import com.hanamja.moa.api.dto.post.request.BoardPostSaveRequestDto;
-import com.hanamja.moa.api.dto.post.response.CreatePostImageResponseDto;
+import com.hanamja.moa.api.dto.post.request.CreatePostRequestDto;
+import com.hanamja.moa.api.dto.post.request.EditPostRequestDto;
 import com.hanamja.moa.api.dto.post.response.CreatePostResponseDto;
+import com.hanamja.moa.api.dto.post.response.PostImageResponseDto;
 import com.hanamja.moa.api.entity.board_category.BoardCategory;
 import com.hanamja.moa.api.entity.board_category.BoardCategoryRepository;
 import com.hanamja.moa.api.entity.department.Department;
@@ -19,8 +19,8 @@ import com.hanamja.moa.api.entity.post_like.PostLikeRepository;
 import com.hanamja.moa.api.entity.user.User;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.service.util.UtilServiceImpl;
-import com.hanamja.moa.exception.custom.CustomException;
 import com.hanamja.moa.exception.custom.NotFoundException;
+import com.hanamja.moa.exception.custom.S3UploadException;
 import com.hanamja.moa.utils.s3.AmazonS3Uploader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -93,34 +93,34 @@ public class PostServiceImpl implements PostService {
         try {
             imageUrl = amazonS3Uploader.saveFileAndGetUrl(image);
         } catch (Exception e) {
-            throw CustomException.builder().httpStatus(HttpStatus.EXPECTATION_FAILED).message("이미지 업로드에 실패했습니다").build();
+            throw S3UploadException.builder().httpStatus(HttpStatus.EXPECTATION_FAILED).message("이미지 업로드에 실패했습니다").build();
         }
         return imageUrl;
     }
 
     @Override
     @Transactional
-    public CreatePostResponseDto registerNewBoardPost(UserAccount userAccount, BoardPostSaveRequestDto boardPostSaveRequestDto) {
+    public CreatePostResponseDto createNewPost(UserAccount userAccount, CreatePostRequestDto createPostRequestDto) {
         User user = utilService.resolveUserById(userAccount);
         Department department = utilService.resolveDepartmentById(userAccount);
-        BoardCategory boardCategory = resolveBoardCategoryById(boardPostSaveRequestDto.getCategoryId());
+        BoardCategory boardCategory = resolveBoardCategoryById(createPostRequestDto.getCategoryId());
 
         Post newPost = postRepository.save(Post.builder()
                 .user(user)
                 .department(department)
                 .boardCategory(boardCategory)
-                .title(boardPostSaveRequestDto.getTitle())
-                .content(boardPostSaveRequestDto.getContent())
-                .thumbnail(!boardPostSaveRequestDto.getImages().isEmpty() ? boardPostSaveRequestDto.getImages().get(0) : null)
+                .title(createPostRequestDto.getTitle())
+                .content(createPostRequestDto.getContent())
+                .thumbnail(!createPostRequestDto.getImages().isEmpty() ? createPostRequestDto.getImages().get(0) : null)
                 .build());
 
-        if (!boardPostSaveRequestDto.getImages().isEmpty()){
-            for (String imageUrl : boardPostSaveRequestDto.getImages()) {
+        if (!createPostRequestDto.getImages().isEmpty()){
+            createPostRequestDto.getImages().forEach(imageUrl -> {
                 postImageRepository.save(PostImage.builder()
                         .post(newPost)
                         .image(imageUrl)
                         .build());
-            }
+            });
         }
 
         return CreatePostResponseDto.builder()
@@ -130,19 +130,19 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public CreatePostImageResponseDto uploadImage(UserAccount userAccount, MultipartFile image){
+    public PostImageResponseDto uploadImage(UserAccount userAccount, MultipartFile image){
         utilService.resolveUserById(userAccount);
         utilService.resolveDepartmentById(userAccount);
         String imageUrl = registerImageToPostImage(image);
-        return CreatePostImageResponseDto.builder().imageUrl(imageUrl).build();
+        return PostImageResponseDto.builder().imageUrl(imageUrl).build();
     }
 
     @Override
     @Transactional
-    public CreatePostResponseDto editBoardPost(UserAccount userAccount, BoardPostEditRequestDto boardPostEditRequestDto) {
-        Post existPost = resolvePostByIdAndUserId(boardPostEditRequestDto.getPostId(), userAccount.getUserId());
+    public CreatePostResponseDto editPost(UserAccount userAccount, EditPostRequestDto editPostRequestDto) {
+        Post existPost = resolvePostByIdAndUserId(editPostRequestDto.getPostId(), userAccount.getUserId());
         // 최종 전달된 이미지 url 에 포함되어있으면 삭제
-        List<String> images = boardPostEditRequestDto.getImages();
+        List<String> images = editPostRequestDto.getImageUrls();
         List<PostImage> allExistImagesByImageUrl = postImageRepository.findAllExistByImageUrl(images);
         allExistImagesByImageUrl.forEach(postImage -> {
                     amazonS3Uploader.deleteFile(postImage.getImage());
@@ -150,7 +150,7 @@ public class PostServiceImpl implements PostService {
                 });
 
         // 새로 추가된 이미지 url 이 있으면 추가
-        if (!boardPostEditRequestDto.getImages().isEmpty()){
+        if (!editPostRequestDto.getImageUrls().isEmpty()){
             List<String> existsImages = allExistImagesByImageUrl.stream().map(PostImage::getImage).collect(Collectors.toList());
             images.forEach(image -> {
                 if (!existsImages.contains(image)){
@@ -162,12 +162,12 @@ public class PostServiceImpl implements PostService {
             });
         }
 
-        BoardCategory boardCategory = resolveBoardCategoryById(boardPostEditRequestDto.getCategoryId());
+        BoardCategory boardCategory = resolveBoardCategoryById(editPostRequestDto.getCategoryId());
 
         existPost.updatePostInfo(
-                boardPostEditRequestDto,
+                editPostRequestDto,
                 boardCategory,
-                boardPostEditRequestDto.getImages().isEmpty() ? null : boardPostEditRequestDto.getImages().get(0)
+                editPostRequestDto.getImageUrls().isEmpty() ? null : editPostRequestDto.getImageUrls().get(0)
                 );
 
         return CreatePostResponseDto.builder()

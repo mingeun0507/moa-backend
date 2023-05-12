@@ -14,9 +14,9 @@ public class PostImageRepositoryCustomImpl implements PostImageRepositoryCustom 
     private final JPAQueryFactory jpaQueryFactory;
 
     @Override
-    public List<PostImage> findAllExistByImageUrl(List<String> imageUrl) {
+    public List<PostImage> findAllExistByImageUrl(List<String> imageUrlList) {
         return jpaQueryFactory.selectFrom(postImage)
-                .where(postImage.image.notIn(imageUrl))
+                .where(postImage.image.notIn(imageUrlList))
                 .fetch();
     }
 

@@ -7,11 +7,11 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class CreatePostImageResponseDto {
+public class PostImageResponseDto {
     private String imageUrl;
 
     @Builder
-    public CreatePostImageResponseDto(String imageUrl) {
+    public PostImageResponseDto(String imageUrl) {
         this.imageUrl = imageUrl;
     }
 }

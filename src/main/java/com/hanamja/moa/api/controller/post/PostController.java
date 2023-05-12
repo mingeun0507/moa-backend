@@ -1,9 +1,9 @@
 package com.hanamja.moa.api.controller.post;
 
-import com.hanamja.moa.api.dto.post.request.BoardPostEditRequestDto;
-import com.hanamja.moa.api.dto.post.request.BoardPostSaveRequestDto;
-import com.hanamja.moa.api.dto.post.response.CreatePostImageResponseDto;
+import com.hanamja.moa.api.dto.post.request.CreatePostRequestDto;
+import com.hanamja.moa.api.dto.post.request.EditPostRequestDto;
 import com.hanamja.moa.api.dto.post.response.CreatePostResponseDto;
+import com.hanamja.moa.api.dto.post.response.PostImageResponseDto;
 import com.hanamja.moa.api.dto.post_comment.request.CreatePostCommentRequestDto;
 import com.hanamja.moa.api.dto.post_comment.request.ModifyPostCommentRequestDto;
 import com.hanamja.moa.api.dto.post_comment.response.PostCommentResponseDto;
@@ -85,35 +85,35 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<CreatePostResponseDto> makeNewBoardPost
+    public ResponseEntity<CreatePostResponseDto> createPost
             (
                     @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
-                    @RequestBody @NotNull BoardPostSaveRequestDto boardPostSaveRequestDto
+                    @RequestBody @NotNull CreatePostRequestDto createPostRequestDto
             )
     {
-        CreatePostResponseDto createPostResponseDto = postService.registerNewBoardPost(userAccount, boardPostSaveRequestDto);
+        CreatePostResponseDto createPostResponseDto = postService.createNewPost(userAccount, createPostRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(createPostResponseDto);
     }
 
     @PostMapping(value = "/image")
-    public ResponseEntity<CreatePostImageResponseDto> uploadNewBoardPostImage
+    public ResponseEntity<PostImageResponseDto> uploadNewBoardPostImage
             (
                     @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
                     @RequestPart @Nullable MultipartFile image
             )
     {
-        CreatePostImageResponseDto createPostImageResponseDto = postService.uploadImage(userAccount, image);
-        return ResponseEntity.status(HttpStatus.OK).body(createPostImageResponseDto);
+        PostImageResponseDto postImageResponseDto = postService.uploadImage(userAccount, image);
+        return ResponseEntity.status(HttpStatus.OK).body(postImageResponseDto);
     }
 
     @PutMapping
-    public ResponseEntity<CreatePostResponseDto> editBoardPost
+    public ResponseEntity<CreatePostResponseDto> editPost
             (
                     @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
-                    @RequestBody @NotNull BoardPostEditRequestDto boardPostEditRequestDto
+                    @RequestBody @NotNull EditPostRequestDto editPostRequestDto
             )
     {
-        CreatePostResponseDto createPostResponseDto = postService.editBoardPost(userAccount, boardPostEditRequestDto);
+        CreatePostResponseDto createPostResponseDto = postService.editPost(userAccount, editPostRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(createPostResponseDto);
     }
 

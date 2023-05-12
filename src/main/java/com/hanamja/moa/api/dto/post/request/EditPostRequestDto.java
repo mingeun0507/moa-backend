@@ -8,11 +8,11 @@ import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class BoardPostEditRequestDto {
+public class EditPostRequestDto {
     private Long postId;
     private String title;
     private Long categoryId;
     private String content;
-    private List<String> images;
+    private List<String> imageUrls;
 
 }

@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class BoardPostSaveRequestDto {
+public class CreatePostRequestDto {
     private String title;
     private Long categoryId;
     private String content;
