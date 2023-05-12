@@ -6,6 +6,7 @@ import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.service.user.UserService;
 import com.hanamja.moa.utils.s3.AmazonS3Uploader;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,9 +27,10 @@ public class UserController {
     private final AmazonS3Uploader amazonS3Uploader;
 
     @Operation(summary = "유저 정보 조회")
-    @GetMapping(value = "/{userId}/info")
-    public ResponseEntity<UserInfoResponseDto> myInfo(@PathVariable("userId") Long userId) {
-        return ResponseEntity.ok().body(userService.getUserInfo(userId));
+    @GetMapping(value = "/info")
+    public ResponseEntity<UserInfoResponseDto> myInfo(
+            @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount) {
+        return ResponseEntity.ok().body(userService.getUserInfo(userAccount));
     }
 
     @Operation(summary = "마이페이지에서 유저 정보 변경")
