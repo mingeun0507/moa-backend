@@ -8,6 +8,7 @@ import com.hanamja.moa.api.entity.post.PostRepository;
 import com.hanamja.moa.api.entity.post_comment.PostComment;
 import com.hanamja.moa.api.entity.post_comment.PostCommentRepository;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
+import com.hanamja.moa.api.service.post.PostService;
 import com.hanamja.moa.api.service.post_comment.PostCommentService;
 import com.hanamja.moa.exception.custom.NotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +33,8 @@ import java.util.List;
 public class PostController {
 
     private final PostCommentService postCommentService;
+
+    private final PostService postService;
 
     @Operation(summary = "게시판 댓글 달기", description = "게시판 댓글 달기")
     @PostMapping("/{postId}/comment")
