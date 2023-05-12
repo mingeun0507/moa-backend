@@ -1,21 +1,17 @@
 package com.hanamja.moa.api.controller.post;
 
+import com.hanamja.moa.api.dto.post.request.BoardPostEditRequestDto;
+import com.hanamja.moa.api.dto.post.request.BoardPostSaveRequestDto;
+import com.hanamja.moa.api.dto.post.response.CreatePostImageResponseDto;
+import com.hanamja.moa.api.dto.post.response.CreatePostResponseDto;
 import com.hanamja.moa.api.dto.post_comment.request.CreatePostCommentRequestDto;
 import com.hanamja.moa.api.dto.post_comment.request.ModifyPostCommentRequestDto;
 import com.hanamja.moa.api.dto.post_comment.response.PostCommentResponseDto;
-import com.hanamja.moa.api.entity.post.Post;
-import com.hanamja.moa.api.entity.post.PostRepository;
-import com.hanamja.moa.api.entity.post_comment.PostComment;
-import com.hanamja.moa.api.entity.post_comment.PostCommentRepository;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.service.post.PostService;
 import com.hanamja.moa.api.service.post_comment.PostCommentService;
-import com.hanamja.moa.exception.custom.NotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.hanamja.moa.api.dto.post.request.BoardPostSaveAndEditRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -90,32 +85,36 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<?> makeNewBoardPost
+    public ResponseEntity<CreatePostResponseDto> makeNewBoardPost
             (
                     @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
-                    @RequestPart @Nullable List<MultipartFile> images,
-                    @RequestPart @NotNull String data
-            ) throws JsonProcessingException
+                    @RequestPart @NotNull BoardPostSaveRequestDto boardPostSaveRequestDto
+            )
     {
-        ObjectMapper objectMapper = new ObjectMapper();
-        BoardPostSaveAndEditRequestDto boardPostSaveAndEditRequestDto = objectMapper.readValue(data, BoardPostSaveAndEditRequestDto.class);
-        postService.registerNewBoardPost(userAccount, images, boardPostSaveAndEditRequestDto);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        CreatePostResponseDto createPostResponseDto = postService.registerNewBoardPost(userAccount, boardPostSaveRequestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(createPostResponseDto);
     }
 
-    @PutMapping("/{postId}")
-    public ResponseEntity<?> editBoardPost
+    @PostMapping(value = "/image")
+    public ResponseEntity<CreatePostImageResponseDto> uploadNewBoardPostImage
             (
                     @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
-                    @PathVariable @NotNull Long postId,
-                    @RequestPart @Nullable List<MultipartFile> images,
-                    @RequestPart @NotNull String data
-            ) throws JsonProcessingException
+                    @RequestPart @Nullable MultipartFile image
+            )
     {
-        ObjectMapper objectMapper = new ObjectMapper();
-        BoardPostSaveAndEditRequestDto boardPostSaveAndEditRequestDto = objectMapper.readValue(data, BoardPostSaveAndEditRequestDto.class);
-        postService.editBoardPost(postId, userAccount, images, boardPostSaveAndEditRequestDto);
-        return ResponseEntity.status(HttpStatus.OK).build();
+        CreatePostImageResponseDto createPostImageResponseDto = postService.uploadImage(userAccount, image);
+        return ResponseEntity.status(HttpStatus.OK).body(createPostImageResponseDto);
+    }
+
+    @PutMapping
+    public ResponseEntity<CreatePostResponseDto> editBoardPost
+            (
+                    @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
+                    @RequestBody @NotNull BoardPostEditRequestDto boardPostEditRequestDto
+            )
+    {
+        CreatePostResponseDto createPostResponseDto = postService.editBoardPost(userAccount, boardPostEditRequestDto);
+        return ResponseEntity.status(HttpStatus.OK).body(createPostResponseDto);
     }
 
     @DeleteMapping("/{postId}")
