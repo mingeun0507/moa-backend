@@ -88,7 +88,7 @@ public class PostController {
     public ResponseEntity<CreatePostResponseDto> makeNewBoardPost
             (
                     @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
-                    @RequestPart @NotNull BoardPostSaveRequestDto boardPostSaveRequestDto
+                    @RequestBody @NotNull BoardPostSaveRequestDto boardPostSaveRequestDto
             )
     {
         CreatePostResponseDto createPostResponseDto = postService.registerNewBoardPost(userAccount, boardPostSaveRequestDto);
