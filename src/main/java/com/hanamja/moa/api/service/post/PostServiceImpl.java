@@ -1,6 +1,9 @@
 package com.hanamja.moa.api.service.post;
 
-import com.hanamja.moa.api.dto.post.request.BoardPostSaveAndEditRequestDto;
+import com.hanamja.moa.api.dto.post.request.BoardPostEditRequestDto;
+import com.hanamja.moa.api.dto.post.request.BoardPostSaveRequestDto;
+import com.hanamja.moa.api.dto.post.response.CreatePostImageResponseDto;
+import com.hanamja.moa.api.dto.post.response.CreatePostResponseDto;
 import com.hanamja.moa.api.entity.board_category.BoardCategory;
 import com.hanamja.moa.api.entity.board_category.BoardCategoryRepository;
 import com.hanamja.moa.api.entity.department.Department;
@@ -26,9 +29,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -85,73 +88,92 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<String> registerImagesToPostImage(List<MultipartFile> images) {
-        List<String> imageUrls = new ArrayList<>();
-        images.forEach(image -> {
-            Optional<String> imageUrl;
-            try {
-                imageUrl = Optional.ofNullable(amazonS3Uploader.saveFileAndGetUrl(image));
-                imageUrls.add(imageUrl.orElseThrow(
-                        () -> CustomException.builder().httpStatus(HttpStatus.EXPECTATION_FAILED).message("이미지 업로드에 실패했습니다").build()
-                ));
-            } catch (Exception e) {
-                throw CustomException.builder().httpStatus(HttpStatus.EXPECTATION_FAILED).message("이미지 업로드에 실패했습니다").build();
-            }
-        });
-        return imageUrls;
+    public String registerImageToPostImage(MultipartFile image) {
+        String imageUrl = "";
+        try {
+            imageUrl = amazonS3Uploader.saveFileAndGetUrl(image);
+        } catch (Exception e) {
+            throw CustomException.builder().httpStatus(HttpStatus.EXPECTATION_FAILED).message("이미지 업로드에 실패했습니다").build();
+        }
+        return imageUrl;
     }
 
     @Override
     @Transactional
-    public void registerNewBoardPost(UserAccount userAccount, List<MultipartFile> images, BoardPostSaveAndEditRequestDto boardPostSaveAndEditRequestDto) {
-        List<String> imagesUrls = new ArrayList<>();
+    public CreatePostResponseDto registerNewBoardPost(UserAccount userAccount, BoardPostSaveRequestDto boardPostSaveRequestDto) {
         User user = utilService.resolveUserById(userAccount);
         Department department = utilService.resolveDepartmentById(userAccount);
-        BoardCategory boardCategory = resolveBoardCategoryById(boardPostSaveAndEditRequestDto.getCategoryId());
-
-        if (images != null) {
-            imagesUrls = registerImagesToPostImage(images);
-        }
+        BoardCategory boardCategory = resolveBoardCategoryById(boardPostSaveRequestDto.getCategoryId());
 
         Post newPost = postRepository.save(Post.builder()
                 .user(user)
                 .department(department)
                 .boardCategory(boardCategory)
-                .title(boardPostSaveAndEditRequestDto.getTitle())
-                .content(boardPostSaveAndEditRequestDto.getContent())
-                .thumbnail(imagesUrls.size() > 0 ? imagesUrls.get(0) : null)
+                .title(boardPostSaveRequestDto.getTitle())
+                .content(boardPostSaveRequestDto.getContent())
+                .thumbnail(!boardPostSaveRequestDto.getImages().isEmpty() ? boardPostSaveRequestDto.getImages().get(0) : null)
                 .build());
 
-        imagesUrls.forEach(imageUrl -> {
-            postImageRepository.save(PostImage.builder()
-                            .post(newPost).image(imageUrl)
-                            .build());
-        });
+        if (!boardPostSaveRequestDto.getImages().isEmpty()){
+            for (String imageUrl : boardPostSaveRequestDto.getImages()) {
+                postImageRepository.save(PostImage.builder()
+                        .post(newPost)
+                        .image(imageUrl)
+                        .build());
+            }
+        }
+
+        return CreatePostResponseDto.builder()
+                .postId(newPost.getId()).title(newPost.getTitle()).content(newPost.getContent()).thumbnail(newPost.getThumbnail())
+                .createdAt(newPost.getCreatedAt()).updatedAt(newPost.getModifiedAt())
+                .build();
+    }
+
+    @Override
+    public CreatePostImageResponseDto uploadImage(UserAccount userAccount, MultipartFile image){
+        utilService.resolveUserById(userAccount);
+        utilService.resolveDepartmentById(userAccount);
+        String imageUrl = registerImageToPostImage(image);
+        return CreatePostImageResponseDto.builder().imageUrl(imageUrl).build();
     }
 
     @Override
     @Transactional
-    public void editBoardPost(Long postId, UserAccount userAccount, List<MultipartFile> images, BoardPostSaveAndEditRequestDto boardPostSaveAndEditRequestDto) {
-        List<String> imagesUrls = new ArrayList<>();
-        Post existPost = resolvePostByIdAndUserId(postId, userAccount.getUserId());
-        postImageRepository.deleteAllByPost_Id(postId);
+    public CreatePostResponseDto editBoardPost(UserAccount userAccount, BoardPostEditRequestDto boardPostEditRequestDto) {
+        Post existPost = resolvePostByIdAndUserId(boardPostEditRequestDto.getPostId(), userAccount.getUserId());
+        // 최종 전달된 이미지 url 에 포함되어있으면 삭제
+        List<String> images = boardPostEditRequestDto.getImages();
+        List<PostImage> allExistImagesByImageUrl = postImageRepository.findAllExistByImageUrl(images);
+        allExistImagesByImageUrl.forEach(postImage -> {
+                    amazonS3Uploader.deleteFile(postImage.getImage());
+                    postImageRepository.delete(postImage);
+                });
 
-        if (images != null) {
-            imagesUrls = registerImagesToPostImage(images);
+        // 새로 추가된 이미지 url 이 있으면 추가
+        if (!boardPostEditRequestDto.getImages().isEmpty()){
+            List<String> existsImages = allExistImagesByImageUrl.stream().map(PostImage::getImage).collect(Collectors.toList());
+            images.forEach(image -> {
+                if (!existsImages.contains(image)){
+                    postImageRepository.save(PostImage.builder()
+                            .post(existPost)
+                            .image(image)
+                            .build());
+                }
+            });
         }
-        BoardCategory boardCategory = resolveBoardCategoryById(boardPostSaveAndEditRequestDto.getCategoryId());
+
+        BoardCategory boardCategory = resolveBoardCategoryById(boardPostEditRequestDto.getCategoryId());
 
         existPost.updatePostInfo(
-                boardPostSaveAndEditRequestDto,
+                boardPostEditRequestDto,
                 boardCategory,
-                imagesUrls.size() > 0 ? imagesUrls.get(0) : ""
+                boardPostEditRequestDto.getImages().isEmpty() ? null : boardPostEditRequestDto.getImages().get(0)
                 );
 
-        imagesUrls.forEach(imageUrl -> {
-            postImageRepository.save(PostImage.builder()
-                    .post(existPost).image(imageUrl)
-                    .build());
-        });
+        return CreatePostResponseDto.builder()
+                .postId(existPost.getId()).title(existPost.getTitle()).content(existPost.getContent()).thumbnail(existPost.getThumbnail())
+                .createdAt(existPost.getCreatedAt()).updatedAt(existPost.getModifiedAt())
+                .build();
     }
 
     @Override
@@ -160,10 +182,10 @@ public class PostServiceImpl implements PostService {
         Post existPost = resolvePostByIdAndUserId(postId, userAccount.getUserId());
 
         postImageRepository.deleteAllByPost_Id(postId);
-        postRepository.delete(existPost);
         postLikeRepository.deleteAllByPost(existPost);
         postCommentRepository.deleteAllByPost(existPost);
         postBookmarkRepository.deleteAllByPost(existPost);
+        postRepository.delete(existPost);
     }
 
     @Override
