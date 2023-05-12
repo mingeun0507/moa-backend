@@ -39,7 +39,7 @@ public class UtilServiceImpl implements UtilService{
                         () -> NotFoundException
                                 .builder()
                                 .httpStatus(HttpStatus.NOT_FOUND)
-                                .message("해당 부서가 존재하지 않습니다.")
+                                .message("해당 학과가 존재하지 않습니다.")
                                 .build()
                 );
     }
