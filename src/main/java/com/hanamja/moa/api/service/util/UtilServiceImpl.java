@@ -1,5 +1,7 @@
 package com.hanamja.moa.api.service.util;
 
+import com.hanamja.moa.api.entity.board.Board;
+import com.hanamja.moa.api.entity.board.BoardRepository;
 import com.hanamja.moa.api.entity.department.Department;
 import com.hanamja.moa.api.entity.department.DepartmentRepository;
 import com.hanamja.moa.api.entity.user.User;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 public class UtilServiceImpl implements UtilService{
     private final UserRepository userRepository;
     private final DepartmentRepository departmentRepository;
+    private final BoardRepository boardRepository;
 
     @Override
     public User resolveUserById(UserAccount userAccount) {
@@ -40,6 +43,19 @@ public class UtilServiceImpl implements UtilService{
                                 .builder()
                                 .httpStatus(HttpStatus.NOT_FOUND)
                                 .message("해당 학과가 존재하지 않습니다.")
+                                .build()
+                );
+    }
+
+    @Override
+    public Board resolveBoardById(Long boardId) {
+        return boardRepository
+                .findById(boardId)
+                .orElseThrow(
+                        () -> NotFoundException
+                                .builder()
+                                .httpStatus(HttpStatus.NOT_FOUND)
+                                .message("해당 게시판이 존재하지 않습니다.")
                                 .build()
                 );
     }
