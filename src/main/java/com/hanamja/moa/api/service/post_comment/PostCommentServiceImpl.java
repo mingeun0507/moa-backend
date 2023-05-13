@@ -67,7 +67,7 @@ public class PostCommentServiceImpl implements PostCommentService{
                 .commentOrder(requestDto.getCommentOrder())
                 .build();
 
-        postCommentRepository.save(postComment);
+        postComment = postCommentRepository.save(postComment);
 
         // TODO 임시로 메세지 내용 채워놓음 논의 후 변경 필요
         notificationRepository.save(
