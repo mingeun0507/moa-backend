@@ -31,6 +31,7 @@ public class PostCommentServiceImpl implements PostCommentService{
     private final NotificationRepository notificationRepository;
 
     @Override
+    @Transactional
     public PostCommentResponseDto createPostComment(Long postId, Long userId, Long departmentId, CreatePostCommentRequestDto requestDto) {
         PostComment parentPostComment = null;
 
@@ -94,6 +95,7 @@ public class PostCommentServiceImpl implements PostCommentService{
     }
 
     @Override
+    @Transactional
     public PostCommentResponseDto updatePostComment(Long postId, Long commentId, Long departmentId, Long userId, ModifyPostCommentRequestDto requestDto) {
 
         User writer = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(
@@ -126,6 +128,7 @@ public class PostCommentServiceImpl implements PostCommentService{
     }
 
     @Override
+    @Transactional
     public PostCommentResponseDto deletePostComment(Long postId, Long commentId, Long departmentId, Long userId) {
 
         User writer = userRepository.findById(userId).orElseThrow(() -> new NotFoundException(
