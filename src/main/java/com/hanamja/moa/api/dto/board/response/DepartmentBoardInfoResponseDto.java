@@ -43,12 +43,18 @@ public class DepartmentBoardInfoResponseDto {
                     // 각 그룹의 첫 번째 CategoryByBoardAndDepartmentDto 객체를 가져옵니다.
                     CategoryByBoardAndDepartmentDto firstBoardCategory = boardCategories.get(0);
                     // 그룹의 CategoryByBoardAndDepartmentDto 객체들을 CategoryInfo 목록으로 변환합니다.
-                    List<CategoryInfo> categoryInfoList = boardCategories.stream()
+                    List<CategoryInfo> categoryInfoList = new ArrayList<>();
+                    categoryInfoList.add(CategoryInfo.builder()
+                            .categoryId(0L)
+                            .categoryName("전체")
+                            .build());
+                    categoryInfoList.addAll(boardCategories.stream()
                             .map(category -> CategoryInfo.builder()
                                     .categoryId(category.getCategoryId())
                                     .categoryName(category.getCategoryName())
                                     .build())
-                            .collect(Collectors.toList());
+                            .collect(Collectors.toList()));
+
 
                     // 변환된 CategoryInfo 목록과 함께 BoardInfo 객체를 생성하고, boardInfoList에 추가합니다.
                     boardInfoList.add(BoardInfo.builder()
