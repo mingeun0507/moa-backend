@@ -37,7 +37,7 @@ public class PostCommentResponseDto {
         return new PostCommentResponseDto(
                 postComment.getId(),
                 postComment.getPost().getId(),
-                postComment.getParentComment().getId(),
+                postComment.getParentComment() != null ? postComment.getParentComment().getId() : null,
                 UserInfoResponseDto.from(postComment.getUser()),
                 postComment.getContent(),
                 postComment.isModified(),
