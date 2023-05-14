@@ -89,6 +89,6 @@ public class BoardServiceImpl implements BoardService {
         validateDepartmentByUserAccount(userAccount.getDepartmentId(), userAccount);
         Board resolvedBoard = utilService.resolveBoardById(boardId);
 
-        return DataResponseDto.<Slice<PostInfoResponseDto>>builder().data(postRepositoryCustom.findAllPagedPostByCategoryId(resolvedBoard, cursor, pageable, categoryId)).build();
+        return DataResponseDto.<Slice<PostInfoResponseDto>>builder().data(postRepositoryCustom.searchAllPagedPostByTitleOrComment(resolvedBoard, keyword, cursor, pageable, categoryId)).build();
     }
 }
