@@ -14,9 +14,9 @@ import java.util.stream.Collectors;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class DepartmentBoardInfoResponseDto {
 
-    Long departmentId;
-    String departmentName;
-    List<BoardInfo> boardInfoList;
+    private Long departmentId;
+    private String departmentName;
+    private List<BoardInfo> boardInfoList;
 
     @Builder
     public DepartmentBoardInfoResponseDto(Long departmentId, String departmentName, List<BoardInfo> boardInfoList) {
