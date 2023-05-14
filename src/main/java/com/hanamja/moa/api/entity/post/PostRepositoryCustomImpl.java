@@ -108,11 +108,10 @@ public class PostRepositoryCustomImpl implements PostRepositoryCustom {
                 .leftJoin(postLike).on(post.id.eq(postLike.post.id))
                 .leftJoin(postComment).on(post.id.eq(postComment.post.id))
                 .where(
-                        boardCategory.board.id.eq(targetBoard.getId())
-                                .and(ltPostId(cursor))
-                                .or(titleContainKeyword(keyword))
-                                .or(contentContainKeyword(keyword))
-                                .and(eqCategoryFilter(categoryId))
+                        boardCategory.board.id.eq(targetBoard.getId()),
+                        ltPostId(cursor),
+                        (titleContainKeyword(keyword).or(contentContainKeyword(keyword))),
+                        eqCategoryFilter(categoryId)
                 )
                 .groupBy(post.id, post.title, post.content, post.thumbnail, post.createdAt, user.id, user.name, user.imageLink, boardCategory.id, boardCategory.name)
                 .orderBy(post.id.desc())
