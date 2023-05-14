@@ -6,5 +6,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 
 public interface PostRepositoryCustom {
-    Slice<PostInfoResponseDto> findAllSimplePostInfo(Board board, Long cursor, Pageable pageable);
+    Slice<PostInfoResponseDto> findAllPagedPostByCategoryId(Board board, Long cursor, Pageable pageable, Long categoryId);
+
+    Slice<PostInfoResponseDto> searchAllPagedPostByTitleOrComment(Board board, String keyword, Long cursor, Pageable pageable, Long categoryId);
 }
