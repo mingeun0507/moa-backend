@@ -16,7 +16,10 @@ public interface BoardService {
     /* Controller에서 사용할 함수들 */
     DepartmentBoardInfoResponseDto getBoardInfoByDepartment(UserAccount userAccount);
 
-    DataResponseDto<Slice<PostInfoResponseDto>> getPostListByBoardId(UserAccount userAccount, Long boardId, Long cursor, Pageable pageable);
+    DataResponseDto<Slice<PostInfoResponseDto>> getPostListByBoardId(UserAccount userAccount, Long boardId, Long cursor, Pageable pageable, Long categoryId);
+
+    DataResponseDto<Slice<PostInfoResponseDto>> searchPostListByBoardId(UserAccount userAccount, Long boardId, String keyword, Long cursor, Pageable pageable, Long categoryId);
 
     void makeNewBoardCategory(UserAccount userAccount, NewBoardCategoryRequestDto newBoardCategoryRequestDto);
+
 }

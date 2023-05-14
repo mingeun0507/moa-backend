@@ -77,10 +77,18 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public DataResponseDto<Slice<PostInfoResponseDto>> getPostListByBoardId(UserAccount userAccount, Long boardId, Long cursor, Pageable pageable) {
+    public DataResponseDto<Slice<PostInfoResponseDto>> getPostListByBoardId(UserAccount userAccount, Long boardId, Long cursor, Pageable pageable, Long categoryId) {
         validateDepartmentByUserAccount(userAccount.getDepartmentId(), userAccount);
         Board resolvedBoard = utilService.resolveBoardById(boardId);
 
-        return DataResponseDto.<Slice<PostInfoResponseDto>>builder().data(postRepositoryCustom.findAllSimplePostInfo(resolvedBoard, cursor, pageable)).build();
+        return DataResponseDto.<Slice<PostInfoResponseDto>>builder().data(postRepositoryCustom.findAllPagedPostByCategoryId(resolvedBoard, cursor, pageable, categoryId)).build();
+    }
+
+    @Override
+    public DataResponseDto<Slice<PostInfoResponseDto>> searchPostListByBoardId(UserAccount userAccount, Long boardId, String keyword, Long cursor, Pageable pageable, Long categoryId) {
+        validateDepartmentByUserAccount(userAccount.getDepartmentId(), userAccount);
+        Board resolvedBoard = utilService.resolveBoardById(boardId);
+
+        return DataResponseDto.<Slice<PostInfoResponseDto>>builder().data(postRepositoryCustom.findAllPagedPostByCategoryId(resolvedBoard, cursor, pageable, categoryId)).build();
     }
 }
