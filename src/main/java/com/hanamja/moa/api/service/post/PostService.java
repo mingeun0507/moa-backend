@@ -1,6 +1,8 @@
 package com.hanamja.moa.api.service.post;
 
 import com.hanamja.moa.api.dto.post.request.BoardPostSaveAndEditRequestDto;
+import com.hanamja.moa.api.dto.post.response.PostDetailInfoResponseDto;
+import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.board_category.BoardCategory;
 import com.hanamja.moa.api.entity.post.Post;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
@@ -26,4 +28,5 @@ public interface PostService {
 
     void bookmarkBoardPost(Long postId, UserAccount userAccount);
 
+    DataResponseDto<PostDetailInfoResponseDto> getPostDetailInfo(UserAccount userAccount, Long postId);
 }

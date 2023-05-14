@@ -1,11 +1,14 @@
 package com.hanamja.moa.api.service.post;
 
 import com.hanamja.moa.api.dto.post.request.BoardPostSaveAndEditRequestDto;
+import com.hanamja.moa.api.dto.post.response.PostDetailInfoResponseDto;
+import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.board_category.BoardCategory;
 import com.hanamja.moa.api.entity.board_category.BoardCategoryRepository;
 import com.hanamja.moa.api.entity.department.Department;
 import com.hanamja.moa.api.entity.post.Post;
 import com.hanamja.moa.api.entity.post.PostRepository;
+import com.hanamja.moa.api.entity.post.PostRepositoryCustom;
 import com.hanamja.moa.api.entity.post_bookmark.PostBookmark;
 import com.hanamja.moa.api.entity.post_bookmark.PostBookmarkRepository;
 import com.hanamja.moa.api.entity.post_comment.PostCommentRepository;
@@ -40,10 +43,10 @@ public class PostServiceImpl implements PostService {
     private final PostLikeRepository postLikeRepository;
     private final PostCommentRepository postCommentRepository;
     private final PostBookmarkRepository postBookmarkRepository;
+    private final PostRepositoryCustom postRepositoryCustom;
     private final UtilServiceImpl utilService;
     private final AmazonS3Uploader amazonS3Uploader;
     @Override
-    @Transactional(readOnly = true)
     public BoardCategory resolveBoardCategoryById(Long boardCategoryId) {
         return boardCategoryRepository
                 .findById(boardCategoryId)
@@ -57,7 +60,6 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Post resolvePostByIdAndUserId(Long postId, Long userId) {
         return postRepository
                 .findByIdAndUser_Id(postId, userId)
@@ -71,7 +73,6 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Post resolvePostById(Long postId) {
         return postRepository
                 .findById(postId)
@@ -188,9 +189,17 @@ public class PostServiceImpl implements PostService {
             postBookmarkRepository.delete(bookmark.get());
         } else {
             postBookmarkRepository.save(PostBookmark.builder()
-                            .user(utilService.resolveUserById(userAccount))
-                            .post(resolvePostById(postId))
-                            .build());
+                    .user(utilService.resolveUserById(userAccount))
+                    .post(resolvePostById(postId))
+                    .build());
         }
+    }
+
+    @Override
+    public DataResponseDto<PostDetailInfoResponseDto> getPostDetailInfo(UserAccount userAccount, Long postId) {
+        Post post = resolvePostById(postId);
+        User user = utilService.resolveUserById(userAccount);
+
+        return DataResponseDto.<PostDetailInfoResponseDto>builder().data(postRepositoryCustom.findPostDetailInfoById(post.getId(), user.getId())).build();
     }
 }
