@@ -40,7 +40,7 @@ public class AmazonS3Uploader {
     }
 
     public void deleteFile(String imageUrl) {
-        int lastIndex = imageUrl.lastIndexOf('/')+1;
+        int lastIndex = imageUrl.lastIndexOf('/') + 1;
         String fileName = imageUrl.substring(lastIndex);
         try {
             String decodedFileName = URLDecoder.decode(fileName, "UTF-8");

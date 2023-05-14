@@ -1,6 +1,8 @@
 package com.hanamja.moa.api.dto.post_comment.request;
 
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 

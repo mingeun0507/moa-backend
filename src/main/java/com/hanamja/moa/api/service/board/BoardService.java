@@ -13,6 +13,8 @@ public interface BoardService {
     /* validate 함수 */
     void validateDepartmentByUserAccount(Long departmentId, UserAccount userAccount);
 
+    void validateCategoryById(Long categoryId);
+
     /* Controller에서 사용할 함수들 */
     DepartmentBoardInfoResponseDto getBoardInfoByDepartment(UserAccount userAccount);
 

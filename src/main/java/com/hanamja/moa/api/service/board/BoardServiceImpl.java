@@ -47,8 +47,19 @@ public class BoardServiceImpl implements BoardService {
         if (!userAccount.getDepartmentId().equals(departmentId)) {
             throw UnauthorizedException
                     .builder()
-                    .httpStatus(HttpStatus.UNAUTHORIZED)
+                    .httpStatus(HttpStatus.FORBIDDEN)
                     .message("해당 학과에 접근할 수 없습니다.")
+                    .build();
+        }
+    }
+
+    @Override
+    public void validateCategoryById(Long categoryId) {
+        if (!boardCategoryRepository.existsById(categoryId)) {
+            throw UnauthorizedException
+                    .builder()
+                    .httpStatus(HttpStatus.NOT_FOUND)
+                    .message("해당 카테고리가 존재하지 않습니다.")
                     .build();
         }
     }
@@ -79,6 +90,8 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public DataResponseDto<Slice<PostInfoResponseDto>> getPostListByBoardId(UserAccount userAccount, Long boardId, Long cursor, Pageable pageable, Long categoryId) {
         validateDepartmentByUserAccount(userAccount.getDepartmentId(), userAccount);
+        validateCategoryById(categoryId);
+
         Board resolvedBoard = utilService.resolveBoardById(boardId);
 
         return DataResponseDto.<Slice<PostInfoResponseDto>>builder().data(postRepositoryCustom.findAllPagedPostByCategoryId(resolvedBoard, cursor, pageable, categoryId)).build();
@@ -87,6 +100,8 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public DataResponseDto<Slice<PostInfoResponseDto>> searchPostListByBoardId(UserAccount userAccount, Long boardId, String keyword, Long cursor, Pageable pageable, Long categoryId) {
         validateDepartmentByUserAccount(userAccount.getDepartmentId(), userAccount);
+        validateCategoryById(categoryId);
+
         Board resolvedBoard = utilService.resolveBoardById(boardId);
 
         return DataResponseDto.<Slice<PostInfoResponseDto>>builder().data(postRepositoryCustom.searchAllPagedPostByTitleOrComment(resolvedBoard, keyword, cursor, pageable, categoryId)).build();

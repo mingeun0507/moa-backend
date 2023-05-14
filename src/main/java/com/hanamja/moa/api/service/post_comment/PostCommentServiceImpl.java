@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
-public class PostCommentServiceImpl implements PostCommentService{
+public class PostCommentServiceImpl implements PostCommentService {
 
     private final PostCommentRepository postCommentRepository;
 
@@ -74,9 +74,9 @@ public class PostCommentServiceImpl implements PostCommentService{
                 Notification.builder()
                         .sender(writer)
                         .receiver(post.getUser())
-                .content("[ " + post.getTitle() + " ] " + post.getTitle() + " 게시글에 댓글이 달렸어요. 우리 한번 확인해볼까요?")
-                .reason("게시글 생성자: " + post.getUser().getName() + "님")
-                .build()
+                        .content("[ " + post.getTitle() + " ] " + post.getTitle() + " 게시글에 댓글이 달렸어요. 우리 한번 확인해볼까요?")
+                        .reason("게시글 생성자: " + post.getUser().getName() + "님")
+                        .build()
         );
 
         // TODO 임시로 메세지 내용 채워놓음 논의 후 변경 필요

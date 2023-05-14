@@ -2,7 +2,6 @@ package com.hanamja.moa.api.dto.post_comment.response;
 
 import com.hanamja.moa.api.dto.user.response.UserInfoResponseDto;
 import com.hanamja.moa.api.entity.post_comment.PostComment;
-import com.hanamja.moa.api.entity.user.User;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

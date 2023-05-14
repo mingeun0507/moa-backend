@@ -58,7 +58,7 @@ public class Post extends BaseTimeEntity {
         this.isModified = false;
     }
 
-    public void updatePostInfo(EditPostRequestDto editPostRequestDto, BoardCategory boardCategory, String thumbnail){
+    public void updatePostInfo(EditPostRequestDto editPostRequestDto, BoardCategory boardCategory, String thumbnail) {
         this.title = editPostRequestDto.getTitle();
         this.content = editPostRequestDto.getContent();
         this.boardCategory = boardCategory;

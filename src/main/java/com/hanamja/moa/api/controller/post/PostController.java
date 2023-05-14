@@ -3,10 +3,12 @@ package com.hanamja.moa.api.controller.post;
 import com.hanamja.moa.api.dto.post.request.CreatePostRequestDto;
 import com.hanamja.moa.api.dto.post.request.EditPostRequestDto;
 import com.hanamja.moa.api.dto.post.response.CreatePostResponseDto;
+import com.hanamja.moa.api.dto.post.response.PostDetailInfoResponseDto;
 import com.hanamja.moa.api.dto.post.response.PostImageResponseDto;
 import com.hanamja.moa.api.dto.post_comment.request.CreatePostCommentRequestDto;
 import com.hanamja.moa.api.dto.post_comment.request.ModifyPostCommentRequestDto;
 import com.hanamja.moa.api.dto.post_comment.response.PostCommentResponseDto;
+import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.service.post.PostService;
 import com.hanamja.moa.api.service.post_comment.PostCommentService;
@@ -30,6 +32,15 @@ public class PostController {
     private final PostCommentService postCommentService;
 
     private final PostService postService;
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<DataResponseDto<PostDetailInfoResponseDto>> getPostDetailInfo
+            (
+                    @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
+                    @PathVariable @NotNull Long postId
+            ) {
+        return ResponseEntity.ok(postService.getPostDetailInfo(userAccount, postId));
+    }
 
     @Operation(summary = "게시판 댓글 달기", description = "게시판 댓글 달기")
     @PostMapping("/{postId}/comment")
@@ -89,8 +100,7 @@ public class PostController {
             (
                     @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
                     @RequestBody @NotNull CreatePostRequestDto createPostRequestDto
-            )
-    {
+            ) {
         CreatePostResponseDto createPostResponseDto = postService.createNewPost(userAccount, createPostRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(createPostResponseDto);
     }
@@ -100,8 +110,7 @@ public class PostController {
             (
                     @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
                     @RequestPart @Nullable MultipartFile image
-            )
-    {
+            ) {
         PostImageResponseDto postImageResponseDto = postService.uploadImage(userAccount, image);
         return ResponseEntity.status(HttpStatus.OK).body(postImageResponseDto);
     }
@@ -111,18 +120,16 @@ public class PostController {
             (
                     @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
                     @RequestBody @NotNull EditPostRequestDto editPostRequestDto
-            )
-    {
+            ) {
         CreatePostResponseDto createPostResponseDto = postService.editPost(userAccount, editPostRequestDto);
         return ResponseEntity.status(HttpStatus.OK).body(createPostResponseDto);
     }
 
     @DeleteMapping("/{postId}")
     public ResponseEntity<?> removeBoardPost
-    (
-            @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
-            @PathVariable @NotNull Long postId)
-    {
+            (
+                    @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
+                    @PathVariable @NotNull Long postId) {
         postService.deleteBoardPost(postId, userAccount);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
