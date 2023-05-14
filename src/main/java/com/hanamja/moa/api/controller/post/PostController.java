@@ -3,6 +3,8 @@ package com.hanamja.moa.api.controller.post;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hanamja.moa.api.dto.post.request.BoardPostSaveAndEditRequestDto;
+import com.hanamja.moa.api.dto.post.response.PostDetailInfoResponseDto;
+import com.hanamja.moa.api.dto.util.DataResponseDto;
 import com.hanamja.moa.api.entity.user.UserAccount.UserAccount;
 import com.hanamja.moa.api.service.post.PostServiceImpl;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -23,14 +25,23 @@ import java.util.List;
 public class PostController {
 
     private final PostServiceImpl postService;
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<DataResponseDto<PostDetailInfoResponseDto>> getPostDetailInfo
+            (
+                    @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
+                    @PathVariable @NotNull Long postId
+            ) {
+        return ResponseEntity.ok(postService.getPostDetailInfo(userAccount, postId));
+    }
+
     @PostMapping
     public ResponseEntity<?> makeNewBoardPost
             (
                     @Parameter(hidden = true) @AuthenticationPrincipal UserAccount userAccount,
                     @RequestPart @Nullable List<MultipartFile> images,
                     @RequestPart @NotNull String data
-            ) throws JsonProcessingException
-    {
+            ) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         BoardPostSaveAndEditRequestDto boardPostSaveAndEditRequestDto = objectMapper.readValue(data, BoardPostSaveAndEditRequestDto.class);
         postService.registerNewBoardPost(userAccount, images, boardPostSaveAndEditRequestDto);
